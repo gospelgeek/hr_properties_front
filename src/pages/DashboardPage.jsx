@@ -1,0 +1,220 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import Loader from '../components/UI/Loader';
+import DashboardCard from '../components/Finance/DashboardCard';
+import { getDashboard } from '../api/finance.api';
+
+const DashboardPage = () => {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
+      const data = await getDashboard();
+      setDashboardData(data);
+    } catch (error) {
+      console.error('Error al cargar dashboard:', error);
+      toast.error('Error al cargar estadísticas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0
+    }).format(value);
+  };
+
+  if (loading) return <Loader />;
+  if (!dashboardData) return <div>No hay datos disponibles</div>;
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+        <p className="text-sm sm:text-base text-gray-600">Vista general del sistema</p>
+      </div>
+
+      {/* Obligaciones */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Obligaciones Financieras</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <DashboardCard
+            title="Total Obligaciones"
+            value={dashboardData.obligations.total_count}
+            subtitle={formatCurrency(dashboardData.obligations.total_amount)}
+            color="blue"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            }
+          />
+          <DashboardCard
+            title="Total Pagado"
+            value={formatCurrency(dashboardData.obligations.total_paid)}
+            color="green"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+          />
+          <DashboardCard
+            title="Pendiente"
+            value={formatCurrency(dashboardData.obligations.pending)}
+            color="red"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+          />
+          <DashboardCard
+            title="Por Vencer"
+            value={dashboardData.obligations.upcoming_due}
+            subtitle="Próximos 7 días"
+            color="yellow"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+          />
+        </div>
+      </div>
+
+      {/* Propiedades */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Propiedades</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <DashboardCard
+            title="Total Propiedades"
+            value={dashboardData.properties.total}
+            color="purple"
+            icon={
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            }
+          />
+          {dashboardData.properties.by_use.map((item, index) => (
+            <DashboardCard
+              key={index}
+              title={item.use.charAt(0).toUpperCase() + item.use.slice(1)}
+              value={item.count}
+              subtitle="propiedades"
+              color="blue"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Arriendos */}
+      {dashboardData.rentals && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Arriendos</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <DashboardCard
+              title="Arriendos Activos"
+              value={dashboardData.rentals.active}
+              color="green"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              }
+            />
+            <DashboardCard
+              title="Disponibles"
+              value={dashboardData.rentals.available}
+              color="blue"
+            />
+            <DashboardCard
+              title="Próximos a Finalizar"
+              value={dashboardData.rentals.ending_soon}
+              subtitle="Próximos 15 días"
+              color="yellow"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Resumen Mensual */}
+      {dashboardData.monthly_summary && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Resumen del Mes</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <DashboardCard
+              title="Ingresos por Arriendos"
+              value={formatCurrency(dashboardData.monthly_summary.rental_income)}
+              color="green"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            />
+            <DashboardCard
+              title="Pagos de Obligaciones"
+              value={formatCurrency(dashboardData.monthly_summary.obligation_payments)}
+              color="red"
+            />
+            <DashboardCard
+              title="Costos de Reparaciones"
+              value={formatCurrency(dashboardData.monthly_summary.repair_costs)}
+              color="yellow"
+            />
+            <DashboardCard
+              title="Balance Neto"
+              value={formatCurrency(dashboardData.monthly_summary.net)}
+              color={dashboardData.monthly_summary.net >= 0 ? 'green' : 'red'}
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              }
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Acciones Rápidas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <button
+          onClick={() => navigate('/obligations')}
+          className="bg-white border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors p-4 text-left"
+        >
+          <h3 className="font-semibold mb-1">Ver Todas las Obligaciones</h3>
+          <p className="text-sm text-gray-600">Gestiona tus obligaciones financieras</p>
+        </button>
+        <button
+          onClick={() => navigate('/rentals')}
+          className="bg-white border-2 border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors p-4 text-left"
+        >
+          <h3 className="font-semibold mb-1">Ver Arriendos</h3>
+          <p className="text-sm text-gray-600">Gestiona tus arriendos activos</p>
+        </button>
+        <button
+          onClick={() => navigate('/notifications')}
+          className="bg-white border-2 border-yellow-600 text-yellow-600 rounded-lg hover:bg-yellow-50 transition-colors p-4 text-left"
+        >
+          <h3 className="font-semibold mb-1">Ver Notificaciones</h3>
+          <p className="text-sm text-gray-600">Revisa alertas y recordatorios</p>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardPage;

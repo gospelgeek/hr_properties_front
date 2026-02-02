@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+
+/* Configuración del tema */
+:root {
+  --primary: #2563eb;
+  --primary-focus: #1d4ed8;
+  --base-100: #ffffff;
+  --base-200: #f9fafb;
+  --base-300: #e5e7eb;
+}
+
+body {
+  background-color: #ffffff;
+}
