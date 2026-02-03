@@ -28,26 +28,26 @@ const PropertyPage = () => {
       const data = await getProperty(id);
       setProperty(data);
       
-      // Cargar obligaciones
+      // Load obligations
       try {
         const oblData = await getPropertyObligations(id);
         setObligations(Array.isArray(oblData) ? oblData : oblData.results || []);
       } catch (err) {
-        console.error('Error al cargar obligaciones:', err);
+        console.error('Error loading obligations:', err);
       }
       
-      // Cargar arriendos si es propiedad de arrendamiento
+      // Load rentals if rental property
       if (data.use === 'arrendamiento') {
         try {
           const rentalsData = await getPropertyRentals(id);
           setRentals(Array.isArray(rentalsData) ? rentalsData : rentalsData.results || []);
         } catch (err) {
-          console.error('Error al cargar arriendos:', err);
+          console.error('Error loading rentals:', err);
         }
       }
     } catch (error) {
-      console.error('Error al cargar propiedad:', error);
-      toast.error('Error al cargar la propiedad');
+      console.error('Error loading property:', error);
+      toast.error('Error loading property');
       navigate('/');
     } finally {
       setLoading(false);
@@ -57,11 +57,11 @@ const PropertyPage = () => {
   const handleDelete = async () => {
     try {
       await deleteProperty(id);
-      toast.success('Propiedad eliminada correctamente');
+      toast.success('Property deleted successfully');
       navigate('/');
     } catch (error) {
-      console.error('Error al eliminar propiedad:', error);
-      toast.error('Error al eliminar la propiedad');
+      console.error('Error deleting property:', error);
+      toast.error('Error deleting property');
     }
   };
 
@@ -72,7 +72,7 @@ const PropertyPage = () => {
   if (!property) {
     return (
       <div className="text-center py-12">
-        <p className="text-base-content/60 text-lg">Propiedad no encontrada</p>
+        <p className="text-base-content/60 text-lg">Property not found</p>
       </div>
     );
   }
@@ -84,7 +84,7 @@ const PropertyPage = () => {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          <span className="font-medium">Volver a propiedades</span>
+          <span className="font-medium">Back to properties</span>
         </Link>
       </div>
 
@@ -95,15 +95,15 @@ const PropertyPage = () => {
           to={`/edit/${id}`}
           className="flex-1 sm:flex-none bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium text-center"
         >
-          Editar Propiedad
+          Edit Property
         </Link>
         <DeletePropertyButton propertyId={id} onDelete={handleDelete} />
       </div>
 
-      {/* Sección de Obligaciones */}
+      {/* Financial Obligations Section */}
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Obligaciones Financieras</h2>
+          <h2 className="text-xl font-bold text-gray-900">Financial Obligations</h2>
           <Link
             to={`/property/${id}/add-obligation`}
             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
@@ -111,12 +111,12 @@ const PropertyPage = () => {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Agregar Obligación
+            Add Obligation
           </Link>
         </div>
         {obligations.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <p className="text-gray-600">No hay obligaciones registradas</p>
+            <p className="text-gray-600">No registered obligations</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -127,11 +127,11 @@ const PropertyPage = () => {
         )}
       </div>
 
-      {/* Sección de Arriendos (solo si es propiedad de arrendamiento) */}
+      {/* Rentals Section (only for rental properties) */}
       {property.use === 'arrendamiento' && (
         <div className="mt-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Arriendos</h2>
+            <h2 className="text-xl font-bold text-gray-900">Rentals</h2>
             <Link
               to={`/property/${id}/add-rental`}
               className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2"
@@ -139,12 +139,12 @@ const PropertyPage = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Agregar Arriendo
+              Add Rental
             </Link>
           </div>
           {rentals.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-              <p className="text-gray-600">No hay arriendos registrados</p>
+              <p className="text-gray-600">No registered rentals</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

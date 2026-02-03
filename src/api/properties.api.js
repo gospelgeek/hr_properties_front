@@ -10,8 +10,8 @@ const api = axios.create({
 });
 
 // GET /api/properties/ - Listar propiedades activas
-export const getProperties = async () => {
-  const response = await api.get('properties/');
+export const getProperties = async (params = {}) => {
+  const response = await api.get('properties/', { params });
   return response.data;
 };
 
@@ -29,13 +29,21 @@ export const getProperty = async (id) => {
 
 // POST /api/properties/ - Crear propiedad
 export const createProperty = async (propertyData) => {
-  const response = await api.post('properties/', propertyData);
+  const config = propertyData instanceof FormData 
+    ? { headers: { 'Content-Type': 'multipart/form-data' } }
+    : {};
+  
+  const response = await api.post('properties/', propertyData, config);
   return response.data;
 };
 
 // PUT/PATCH /api/properties/{id}/ - Actualizar propiedad
 export const updateProperty = async (id, propertyData) => {
-  const response = await api.patch(`properties/${id}/`, propertyData);
+  const config = propertyData instanceof FormData 
+    ? { headers: { 'Content-Type': 'multipart/form-data' } }
+    : {};
+  
+  const response = await api.patch(`properties/${id}/`, propertyData, config);
   return response.data;
 };
 
@@ -100,5 +108,17 @@ export const updatePropertyLaw = async (propertyId, lawId, lawData) => {
 // DELETE /api/properties/{propertyId}/laws/{lawId}/ - Eliminar una ley de la propiedad
 export const deletePropertyLaw = async (propertyId, lawId) => {
   const response = await api.delete(`properties/${propertyId}/laws/${lawId}/`);
+  return response.data;
+};
+
+// GET /api/properties/{id}/repairs_cost/ - Obtener el costo total de reparaciones de una propiedad
+export const getPropertyRepairsCost = async (id) => {
+  const response = await api.get(`properties/${id}/repairs_cost/`);
+  return response.data;
+};
+
+// GET /api/properties/{id}/financials/ - Obtener las finanzas de una propiedad
+export const getPropertyFinancials = async (id) => {
+  const response = await api.get(`properties/${id}/financials/`);
   return response.data;
 };

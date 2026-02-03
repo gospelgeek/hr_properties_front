@@ -34,13 +34,13 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tipo de Obligación *
+            Obligation Type *
           </label>
           <select
-            {...register('obligation_type', { required: 'El tipo es obligatorio' })}
+            {...register('obligation_type', { required: 'The type is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">Seleccionar tipo...</option>
+            <option value="">Select type...</option>
             {obligationTypes.map((type) => (
               <option key={type.id} value={type.id}>{type.name}</option>
             ))}
@@ -52,11 +52,11 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Entidad *
+            Entity *
           </label>
           <input
             type="text"
-            {...register('entity_name', { required: 'La entidad es obligatoria' })}
+            {...register('entity_name', { required: 'The entity is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Ej: EAAB, EPM, etc."
           />
@@ -72,7 +72,7 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
           <input
             type="number"
             step="0.01"
-            {...register('amount', { required: 'El monto es obligatorio', min: { value: 0, message: 'El monto debe ser positivo' } })}
+            {...register('amount', { required: 'The amount is required', min: { value: 0, message: 'The amount must be positive' } })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="0.00"
           />
@@ -83,11 +83,11 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Fecha de Vencimiento *
+            Due Date *
           </label>
           <input
             type="date"
-            {...register('due_date', { required: 'La fecha es obligatoria' })}
+            {...register('due_date', { required: 'The date is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           {errors.due_date && (
@@ -97,17 +97,18 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Periodicidad *
+            Periodicity *
           </label>
           <select
-            {...register('temporality', { required: 'La periodicidad es obligatoria' })}
+            {...register('temporality', { required: 'Periodicity is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="monthly">Mensual</option>
-            <option value="bimonthly">Bimestral</option>
-            <option value="quarterly">Trimestral</option>
-            <option value="yearly">Anual</option>
-            <option value="one_time">Única vez</option>
+            <option value="monthly">Monthly</option>
+            <option value="bimonthly">Bimonthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="yearly">Yearly</option>
+            <option value="one_time">One Time</option>
+            <option value='weekly'>Weekly</option>
           </select>
           {errors.temporality && (
             <p className="mt-1 text-sm text-red-600">{errors.temporality.message}</p>
@@ -120,7 +121,7 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
             disabled={isLoading}
             className="flex-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors py-2.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Guardando...' : initialData ? 'Actualizar' : 'Crear Obligación'}
+            {isLoading ? 'Saving...' : initialData ? 'Update' : 'Create Obligation'}
           </button>
         </div>
       </div>

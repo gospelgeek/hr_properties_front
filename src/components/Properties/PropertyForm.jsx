@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(initialData?.image_url || null);
+  
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: initialData ? {
       name: initialData.name || '',
       use: initialData.use || '',
       address: initialData.address || '',
-      ubication: initialData.ubication || '',
+      map_url: initialData.map_url || '',
+      image_url: initialData.image_url || '',
       zip_code: initialData.zip_code || '',
       type_building: initialData.type_building || '',
       city: initialData.city || '',
@@ -19,25 +23,55 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
     } : {}
   });
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleFormSubmit = (data) => {
-    // Transformar los datos al formato que espera la API
-    const formattedData = {
-      name: data.name,
-      use: data.use,
-      address: data.address,
-      ubication: data.ubication,
-      zip_code: data.zip_code,
-      type_building: data.type_building,
-      city: data.city,
-      details: {
-        bedrooms: parseInt(data.bedrooms) || 0,
-        bathrooms: parseInt(data.bathrooms) || 0,
-        floors: parseInt(data.floors) || 0,
-        observations: data.observations || '',
-        buildings: parseInt(data.buildings) || 0
-      }
+    const formData = new FormData();
+    
+    // Add main fields
+    formData.append('name', data.name);
+    formData.append('use', data.use);
+    formData.append('address', data.address);
+    formData.append('type_building', data.type_building);
+    
+    // Optional fields - only add if they have values
+    if (data.map_url && data.map_url.trim()) {
+      formData.append('map_url', data.map_url.trim());
+    }
+    if (data.zip_code && data.zip_code.trim()) {
+      formData.append('zip_code', data.zip_code.trim());
+    }
+    if (data.city && data.city.trim()) {
+      formData.append('city', data.city.trim());
+    }
+    
+    // Add details as a JSON string
+    const detailsObj = {
+      bedrooms: parseInt(data.bedrooms) || 0,
+      bathrooms: parseInt(data.bathrooms) || 0,
+      floors: parseInt(data.floors) || 0,
+      buildings: parseInt(data.buildings) || 0,
+      observations: data.observations || ''
     };
-    onSubmit(formattedData);
+    formData.append('details', JSON.stringify(detailsObj));
+    
+    // Add image if selected
+    if (imageFile) {
+      formData.append('image_url', imageFile);
+    }
+    
+    onSubmit(formData);
   };
 
   return (
@@ -45,12 +79,12 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Nombre *
+            Name *
           </label>
           <input
-            {...register('name', { required: 'El nombre es requerido' })}
+            {...register('name', { required: 'Name is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-            placeholder="Ej: Casa2"
+            placeholder="Ex: House 2"
           />
           {errors.name && (
             <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>
@@ -59,16 +93,16 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Uso *
+            Use *
           </label>
           <select
-            {...register('use', { required: 'El uso es requerido' })}
+            {...register('use', { required: 'Use is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
           >
-            <option value="">Selecciona un uso</option>
+            <option value="">Select a use</option>
             <option value="personal">Personal</option>
-            <option value="arrendamiento">Arrendamiento</option>
-            <option value="comercial">Comercial</option>
+            <option value="rental">Rental</option>
+            <option value="commercial">Commercial</option>
           </select>
           {errors.use && (
             <p className="text-red-600 text-sm mt-1">{errors.use.message}</p>
@@ -77,12 +111,12 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Dirección *
+            Address *
           </label>
           <input
-            {...register('address', { required: 'La dirección es requerida' })}
+            {...register('address', { required: 'Address is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-            placeholder="Ej: calle siempre viva 2"
+            placeholder="Ex: 123 Main Street"
           />
           {errors.address && (
             <p className="text-red-600 text-sm mt-1">{errors.address.message}</p>
@@ -91,19 +125,42 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Ubicación
+            Map URL
           </label>
           <input
-            {...register('ubication')}
+            {...register('map_url')}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-            placeholder="Ej: 3.402674, -76.530746"
+            placeholder="Ex: https://www.google.com/maps/embed?pb=..."
           />
+          <p className="text-gray-500 text-xs mt-1">Google Maps embed URL (iframe src)</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Property Image
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          />
+          <p className="text-gray-500 text-xs mt-1">Select the main property image</p>
+          {imagePreview && (
+            <div className="mt-3">
+              <img 
+                src={imagePreview} 
+                alt="Preview" 
+                className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200"
+              />
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Código postal
+              Zip Code
             </label>
             <input
               {...register('zip_code')}
@@ -114,29 +171,28 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Ciudad
+              City
             </label>
             <input
               {...register('city')}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              placeholder="Ej: Boston"
+              placeholder="Ex: Boston"
             />
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tipo de edificio *
+            Building Type *
           </label>
           <select
-            {...register('type_building', { required: 'El tipo de edificio es requerido' })}
+            {...register('type_building', { required: 'Building type is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
           >
-            <option value="">Selecciona un tipo</option>
-            <option value="casa">Casa</option>
-            <option value="apartamento">Apartamento</option>
-            <option value="local">Local</option>
-            <option value="oficina">Oficina</option>
+            <option value="">Select a type</option>
+            <option value="house">House</option>
+            <option value="apartment">Apartment</option>
+            <option value="office">Office</option>
           </select>
           {errors.type_building && (
             <p className="text-red-600 text-sm mt-1">{errors.type_building.message}</p>
@@ -149,7 +205,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Habitaciones
+                Bedrooms
               </label>
               <input
                 type="number"
@@ -161,7 +217,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Baños
+                Bathrooms
               </label>
               <input
                 type="number"
@@ -173,7 +229,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Pisos
+                Floors
               </label>
               <input
                 type="number"
@@ -185,7 +241,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Edificios
+                Buildings
               </label>
               <input
                 type="number"
@@ -198,13 +254,13 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
 
           <div className="mt-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Observaciones
+              Observations
             </label>
             <textarea
               {...register('observations')}
               rows="3"
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              placeholder="Observaciones adicionales..."
+              placeholder="Additional observations..."
             />
           </div>
         </div>
@@ -215,7 +271,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
             disabled={isLoading}
             className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
-            {isLoading ? 'Guardando...' : initialData ? 'Actualizar Propiedad' : 'Crear Propiedad'}
+            {isLoading ? 'Saving...' : initialData ? 'Update Property' : 'Create Property'}
           </button>
         </div>
       </div>

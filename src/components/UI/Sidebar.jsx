@@ -106,7 +106,7 @@ const Sidebar = () => {
                 </svg>
               }
             >
-              Mis Propiedades
+              My Properties
             </MenuItem>
             <MenuItem
               to="/create"
@@ -117,7 +117,7 @@ const Sidebar = () => {
                 </svg>
               }
             >
-              Nueva Propiedad
+              New Property
             </MenuItem>
             <MenuItem
               to="/deleted"
@@ -127,7 +127,7 @@ const Sidebar = () => {
                 </svg>
               }
             >
-              Eliminadas
+              Deleted
             </MenuItem>
           </div>
         </div>
@@ -145,7 +145,7 @@ const Sidebar = () => {
                 </svg>
               }
             >
-              Obligaciones
+              Obligations
             </MenuItem>
           </div>
         </div>
@@ -163,7 +163,7 @@ const Sidebar = () => {
                 </svg>
               }
             >
-              Arriendos
+              Rentals
             </MenuItem>
             <MenuItem
               to="/tenants"
@@ -173,14 +173,14 @@ const Sidebar = () => {
                 </svg>
               }
             >
-              Inquilinos
+              Tenants
             </MenuItem>
           </div>
         </div>
 
         <div>
           <h3 className="px-4 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            Reparaciones
+            Repairs
           </h3>
           <div className="space-y-2">
             <MenuItem
@@ -192,7 +192,7 @@ const Sidebar = () => {
                 </svg>
               }
             >
-              Todas las Reparaciones
+              All Repairs
             </MenuItem>
           </div>
         </div>
