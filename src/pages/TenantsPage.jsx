@@ -46,7 +46,7 @@ const TenantsPage = () => {
       loadTenants();
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Error al guardar inquilino');
+      toast.error('Error saving tenant');
     } finally {
       setIsSubmitting(false);
     }
@@ -58,15 +58,15 @@ const TenantsPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('¿Estás seguro de eliminar este inquilino?')) return;
+    if (!confirm('Are you sure you want to delete this tenant?')) return;
     
     try {
       await deleteTenant(id);
-      toast.success('Inquilino eliminado correctamente');
+      toast.success('Tenant deleted successfully');
       loadTenants();
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Error al eliminar inquilino');
+      toast.error('Error deleting tenant');
     }
   };
 
@@ -79,8 +79,8 @@ const TenantsPage = () => {
     <div>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6 sm:mb-8">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Inquilinos</h1>
-          <p className="text-sm sm:text-base text-gray-600">Gestiona tus inquilinos</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Tenants</h1>
+          <p className="text-sm sm:text-base text-gray-600">Manage your tenants</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
@@ -89,7 +89,7 @@ const TenantsPage = () => {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          {showForm ? 'Cancelar' : 'Nuevo Inquilino'}
+          {showForm ? 'Cancel' : 'New Tenant'}
         </button>
       </div>
 
@@ -105,7 +105,7 @@ const TenantsPage = () => {
               onClick={handleCancel}
               className="mt-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors px-4 py-2 text-sm font-medium"
             >
-              Cancelar Edición
+              Cancel Edit
             </button>
           )}
         </div>
@@ -118,13 +118,13 @@ const TenantsPage = () => {
           <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay inquilinos</h3>
-          <p className="text-gray-600 mb-4">Crea tu primer inquilino para comenzar</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No tenants found</h3>
+          <p className="text-gray-600 mb-4">Create your first tenant to get started</p>
           <button
             onClick={() => setShowForm(true)}
             className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors px-6 py-2 text-sm font-medium"
           >
-            Crear Inquilino
+            Create Tenant
           </button>
         </div>
       ) : (

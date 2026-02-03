@@ -14,6 +14,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
       image_url: initialData.image_url || '',
       zip_code: initialData.zip_code || '',
       type_building: initialData.type_building || '',
+      state: initialData.state || '',
       city: initialData.city || '',
       bedrooms: initialData.details?.bedrooms || '',
       bathrooms: initialData.details?.bathrooms || '',
@@ -37,41 +38,54 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
   };
 
   const handleFormSubmit = (data) => {
-    const formData = new FormData();
-    
-    // Add main fields
-    formData.append('name', data.name);
-    formData.append('use', data.use);
-    formData.append('address', data.address);
-    formData.append('type_building', data.type_building);
-    
-    // Optional fields - only add if they have values
-    if (data.map_url && data.map_url.trim()) {
-      formData.append('map_url', data.map_url.trim());
-    }
-    if (data.zip_code && data.zip_code.trim()) {
-      formData.append('zip_code', data.zip_code.trim());
-    }
-    if (data.city && data.city.trim()) {
-      formData.append('city', data.city.trim());
-    }
-    
-    // Add details as a JSON string
-    const detailsObj = {
-      bedrooms: parseInt(data.bedrooms) || 0,
-      bathrooms: parseInt(data.bathrooms) || 0,
-      floors: parseInt(data.floors) || 0,
-      buildings: parseInt(data.buildings) || 0,
-      observations: data.observations || ''
+    // Transform data to API format (JSON)
+    const formattedData = {
+      name: data.name,
+      use: data.use,
+      address: data.address,
+      type_building: data.type_building,
+      map_url: data.map_url || '',
+      zip_code: data.zip_code || '',
+      state: data.state || '',
+      city: data.city || '',
+      details: {
+        bedrooms: parseInt(data.bedrooms) || 0,
+        bathrooms: parseInt(data.bathrooms) || 0,
+        floors: parseInt(data.floors) || 0,
+        observations: data.observations || '',
+        buildings: parseInt(data.buildings) || 0
+      }
     };
-    formData.append('details', JSON.stringify(detailsObj));
     
-    // Add image if selected
+    // If there's an image file, we need to send FormData
     if (imageFile) {
+      const formData = new FormData();
+      
+      // Add main fields
+      formData.append('name', formattedData.name);
+      formData.append('use', formattedData.use);
+      formData.append('address', formattedData.address);
+      formData.append('type_building', formattedData.type_building);
+      formData.append('map_url', formattedData.map_url);
+      formData.append('zip_code', formattedData.zip_code);
+      formData.append('state', formattedData.state);
+      formData.append('city', formattedData.city);
+      
+      // Add details fields individually
+      formData.append('details.bedrooms', formattedData.details.bedrooms);
+      formData.append('details.bathrooms', formattedData.details.bathrooms);
+      formData.append('details.floors', formattedData.details.floors);
+      formData.append('details.buildings', formattedData.details.buildings);
+      formData.append('details.observations', formattedData.details.observations);
+      
+      // Add the image file
       formData.append('image_url', imageFile);
+      
+      onSubmit(formData);
+    } else {
+      // No image, send as JSON
+      onSubmit(formattedData);
     }
-    
-    onSubmit(formData);
   };
 
   return (
@@ -168,6 +182,19 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
               placeholder="Ej: 58"
             />
           </div>
+
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              State
+            </label>
+            <input
+              {...register('state')}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              placeholder="Ex: California"
+            />
+          </div>
+        
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

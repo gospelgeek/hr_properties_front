@@ -21,8 +21,8 @@ const RentalsPage = () => {
       const data = await getRentals();
       setRentals(data);
     } catch (error) {
-      console.error('Error al cargar arriendos:', error);
-      toast.error('Error al cargar arriendos');
+      console.error('Error loading rentals:', error);
+      toast.error('Error loading rentals');
     } finally {
       setLoading(false);
     }
@@ -56,18 +56,18 @@ const RentalsPage = () => {
     <div>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6 sm:mb-8">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Arriendos</h1>
-          <p className="text-sm sm:text-base text-gray-600">Gestiona todos tus arriendos</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Rentals</h1>
+          <p className="text-sm sm:text-base text-gray-600">Manage all your rentals</p>
         </div>
         <button
           onClick={() => navigate('/tenants')}
           className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors px-5 py-3 font-medium"
         >
-          Gestionar Inquilinos
+          Manage Tenants
         </button>
       </div>
 
-      {/* Filtros */}
+      {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-6">
         <button
           onClick={() => setFilter('all')}
@@ -77,7 +77,7 @@ const RentalsPage = () => {
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
-          Todos
+          All
         </button>
         <button
           onClick={() => setFilter('active')}
@@ -87,7 +87,7 @@ const RentalsPage = () => {
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
-          Activos
+          Active
         </button>
         <button
           onClick={() => setFilter('ended')}
@@ -97,7 +97,7 @@ const RentalsPage = () => {
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
-          Finalizados
+          Ended
         </button>
         <button
           onClick={() => setFilter('monthly')}
@@ -107,7 +107,7 @@ const RentalsPage = () => {
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
-          Mensuales
+          Monthly
         </button>
         <button
           onClick={() => setFilter('airbnb')}
@@ -128,17 +128,17 @@ const RentalsPage = () => {
           <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay arriendos</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No rentals</h3>
           <p className="text-gray-600 mb-4">
             {filter === 'all' 
-              ? 'Crea arriendos desde las propiedades de tipo arrendamiento'
-              : `No hay arriendos ${filter === 'active' ? 'activos' : filter === 'ended' ? 'finalizados' : filter}`}
+              ? 'Create rentals from properties of type rental'
+              : `No rentals ${filter === 'active' ? 'active' : filter === 'ended' ? 'ended' : filter}`}
           </p>
           <button
             onClick={() => navigate('/')}
             className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors px-6 py-2 text-sm font-medium"
           >
-            Ver Propiedades
+            View Properties
           </button>
         </div>
       ) : (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ConfirmDialog from '../UI/ConfirmDialog';
 
-const DeletePropertyButton = ({ propertyId, onDelete, buttonText = 'Eliminar Propiedad' }) => {
+const DeletePropertyButton = ({ propertyId, onDelete, buttonText = 'Delete Property' }) => {
   const [showDialog, setShowDialog] = useState(false);
 
   const handleConfirm = () => {
@@ -20,12 +20,12 @@ const DeletePropertyButton = ({ propertyId, onDelete, buttonText = 'Eliminar Pro
 
       <ConfirmDialog
         isOpen={showDialog}
-        title="Eliminar Propiedad"
-        message="¿Estás seguro de que deseas eliminar esta propiedad? Esta acción se puede revertir desde la sección de propiedades eliminadas."
+        title="Delete Property"
+        message="Are you sure you want to delete this property? This action can be undone from the deleted properties section."
         onConfirm={handleConfirm}
         onCancel={() => setShowDialog(false)}
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        confirmText="Delete"
+        cancelText="Cancel"
         isDanger={true}
       />
     </>

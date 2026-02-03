@@ -13,6 +13,7 @@ import AddEnserPage from './pages/AddEnserPage';
 import AddLawPage from './pages/AddLawPage';
 import UploadMediaPage from './pages/UploadMediaPage';
 import PropertyLawsPage from './pages/PropertyLawsPage';
+import PropertyFinancialPage from './pages/PropertyFinancialPage';
 // Finance Pages
 import DashboardPage from './pages/DashboardPage';
 import NotificationsPage from './pages/NotificationsPage';
@@ -49,6 +50,7 @@ function App() {
           <Route path="/property/:id/add-law" element={<AddLawPage />} />
           <Route path="/property/:id/upload-media" element={<UploadMediaPage />} />
           <Route path="/property/:id/laws" element={<PropertyLawsPage />} />
+          <Route path="/property/:id/financials" element={<PropertyFinancialPage />} />
           
           {/* Finance */}
           <Route path="/notifications" element={<NotificationsPage />} />

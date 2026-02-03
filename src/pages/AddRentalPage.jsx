@@ -23,14 +23,14 @@ const AddRentalPage = () => {
       const data = await getProperty(id);
       setProperty(data);
       
-      // Validar que la propiedad sea de arrendamiento
-      if (data.use !== 'arrendamiento') {
-        toast.error('Esta propiedad no es de tipo arrendamiento');
+      // Validar que la propiedad sea de rental
+      if (data.use !== 'rental') {
+        toast.error('This property is not of type rental');
         navigate(`/property/${id}`);
       }
     } catch (error) {
-      console.error('Error al cargar propiedad:', error);
-      toast.error('Error al cargar la propiedad');
+      console.error('Error loading property:', error);
+      toast.error('Error loading property');
       navigate('/');
     } finally {
       setLoading(false);
@@ -41,11 +41,11 @@ const AddRentalPage = () => {
     try {
       setIsSubmitting(true);
       await addRentalToProperty(id, data);
-      toast.success('Arriendo creado correctamente');
+      toast.success('Rental created successfully');
       navigate(`/property/${id}`);
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error.response?.data?.detail || 'Error al crear arriendo');
+      toast.error(error.response?.data?.detail || 'Error creating rental');
     } finally {
       setIsSubmitting(false);
     }
@@ -64,11 +64,11 @@ const AddRentalPage = () => {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Volver a la propiedad
+          Back to Property
         </button>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Crear Arriendo</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Create Rental</h1>
         <p className="text-sm sm:text-base text-gray-600">
-          Agregar nuevo arriendo para: <span className="font-semibold">{property.name || property.address}</span>
+          Add new rental for: <span className="font-semibold">{property.name || property.address}</span>
         </p>
       </div>
 

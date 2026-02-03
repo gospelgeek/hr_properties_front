@@ -49,7 +49,7 @@ const TenantCard = ({ tenant, onEdit, onDelete }) => {
             onClick={() => onDelete(tenant.id)}
             className="flex-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors py-2 text-sm font-medium"
           >
-            Eliminar
+            Delete
           </button>
         )}
       </div>

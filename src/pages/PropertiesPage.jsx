@@ -54,9 +54,9 @@ const PropertiesPage = () => {
             className="bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Types</option>
-            <option value="arrendamiento">Rental</option>
+            <option value="rental">Rental</option>
             <option value="personal">Personal</option>
-            <option value="comercial">Commercial</option>
+            <option value="commercial">Commercial</option>
           </select>
           <button
             onClick={() => navigate('/create')}

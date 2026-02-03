@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getPropertyRepairsCost, getPropertyFinancials } from '../../api/properties.api';
-import toast from 'react-hot-toast';
+import { getPropertyRepairsCost } from '../../api/properties.api';
 
 const PropertyDetails = ({ property, onEdit, onDelete }) => {
   const [showInventory, setShowInventory] = useState(false);
   const [showRepairs, setShowRepairs] = useState(false);
   const [showLaws, setShowLaws] = useState(false);
   const [showMedia, setShowMedia] = useState(false);
-  const [showFinancials, setShowFinancials] = useState(false);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(null);
   const [repairsCost, setRepairsCost] = useState(null);
-  const [financials, setFinancials] = useState(null);
   const [loadingRepairsCost, setLoadingRepairsCost] = useState(false);
-  const [loadingFinancials, setLoadingFinancials] = useState(false);
+
+const useLabels = {
+  rental: "Rental",
+  personal: "Personal",
+  commercial: "Commercial"
+}
+
+const useLabelBuilding = {
+  apartment: "Apartment",
+  house: "House",
+  office: "Office"
+}
 
   useEffect(() => {
     if (property && property.id) {
@@ -30,25 +38,6 @@ const PropertyDetails = ({ property, onEdit, onDelete }) => {
       console.error('Error loading repairs cost:', error);
     } finally {
       setLoadingRepairsCost(false);
-    }
-  };
-
-  const loadFinancials = async () => {
-    if (financials) {
-      setShowFinancials(!showFinancials);
-      return;
-    }
-    
-    try {
-      setLoadingFinancials(true);
-      const data = await getPropertyFinancials(property.id);
-      setFinancials(data);
-      setShowFinancials(true);
-    } catch (error) {
-      console.error('Error loading financials:', error);
-      toast.error('Error loading financial data');
-    } finally {
-      setLoadingFinancials(false);
     }
   };
 
@@ -96,7 +85,7 @@ const PropertyDetails = ({ property, onEdit, onDelete }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <span>{property.address}</span>
+          <span>{property.address+", "+property.city+", "+property.state+", "+property.zip_code}</span>
         </p>
         {/* Action buttons in header */}
         <div className="flex flex-wrap gap-3 mt-6">
@@ -145,60 +134,67 @@ const PropertyDetails = ({ property, onEdit, onDelete }) => {
             </svg>
             View Documents
           </Link>
-          <button 
-            onClick={loadFinancials}
-            className="bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
-            disabled={loadingFinancials}
+          <Link 
+            to={`/property/${property.id}/financials`}
+            className="bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            {loadingFinancials ? 'Loading...' : 'Balance'}
-          </button>
+            View Financials
+          </Link>
         </div>
       </div>
 
       <div className="p-6 sm:p-8">
         {/* Map */}
-        {property.map_url && (
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Location</h2>
-            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-              <iframe
-                src={property.map_url}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Property Location Map"
-              ></iframe>
-            </div>
-          </div>
-        )}
+       
 
-        {/* General Information */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Use Type</div>
-            <div className="text-xl font-semibold text-gray-900">{property.use || 'Not specified'}</div>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Building Type</div>
-            <div className="text-xl font-semibold text-gray-900">{property.type_building || 'Not specified'}</div>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">City</div>
-            <div className="text-xl font-semibold text-gray-900">{property.city || 'Not specified'}</div>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Zip Code</div>
-            <div className="text-xl font-semibold text-gray-900">{property.zip_code || 'Not specified'}</div>
-          </div>
+        {/* General Information */
+        console.log(property)}
+        
+<div className="mb-8">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {/* Columna izquierda: cuadros pequeños */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Use Type</div>
+        <div className="text-xl font-semibold text-gray-900">{ useLabels[property.use] || 'Not specified'}</div>
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Building Type</div>
+        <div className="text-xl font-semibold text-gray-900">{useLabelBuilding[property.type_building] || 'Not specified'}</div>
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 ">
+        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">City</div>
+        <div className="text-xl font-semibold text-gray-900">{property.city || 'Not specified'}</div>
+      </div>
+    </div>
+    {/* Columna derecha: mapa */}
+    {property.map_url && (
+      <div>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Location</h2>
+        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200 h-64">
+          <iframe
+            src={property.map_url}
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen=""
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Property Location Map"
+          ></iframe>
         </div>
+      </div>
+    )}
+  </div>
+</div>
 
-        {/* Property Details */}
+ 
+        {/* Property Details */
+        console.log(property.details)}
+        
         {property.details && (
           <div className="mb-8">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Property Details</h2>
@@ -258,7 +254,7 @@ const PropertyDetails = ({ property, onEdit, onDelete }) => {
                   </h3>
                   {repairsCost && (
                     <span className="px-4 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-semibold">
-                      Total: {formatCurrency(repairsCost.total_cost || 0)}
+                      Total: {formatCurrency(  property.repairs.reduce((sum, repair) => sum + (parseFloat(repair.cost) || 0), 0))}
                     </span>
                   )}
                   {loadingRepairsCost && (
@@ -302,61 +298,6 @@ const PropertyDetails = ({ property, onEdit, onDelete }) => {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Financial Balance */}
-        {showFinancials && financials && (
-          <div className="mb-8">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-              <div className="px-6 py-4 bg-gradient-to-r from-green-50 to-blue-50 border-b border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900">Financial Balance</h3>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  {/* Income Row */}
-                  <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                    <div>
-                      <div className="text-sm font-medium text-gray-600">Total Income</div>
-                      {financials.income_breakdown && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Rentals: {formatCurrency(financials.income_breakdown.rentals || 0)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-2xl font-bold text-green-600">
-                      {formatCurrency(financials.total_income || 0)}
-                    </div>
-                  </div>
-
-                  {/* Expenses Row */}
-                  <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                    <div>
-                      <div className="text-sm font-medium text-gray-600">Total Expenses</div>
-                      {financials.expense_breakdown && (
-                        <div className="text-xs text-gray-500 mt-1 space-y-0.5">
-                          <div>Obligations: {formatCurrency(financials.expense_breakdown.obligations || 0)}</div>
-                          <div>Repairs: {formatCurrency(financials.expense_breakdown.repairs || 0)}</div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-2xl font-bold text-red-600">
-                      {formatCurrency(financials.total_expenses || 0)}
-                    </div>
-                  </div>
-
-                  {/* Balance Row */}
-                  <div className="flex justify-between items-center py-3 bg-gray-50 rounded-lg px-4">
-                    <div className="text-base font-semibold text-gray-900">Net Balance</div>
-                    <div className={`text-3xl font-bold ${
-                      (financials.net_balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {formatCurrency(financials.net_balance || 0)}
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}

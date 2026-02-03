@@ -38,7 +38,7 @@ const RepairCard = ({ repair, onDelete }) => {
             onClick={() => onDelete(repair.id)}
             className="btn btn-sm btn-error"
           >
-            Eliminar
+            Delete
           </button>
         </div>
       </div>
