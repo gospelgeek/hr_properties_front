@@ -97,25 +97,25 @@ const PropertyLawsPage = () => {
     console.log('✅ lawToDelete:', lawToDelete);
     try {
       await deletePropertyLaw(id, lawToDelete.id);
-      toast.success('Documento eliminado exitosamente');
-      console.log('✅ Cerrando diálogo...');
+      toast.success('Document deleted successfully');
+      console.log('✅ Closing dialog...');
       setShowDeleteDialog(false);
       setLawToDelete(null);
       loadPropertyLaws();
     } catch (error) {
-      console.error('Error al eliminar documento:', error);
-      toast.error('Error al eliminar el documento');
+      console.error('Error deleting document:', error);
+      toast.error('Error deleting document');
     }
   };
 
   const handleCancelDelete = useCallback(() => {
-    console.log('❌ handleCancelDelete - Cancelando eliminación');
+    console.log('❌ handleCancelDelete - Canceling deletion');
     setShowDeleteDialog(false);
     setLawToDelete(null);
   }, []);
 
   const deleteDialogMessage = useMemo(
-    () => `¿Estás seguro de que deseas eliminar el documento "${lawToDelete?.entity_name}"? Esta acción no se puede deshacer.`,
+    () => `Are you sure you want to delete the document "${lawToDelete?.entity_name}"? This action cannot be undone.`,
     [lawToDelete?.entity_name]
   );
 
@@ -132,12 +132,12 @@ const PropertyLawsPage = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-t-xl">
-              <h2 className="text-2xl font-bold">Editar Documento</h2>
+              <h2 className="text-2xl font-bold">Edit Document</h2>
             </div>
             <form onSubmit={handleUpdate} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Nombre de la Entidad *
+                  Entity Name *
                 </label>
                 <input
                   type="text"
@@ -150,7 +150,7 @@ const PropertyLawsPage = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Número Legal *
+                  Legal Number *
                 </label>
                 <input
                   type="text"
@@ -163,7 +163,7 @@ const PropertyLawsPage = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Monto Original *
+                  Original Amount *
                 </label>
                 <input
                   type="number"
@@ -184,13 +184,13 @@ const PropertyLawsPage = () => {
                   className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label htmlFor="is_paid" className="text-sm font-semibold text-gray-900">
-                  ¿Está pagado?
+                  Is Paid?
                 </label>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Actualizar Documento (Opcional)
+                  Update Document (Optional)
                 </label>
                 <input
                   type="file"
@@ -205,13 +205,13 @@ const PropertyLawsPage = () => {
                   onClick={handleCancelEdit}
                   className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium"
                 >
-                  Guardar Cambios
+                  Save Changes
                 </button>
               </div>
             </form>
@@ -226,15 +226,15 @@ const PropertyLawsPage = () => {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Volver a detalles de la propiedad
+            Back to Property Details
           </Link>
         </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 sm:px-8 py-6 rounded-t-xl">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Documentos y Normativas</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Documents and Regulations</h1>
           <p className="text-blue-100">
-            {laws.length} {laws.length === 1 ? 'documento encontrado' : 'documentos encontrados'}
+            {laws.length} {laws.length === 1 ? 'document found' : 'documents found'}
           </p>
         </div>
 
@@ -244,7 +244,7 @@ const PropertyLawsPage = () => {
               <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <p className="text-gray-500 text-lg mb-4">No hay documentos registrados</p>
+              <p className="text-gray-500 text-lg mb-4">No documents registered</p>
               <Link
                 to={`/property/${id}/add-law`}
                 className="inline-flex items-center gap-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium px-6 py-3"
@@ -252,7 +252,7 @@ const PropertyLawsPage = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Añadir primer documento
+                Add first document
               </Link>
             </div>
           ) : (
@@ -276,7 +276,7 @@ const PropertyLawsPage = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                       </svg>
                       <div>
-                        <p className="text-xs font-medium text-gray-500 uppercase">Número Legal</p>
+                        <p className="text-xs font-medium text-gray-500 uppercase">Legal Number</p>
                         <p className="text-sm text-gray-900 font-medium">{law.legal_number}</p>
                       </div>
                     </div>
@@ -286,7 +286,7 @@ const PropertyLawsPage = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <div>
-                        <p className="text-xs font-medium text-gray-500 uppercase">Monto Original</p>
+                        <p className="text-xs font-medium text-gray-500 uppercase">Original Amount</p>
                         <p className="text-sm text-gray-900 font-bold">${parseFloat(law.original_amount).toLocaleString()}</p>
                       </div>
                     </div>
@@ -301,7 +301,7 @@ const PropertyLawsPage = () => {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
-                        Ver documento adjunto
+                        View attached document
                       </a>
                     )}
                   </div>
@@ -314,7 +314,7 @@ const PropertyLawsPage = () => {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
-                      Editar
+                      Edit
                     </button>
                     <button
                       onClick={() => handleDeleteClick(law)}
@@ -329,7 +329,7 @@ const PropertyLawsPage = () => {
 
                   {law.created_at && (
                     <p className="text-xs text-gray-500 mt-2">
-                      Registrado: {new Date(law.created_at).toLocaleString()}
+                      Registered: {new Date(law.created_at).toLocaleString()}
                     </p>
                   )}
                 </div>
@@ -345,10 +345,10 @@ const PropertyLawsPage = () => {
       isOpen={showDeleteDialog}
       onCancel={handleCancelDelete}
       onConfirm={handleConfirmDelete}
-      title="Eliminar Documento"
+      title="Delete Document"
       message={deleteDialogMessage}
-      confirmText="Eliminar"
-      cancelText="Cancelar"
+      confirmText="Delete"
+      cancelText="Cancel"
       isDanger={true}
     />
   </>

@@ -135,7 +135,9 @@ export const deletePropertyRental = async (propertyId, rentalId) => {
 
 // POST /api/properties/{id}/rentals/{rental_id}/add_payment/ - Añadir pago a un rental
 export const addPaymentToRental = async (propertyId, rentalId, paymentData) => {
+  console.log('Adding payment data:', paymentData);
   const response = await api.post(`properties/${propertyId}/rentals/${rentalId}/add_payment/`, paymentData);
+console.log('Response from adding payment:', response.data);
   return response.data;
 };
 

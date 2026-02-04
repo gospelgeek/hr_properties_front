@@ -36,6 +36,7 @@ function App() {
           
           {/* Properties */}
           <Route path="/" element={<PropertiesPage />} />
+          <Route path="/properties" element={<PropertiesPage />} />
           <Route path="/property/:id" element={<PropertyPage />} />
           <Route path="/create" element={<CreatePropertyPage />} />
           <Route path="/edit/:id" element={<EditPropertyPage />} />

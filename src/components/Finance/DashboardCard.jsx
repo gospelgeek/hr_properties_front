@@ -1,6 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const DashboardCard = ({ title, value, subtitle, icon, color = 'blue', trend }) => {
+const DashboardCard = ({ title, value, subtitle, icon, color = 'blue', trend, onClick, to }) => {
+  const navigate = useNavigate();
+  
   const colorClasses = {
     blue: 'bg-blue-100 text-blue-600',
     green: 'bg-green-100 text-green-600',
@@ -9,8 +12,23 @@ const DashboardCard = ({ title, value, subtitle, icon, color = 'blue', trend }) 
     purple: 'bg-purple-100 text-purple-600'
   };
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else if (to) {
+      navigate(to);
+    }
+  };
+
+  const isClickable = onClick || to;
+
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 p-6">
+    <div 
+      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 p-6 ${
+        isClickable ? 'cursor-pointer hover:border-blue-300' : ''
+      }`}
+      onClick={handleClick}
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>

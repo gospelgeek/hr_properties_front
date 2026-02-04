@@ -75,14 +75,14 @@ const PropertyFinancialPage = () => {
             <div className="flex justify-between items-center py-4 border-b border-gray-200">
               <div>
                 <div className="text-base font-semibold text-gray-900">Total Income</div>
-                {financials.income_breakdown && (
+                {financials.income && (
                   <div className="text-sm text-gray-500 mt-1">
-                    Rentals: {formatCurrency(financials.income_breakdown.rentals || 0)}
+                    Rentals: {formatCurrency(financials.income.rental_payments || 0)}
                   </div>
                 )}
               </div>
               <div className="text-3xl font-bold text-green-600">
-                {formatCurrency(financials.total_income || 0)}
+                {formatCurrency(financials.income.total_income || 0)}
               </div>
             </div>
 

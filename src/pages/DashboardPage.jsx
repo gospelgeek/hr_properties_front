@@ -54,9 +54,8 @@ const DashboardPage = () => {
  {/* Properties */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Properties</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Properties - Total: {dashboardData.properties.total}</h2>
           <div className="text-sm text-gray-600">
-            <span className="font-semibold text-gray-900 text-lg">Total: {dashboardData.properties.total}</span>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -65,6 +64,7 @@ const DashboardPage = () => {
             value={getPropertyCountByUse('rental')}
             subtitle="properties"
             color="blue"
+            to="/properties?use=rental"
             icon={
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -76,6 +76,7 @@ const DashboardPage = () => {
             value={getPropertyCountByUse('personal')}
             subtitle="properties"
             color="green"
+            to="/properties?use=personal"
             icon={
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -87,6 +88,7 @@ const DashboardPage = () => {
             value={getPropertyCountByUse('commercial')}
             subtitle="properties"
             color="purple"
+            to="/properties?use=commercial"
             icon={
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -100,19 +102,10 @@ const DashboardPage = () => {
 
       {/* Financial Obligations */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Financial Obligations</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <DashboardCard
-            title="Total Obligations"
-            value={dashboardData.obligations.total_count}
-            subtitle={formatCurrency(dashboardData.obligations.total_amount)}
-            color="blue"
-            icon={
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            }
-          />
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Financial Obligations - Total: {dashboardData.obligations.total_count}</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <DashboardCard
             title="Total Paid"
             value={formatCurrency(dashboardData.obligations.total_paid)}
@@ -148,31 +141,88 @@ const DashboardPage = () => {
       </div>
 
      
-      {/* Rentals */}
+      {/* Rentals Mensuales */
+      console.log(dashboardData)}
       {dashboardData.rentals && (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Rentals</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Rentals Mensuales</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <DashboardCard
-              title="Active Rentals"
-              value={dashboardData.rentals.active}
+              title="Active"
+              value={dashboardData.rentals.monthly_active || 0}
               color="green"
+              to="/properties?rental_type=monthly&rental_status=active"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               }
             />
             <DashboardCard
               title="Available"
-              value={dashboardData.rentals.available}
+              value={dashboardData.rentals.monthly_available || 0}
               color="blue"
+              to="/properties?rental_type=monthly&rental_status=available"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              }
             />
             <DashboardCard
               title="Ending Soon"
-              value={dashboardData.rentals.ending_soon}
+              value={dashboardData.rentals.monthly_ending_soon || 0}
               subtitle="Next 15 days"
               color="yellow"
+              to="/properties?rental_type=monthly&rental_status=ending_soon"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Rentals Airbnb */}
+      {dashboardData.rentals && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Rentals Airbnb</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <DashboardCard
+              title="Active"
+              value={dashboardData.rentals.airbnb_active || 0}
+              color="green"
+              to="/properties?rental_type=airbnb&rental_status=active"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            />
+            <DashboardCard
+              title="Available"
+              value={dashboardData.rentals.airbnb_available || 0}
+              color="blue"
+              to="/properties?rental_type=airbnb&rental_status=available"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              }
+            />
+            <DashboardCard
+              title="Ending Soon"
+              value={dashboardData.rentals.airbnb_ending_soon || 0}
+              subtitle="Next 15 days"
+              color="yellow"
+              to="/properties?rental_type=airbnb&rental_status=ending_soon"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
             />
           </div>
         </div>

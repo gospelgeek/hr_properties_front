@@ -208,7 +208,7 @@ export const deleteObligationPayment = async (propertyId, obligationId, paymentI
 // DASHBOARD - ESTADÍSTICAS GENERALES
 // ═══════════════════════════════════════════════════════════════════════
 
-// GET /api/dashboard/ - Obtener estadísticas generales del sistema
+// GET /api/dashboard/stats/ - Obtener estadísticas generales del sistema
 export const getDashboard = async () => {
   const response = await api.get('dashboard/');
   return response.data;

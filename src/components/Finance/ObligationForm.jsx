@@ -64,10 +64,10 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
             <p className="mt-1 text-sm text-red-600">{errors.entity_name.message}</p>
           )}
         </div>
-
+          
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Monto *
+            Amount *
           </label>
           <input
             type="number"

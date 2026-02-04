@@ -60,22 +60,22 @@ const RentalCard = ({ rental, propertyId }) => {
           <span className="font-medium text-gray-900">{formatDate(rental.check_out)}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">Monto:</span>
+          <span className="text-gray-600">Amount:</span>
           <span className="font-semibold text-green-600">{formatCurrency(rental.amount)}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">Personas:</span>
+          <span className="text-gray-600">People:</span>
           <span className="font-medium text-gray-900">{rental.people_count}</span>
         </div>
 
         {rental.rental_type === 'monthly' && rental.monthly_data && (
           <div className="pt-2 border-t border-gray-200">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Depósito:</span>
+              <span className="text-gray-600">Deposit:</span>
               <span className="font-medium text-gray-900">
                 {formatCurrency(rental.monthly_data.deposit_amount)}
                 {rental.monthly_data.is_refundable && (
-                  <span className="ml-2 text-xs text-green-600">(Reembolsable)</span>
+                  <span className="ml-2 text-xs text-green-600">(Refundable)</span>
                 )}
               </span>
             </div>
@@ -85,9 +85,9 @@ const RentalCard = ({ rental, propertyId }) => {
         {rental.rental_type === 'airbnb' && rental.airbnb_data && (
           <div className="pt-2 border-t border-gray-200">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Estado de pago:</span>
+              <span className="text-gray-600">Payment Status:</span>
               <span className={`font-medium ${rental.airbnb_data.is_paid ? 'text-green-600' : 'text-red-600'}`}>
-                {rental.airbnb_data.is_paid ? 'Pagado' : 'Pendiente'}
+                {rental.airbnb_data.is_paid ? 'Paid' : 'Pending'}
               </span>
             </div>
           </div>
@@ -98,7 +98,7 @@ const RentalCard = ({ rental, propertyId }) => {
         onClick={() => navigate(`/property/${propertyId}/rentals/${rental.id}`)}
         className="w-full bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors py-2 text-sm font-medium"
       >
-        Ver detalles y pagos
+        View Details and Payments
       </button>
     </div>
   );

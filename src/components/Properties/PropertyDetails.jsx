@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getPropertyRepairsCost } from '../../api/properties.api';
+import { getPropertyRepairsCost, getPropertyFinancials } from '../../api/properties.api';
 
 const PropertyDetails = ({ property, onEdit, onDelete }) => {
   const [showInventory, setShowInventory] = useState(false);
@@ -10,6 +10,9 @@ const PropertyDetails = ({ property, onEdit, onDelete }) => {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(null);
   const [repairsCost, setRepairsCost] = useState(null);
   const [loadingRepairsCost, setLoadingRepairsCost] = useState(false);
+  const [showFinancials, setShowFinancials] = useState(false);
+  const [financials, setFinancials] = useState(null);
+  const [loadingFinancials, setLoadingFinancials] = useState(false);
 
 const useLabels = {
   rental: "Rental",
@@ -47,6 +50,25 @@ const useLabelBuilding = {
       currency: 'USD',
       minimumFractionDigits: 0
     }).format(value);
+  };
+
+  const loadFinancials = async () => {
+    try {
+      setLoadingFinancials(true);
+      const data = await getPropertyFinancials(property.id);
+      setFinancials(data);
+    } catch (error) {
+      console.error('Error loading financials:', error);
+    } finally {
+      setLoadingFinancials(false);
+    }
+  };
+
+  const handleToggleFinancials = async () => {
+    if (!showFinancials && !financials) {
+      await loadFinancials();
+    }
+    setShowFinancials(!showFinancials);
   };
 
   const handlePrevMedia = () => {
@@ -134,26 +156,24 @@ const useLabelBuilding = {
             </svg>
             View Documents
           </Link>
-          <Link 
-            to={`/property/${property.id}/financials`}
+          <button
+            onClick={handleToggleFinancials}
             className="bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            View Financials
-          </Link>
+            {showFinancials ? 'Hide Financials' : 'View Financials'}
+          </button>
         </div>
       </div>
 
       <div className="p-6 sm:p-8">
-        {/* Map */}
-       
-
-        {/* General Information */
-        console.log(property)}
-        
-<div className="mb-8">
+        {/* Toggle between General Info and Financials */}
+        {!showFinancials ? (
+          <>
+            {/* General Information */}
+            <div className="mb-8">
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
     {/* Columna izquierda: cuadros pequeños */}
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -190,11 +210,7 @@ const useLabelBuilding = {
     )}
   </div>
 </div>
-
- 
-        {/* Property Details */
-        console.log(property.details)}
-        
+        {/* Property Details */}
         {property.details && (
           <div className="mb-8">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Property Details</h2>
@@ -239,6 +255,83 @@ const useLabelBuilding = {
             )}
           </div>
         )}
+          </>
+        ) : (
+          <>
+            {/* Financial Information */
+            console.log(financials)}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Financial Balance</h2>
+                <button
+                  onClick={() => setShowFinancials(false)}
+                  className="text-blue-600 hover:text-blue-700 flex items-center gap-2 font-medium"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Back to Details
+                </button>
+              </div>
+
+              {loadingFinancials ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+              ) : financials ? (
+                <div className="space-y-4">
+                  {/* Income Row */}
+                  <div className="flex justify-between items-center py-4 border-b border-gray-200 bg-white rounded-lg px-6 shadow-sm">
+                    <div>
+                      <div className="text-base font-semibold text-gray-900">Total Income</div>
+                      {financials.income && (
+                        <div className="text-sm text-gray-500 mt-1">
+                          Rentals: {formatCurrency(financials.income.rental_payments || 0)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-3xl font-bold text-green-600">
+                      {formatCurrency(financials.income.total_income || 0)}
+                    </div>
+                  </div>
+
+                  {/* Expenses Row */}
+                  <div className="flex justify-between items-center py-4 border-b border-gray-200 bg-white rounded-lg px-6 shadow-sm">
+                    <div>
+                      <div className="text-base font-semibold text-gray-900">Total Expenses</div>
+                      {financials.expenses && (
+                        <div className="text-sm text-gray-500 mt-1 space-y-0.5">
+                          <div>Obligations: {formatCurrency(financials.expenses.obligations || 0)}</div>
+                          <div>Repairs: {formatCurrency(financials.expenses.repairs || 0)}</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-3xl font-bold text-red-600">
+                      {formatCurrency(financials.expenses.total_expenses || 0)}
+                    </div>
+                  </div>
+
+                  {/* Balance Row */}
+                  <div className="flex justify-between items-center py-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg px-6 shadow-md">
+                    <div className="text-lg font-bold text-gray-900">Net Balance</div>
+                    <div className={`text-4xl font-bold ${
+                      (financials.balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {formatCurrency(financials.balance || 0)}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  No financial data available
+                </div>
+              )}
+            </div>
+          </>
+        )}
+        
+        {!showFinancials && (
+          <>
 
         {/* Repairs */}
         {property.repairs && property.repairs.length > 0 && (
@@ -617,19 +710,23 @@ const useLabelBuilding = {
           </div>
         )}
 
-        {/* Footer Info */}
-        <div className="border-t border-gray-200 pt-6 mt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
-            <div>
-              <span className="font-medium text-gray-700">Created:</span> {new Date(property.created_at).toLocaleString()}
-            </div>
-            {property.updated_at && (
+        {/* Footer Info - Only show when not in financials view */}
+        {!showFinancials && (
+          <div className="border-t border-gray-200 pt-6 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
               <div>
-                <span className="font-medium text-gray-700">Last updated:</span> {new Date(property.updated_at).toLocaleString()}
+                <span className="font-medium text-gray-700">Created:</span> {new Date(property.created_at).toLocaleString()}
               </div>
-            )}
+              {property.updated_at && (
+                <div>
+                  <span className="font-medium text-gray-700">Last updated:</span> {new Date(property.updated_at).toLocaleString()}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
+          </>
+        )}
       </div>
     </div>
   );
