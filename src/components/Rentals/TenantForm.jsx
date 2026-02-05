@@ -4,13 +4,13 @@ import { useForm } from 'react-hook-form';
 const TenantForm = ({ initialData, onSubmit, isLoading }) => {
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: initialData || {
-      first_name: '',
-      last_name: '',
-      document_number: '',
+      name: '',
+      lastname: '',
       email: '',
-      phone: '',
+      birth_year: '',
+      phone1: '',
       phone2: '',
-      observation: ''
+      observations: ''
     }
   });
 
@@ -20,48 +20,33 @@ const TenantForm = ({ initialData, onSubmit, isLoading }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nombre *
+              Name *
             </label>
             <input
               type="text"
-              {...register('first_name', { required: 'El nombre es obligatorio' })}
+              {...register('name', { required: 'Name is required' })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Juan"
             />
-            {errors.first_name && (
-              <p className="mt-1 text-sm text-red-600">{errors.first_name.message}</p>
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
             )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Apellido *
+              Last Name *
             </label>
             <input
               type="text"
-              {...register('last_name', { required: 'El apellido es obligatorio' })}
+              {...register('lastname', { required: 'Last name is required' })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Pérez"
             />
-            {errors.last_name && (
-              <p className="mt-1 text-sm text-red-600">{errors.last_name.message}</p>
+            {errors.lastname && (
+              <p className="mt-1 text-sm text-red-600">{errors.lastname.message}</p>
             )}
           </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Número de Documento *
-          </label>
-          <input
-            type="text"
-            {...register('document_number', { required: 'El documento es obligatorio' })}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="1234567890"
-          />
-          {errors.document_number && (
-            <p className="mt-1 text-sm text-red-600">{errors.document_number.message}</p>
-          )}
         </div>
 
         <div>
@@ -71,10 +56,10 @@ const TenantForm = ({ initialData, onSubmit, isLoading }) => {
           <input
             type="email"
             {...register('email', { 
-              required: 'El email es obligatorio',
+              required: 'Email is required',
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Email inválido'
+                message: 'Invalid email'
               }
             })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -85,24 +70,41 @@ const TenantForm = ({ initialData, onSubmit, isLoading }) => {
           )}
         </div>
 
+
+<div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Birth Year *
+          </label>
+          <input
+            type="number"
+            {...register('birth_year', { required: 'Birth year is required' })}
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="1990"
+          />
+          {errors.birth_year && (
+            <p className="mt-1 text-sm text-red-600">{errors.birth_year.message}</p>
+          )}
+        </div>
+
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Teléfono *
+            Phone *
           </label>
           <input
             type="tel"
-            {...register('phone', { required: 'El teléfono es obligatorio' })}
+            {...register('phone1', { required: 'Phone is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="3001234567"
           />
-          {errors.phone && (
-            <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
+          {errors.phone1 && (
+            <p className="mt-1 text-sm text-red-600">{errors.phone1.message}</p>
           )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Teléfono 2 (opcional)
+            Phone 2 (optional)
           </label>
           <input
             type="tel"
@@ -114,13 +116,13 @@ const TenantForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Observaciones (opcional)
+            Observations (optional)
           </label>
           <textarea
-            {...register('observation')}
+            {...register('observations')}
             rows={3}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            placeholder="Notas adicionales sobre el inquilino..."
+            placeholder="Additional notes about the tenant..."
           />
         </div>
 
@@ -129,7 +131,7 @@ const TenantForm = ({ initialData, onSubmit, isLoading }) => {
           disabled={isLoading}
           className="w-full bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors py-2.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Guardando...' : initialData ? 'Actualizar Inquilino' : 'Crear Inquilino'}
+          {isLoading ? 'Saving...' : initialData ? 'Update Tenant' : 'Create Tenant'}
         </button>
       </div>
     </form>

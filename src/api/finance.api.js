@@ -9,6 +9,57 @@ const api = axios.create({
   },
 });
 
+// Interceptor para agregar token de autenticación
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para manejar errores 401 (token expirado)
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken) {
+          throw new Error('No refresh token');
+        }
+        
+        const response = await axios.post(`${API_URL}users/refresh/`, {
+          refresh: refreshToken
+        });
+        
+        const { access } = response.data;
+        localStorage.setItem('access_token', access);
+        
+        originalRequest.headers.Authorization = `Bearer ${access}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 // ═══════════════════════════════════════════════════════════════════════
 // CATÁLOGOS - OBLIGATION TYPES (Tipos de obligaciones)
 // ═══════════════════════════════════════════════════════════════════════
@@ -170,7 +221,9 @@ export const deletePropertyObligation = async (propertyId, obligationId) => {
 
 // POST /api/properties/{property_id}/obligations/{obligation_id}/add_payment/ - Crear pago
 export const addPaymentToObligation = async (propertyId, obligationId, paymentData) => {
+  console.log(paymentData)
   const response = await api.post(`properties/${propertyId}/obligations/${obligationId}/add_payment/`, paymentData);
+  console.log(response.data)
   return response.data;
 };
 
@@ -208,7 +261,7 @@ export const deleteObligationPayment = async (propertyId, obligationId, paymentI
 // DASHBOARD - ESTADÍSTICAS GENERALES
 // ═══════════════════════════════════════════════════════════════════════
 
-// GET /api/dashboard/ - Obtener estadísticas generales del sistema
+// GET /api/dashboard/stats/ - Obtener estadísticas generales del sistema
 export const getDashboard = async () => {
   const response = await api.get('dashboard/');
   return response.data;

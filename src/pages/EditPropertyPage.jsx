@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import PropertyForm from '../components/Properties/PropertyForm';
 import Loader from '../components/UI/Loader';
-import { getProperty, updateProperty } from '../api/properties.api';
+import { getProperty, updateProperty, uploadMedia } from '../api/properties.api';
 
 const EditPropertyPage = () => {
   const { id } = useParams();
@@ -22,8 +22,8 @@ const EditPropertyPage = () => {
       const data = await getProperty(id);
       setProperty(data);
     } catch (error) {
-      console.error('Error al cargar propiedad:', error);
-      toast.error('Error al cargar la propiedad');
+      console.error('Error loading property:', error);
+      toast.error('Error loading property');
       navigate('/');
     } finally {
       setLoading(false);
@@ -34,11 +34,11 @@ const EditPropertyPage = () => {
     try {
       setIsSubmitting(true);
       await updateProperty(id, data);
-      toast.success('Propiedad actualizada exitosamente');
+      toast.success('Property updated successfully');
       navigate(`/property/${id}`);
     } catch (error) {
-      console.error('Error al actualizar propiedad:', error);
-      toast.error('Error al actualizar la propiedad');
+      console.error('Error updating property:', error);
+      toast.error('Error updating property');
     } finally {
       setIsSubmitting(false);
     }
@@ -51,7 +51,7 @@ const EditPropertyPage = () => {
   if (!property) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">Propiedad no encontrada</p>
+        <p className="text-gray-500 text-lg">Property not found</p>
       </div>
     );
   }
@@ -63,7 +63,7 @@ const EditPropertyPage = () => {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Volver a detalles
+          Back to details
         </Link>
         <div className="flex gap-3">
           <Link 
@@ -73,7 +73,7 @@ const EditPropertyPage = () => {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Añadir Reparación
+            Add Repair
           </Link>
           <Link 
             to={`/property/${id}/add-enser`}

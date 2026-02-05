@@ -37,8 +37,8 @@ const RentalDetailPage = () => {
       setRental(rentalData);
       setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
     } catch (error) {
-      console.error('Error al cargar datos:', error);
-      toast.error('Error al cargar el arriendo');
+      console.error('Error loading data:', error);
+      toast.error('Error loading rental');
       navigate(`/property/${id}`);
     } finally {
       setLoading(false);
@@ -48,28 +48,38 @@ const RentalDetailPage = () => {
   const handleAddPayment = async (data) => {
     try {
       setIsSubmitting(true);
-      await addPaymentToRental(id, rentalId, data);
-      toast.success('Pago agregado correctamente');
+      // Construir FormData para enviar archivo
+      const formData = new FormData();
+      formData.append('payment_location', data.payment_location);
+      formData.append('payment_method', data.payment_method);
+      formData.append('amount', data.amount);
+      formData.append('date', data.date);
+      if (data.voucher_url && data.voucher_url.length > 0) {
+        formData.append('voucher_url', data.voucher_url[0]);
+      }
+      await addPaymentToRental(id, rentalId, formData);
+      toast.success('Payment added successfully');
       setShowPaymentForm(false);
       loadData();
     } catch (error) {
-      console.error('Error:', error);
-      toast.error(error.response?.data?.detail || 'Error al agregar pago');
+      console.error('Error adding payment:', error);
+      console.log('Error response data:', error.response);
+      toast.error(error.response?.data?.detail || 'Error adding payment');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeletePayment = async (paymentId) => {
-    if (!confirm('¿Estás seguro de eliminar este pago?')) return;
+    if (!confirm('Are you sure you want to delete this payment?')) return;
     
     try {
       await deleteRentalPayment(id, rentalId, paymentId);
-      toast.success('Pago eliminado correctamente');
+      toast.success('Payment deleted successfully');
       loadData();
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error al eliminar pago');
+      console.error('Error deleting payment:', error);
+      toast.error('Error deleting payment');
     }
   };
 
@@ -120,21 +130,21 @@ const RentalDetailPage = () => {
           </svg>
           Volver a la propiedad
         </button>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Detalle de Arriendo</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Rental Detail</h1>
         <p className="text-sm sm:text-base text-gray-600">
-          Propiedad: <span className="font-semibold">{property?.name || property?.address}</span>
+          Property: <span className="font-semibold">{property?.name || property?.address}</span>
         </p>
       </div>
 
-      {/* Información del Arriendo */}
+      {/* Rental Information */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex justify-between items-start mb-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-1">
-              {rental.tenant_name || 'Inquilino'}
+              {rental.tenant_name || 'Tenant'}
             </h2>
             <p className="text-gray-600">
-              {rental.rental_type === 'monthly' ? 'Arriendo Mensual' : 'Airbnb'}
+              {rental.rental_type === 'monthly' ? 'Monthly Rental' : 'Airbnb'}
             </p>
           </div>
           <span className={`px-3 py-1 text-sm font-medium rounded-full ${status.color}`}>
@@ -152,31 +162,31 @@ const RentalDetailPage = () => {
             <p className="text-lg font-semibold text-gray-900">{formatDate(rental.check_out)}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600 mb-1">Monto Total</p>
+            <p className="text-sm text-gray-600 mb-1">Total Amount</p>
             <p className="text-2xl font-bold text-gray-900">{formatCurrency(rental.amount)}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600 mb-1">Número de Personas</p>
+            <p className="text-sm text-gray-600 mb-1">Number of People</p>
             <p className="text-lg font-semibold text-gray-900">{rental.people_count}</p>
           </div>
         </div>
 
         {rental.rental_type === 'monthly' && rental.monthly_data && (
           <div className="pt-4 border-t border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-2">Información Mensual</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Monthly Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Depósito</p>
+                <p className="text-sm text-gray-600 mb-1">Deposit</p>
                 <p className="text-lg font-semibold text-gray-900">
                   {formatCurrency(rental.monthly_data.deposit_amount)}
                   {rental.monthly_data.is_refundable && (
-                    <span className="ml-2 text-sm text-green-600">(Reembolsable)</span>
+                    <span className="ml-2 text-sm text-green-600">(Refundable)</span>
                   )}
                 </p>
               </div>
               {rental.monthly_data.url_files && (
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Archivos</p>
+                  <p className="text-sm text-gray-600 mb-1">Files</p>
                   <a 
                     href={rental.monthly_data.url_files} 
                     target="_blank" 
@@ -186,7 +196,7 @@ const RentalDetailPage = () => {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
-                    Ver archivos
+                    View Files
                   </a>
                 </div>
               )}
@@ -196,11 +206,11 @@ const RentalDetailPage = () => {
 
         {rental.rental_type === 'airbnb' && rental.airbnb_data && (
           <div className="pt-4 border-t border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-2">Información Airbnb</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Airbnb Information</h3>
             <p className="text-sm text-gray-600">
-              Estado de pago: 
+              Payment Status: 
               <span className={`ml-2 font-semibold ${rental.airbnb_data.is_paid ? 'text-green-600' : 'text-red-600'}`}>
-                {rental.airbnb_data.is_paid ? 'Pagado' : 'Pendiente'}
+                {rental.airbnb_data.is_paid ? 'Paid' : 'Pending'}
               </span>
             </p>
           </div>
@@ -208,21 +218,21 @@ const RentalDetailPage = () => {
 
         <div className="pt-4 border-t border-gray-200 mt-4">
           <div className="flex justify-between items-center mb-2">
-            <p className="text-sm font-medium text-gray-700">Estado de Pagos</p>
+            <p className="text-sm font-medium text-gray-700">Payment Status</p>
             <p className="text-sm font-semibold text-gray-900">
               {formatCurrency(totalPaid)} / {formatCurrency(rental.amount)}
             </p>
           </div>
           {pending > 0 && (
             <p className="text-sm text-red-600 font-medium">
-              Pendiente: {formatCurrency(pending)}
+              Pending: {formatCurrency(pending)}
             </p>
           )}
         </div>
       </div>
 
-      {/* Formulario de Pago */}
-      {!isCompleted && status.text !== 'Finalizado' && (
+      {/* Payment Form */}
+      {!isCompleted && status.text !== 'Completed' && (
         <div className="mb-6">
           {showPaymentForm ? (
             <div>
@@ -235,7 +245,7 @@ const RentalDetailPage = () => {
                 onClick={() => setShowPaymentForm(false)}
                 className="mt-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors px-4 py-2 text-sm font-medium"
               >
-                Cancelar
+                Cancel
               </button>
             </div>
           ) : (
@@ -246,7 +256,7 @@ const RentalDetailPage = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Agregar Pago
+              Add Payment
             </button>
           )}
         </div>
@@ -255,7 +265,7 @@ const RentalDetailPage = () => {
       {/* Lista de Pagos */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Historial de Pagos ({payments.length})
+          Payment History ({payments.length})
         </h3>
         
         {payments.length === 0 ? (
@@ -263,7 +273,7 @@ const RentalDetailPage = () => {
             <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="text-gray-600">No hay pagos registrados</p>
+            <p className="text-gray-600">No payments recorded</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -274,11 +284,11 @@ const RentalDetailPage = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <p className="font-semibold text-gray-900">{formatCurrency(payment.amount)}</p>
                       <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
-                        {payment.payment_method_name || 'Pago'}
+                        {payment.payment_method_name || 'Payment Method'}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-1">
-                      Fecha: {formatDate(payment.date)}
+                      Date: {formatDate(payment.date)}
                     </p>
                     {payment.voucher_url && (
                       <a 
@@ -290,14 +300,14 @@ const RentalDetailPage = () => {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
-                        Ver comprobante
+                        View Voucher
                       </a>
                     )}
                   </div>
                   <button
                     onClick={() => handleDeletePayment(payment.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Eliminar pago"
+                    title="Delete Payment"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

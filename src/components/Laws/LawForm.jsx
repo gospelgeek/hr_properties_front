@@ -30,18 +30,18 @@ const LawForm = ({ initialData, onSubmit, isLoading }) => {
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
         <h2 className="text-2xl font-bold text-gray-900">
-          {initialData ? 'Editar Documentacion/Normativa' : 'Nueva Documentacion/Normativa'}
+          {initialData ? 'Edit Documentation' : 'New Documentation'}
         </h2>
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-gray-900">
-            Nombre de la Entidad *
+            Entity name *
           </label>
           <input
             type="text"
-            {...register('entity_name', { required: 'El nombre de la entidad es requerido' })}
+            {...register('entity_name', { required: 'The entity name is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400"
-            placeholder="Ej: BANCO, Notaría, etc."
+            placeholder="Eg: BANK, Notary, etc."
           />
           {errors.entity_name && (
             <p className="text-sm text-red-600">{errors.entity_name.message}</p>
@@ -50,13 +50,13 @@ const LawForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-gray-900">
-            Número Legal *
+            Legal Number *
           </label>
           <input
             type="text"
-            {...register('legal_number', { required: 'El número legal es requerido' })}
+            {...register('legal_number', { required: 'The legal number is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400"
-            placeholder="Ej: 123243"
+            placeholder="Eg: 123243"
           />
           {errors.legal_number && (
             <p className="text-sm text-red-600">{errors.legal_number.message}</p>
@@ -65,14 +65,14 @@ const LawForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-gray-900">
-            Monto Original *
+            Original Amount *
           </label>
           <input
             type="number"
             step="0.01"
-            {...register('original_amount', { required: 'El monto original es requerido' })}
+            {...register('original_amount', { required: 'The original amount is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400"
-            placeholder="Ej: 500000000.00"
+            placeholder="Eg: 500000000.00"
           />
           {errors.original_amount && (
             <p className="text-sm text-red-600">{errors.original_amount.message}</p>
@@ -86,13 +86,13 @@ const LawForm = ({ initialData, onSubmit, isLoading }) => {
               {...register('is_paid')}
               className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             />
-            <span className="text-sm font-semibold text-gray-900">¿Está pagado?</span>
+            <span className="text-sm font-semibold text-gray-900">Is Paid?</span>
           </label>
         </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-gray-900">
-            Documento (PDF, Imagen, etc.)
+            Document (PDF, Image, etc.)
           </label>
           <input
             type="file"
@@ -102,12 +102,12 @@ const LawForm = ({ initialData, onSubmit, isLoading }) => {
           />
           {selectedFile && (
             <p className="text-sm text-gray-600 mt-2">
-              Archivo seleccionado: <span className="font-medium">{selectedFile.name}</span>
+              Selected file: <span className="font-medium">{selectedFile.name}</span>
             </p>
           )}
           {previewUrl && (
             <div className="mt-3">
-              <p className="text-sm text-gray-600 mb-2">Vista previa:</p>
+              <p className="text-sm text-gray-600 mb-2">Preview:</p>
               <img
                 src={previewUrl}
                 alt="Preview"
@@ -129,10 +129,10 @@ const LawForm = ({ initialData, onSubmit, isLoading }) => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Guardando...
+                Saving...
               </>
             ) : (
-              initialData ? 'Actualizar Documentacion/Normativa' : 'Crear Documentacion/Normativa'
+              initialData ? 'Update Documentation/Law' : 'Create Documentation/Law'
             )}
           </button>
         </div>

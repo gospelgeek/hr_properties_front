@@ -25,18 +25,18 @@ const EnserForm = ({ initialData, onSubmit, isLoading }) => {
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
         <h2 className="text-2xl font-bold text-gray-900">
-          {initialData ? 'Editar Enser' : 'Nuevo Enser'}
+          {initialData ? 'Edit Enser' : 'New Enser'}
         </h2>
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-gray-900">
-            Nombre *
+            Name *
           </label>
           <input
             type="text"
-            {...register('name', { required: 'El nombre es requerido' })}
+            {...register('name', { required: 'Name is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400"
-            placeholder="Ej: Lavadora"
+            placeholder="Ex: Washing Machine"
           />
           {errors.name && (
             <p className="text-sm text-red-600">{errors.name.message}</p>
@@ -45,14 +45,14 @@ const EnserForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-gray-900">
-            Precio *
+            Price *
           </label>
           <input
             type="number"
             step="0.01"
-            {...register('price', { required: 'El precio es requerido' })}
+            {...register('price', { required: 'Price is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400"
-            placeholder="Ej: 500000"
+            placeholder="Ex: 500000"
           />
           {errors.price && (
             <p className="text-sm text-red-600">{errors.price.message}</p>
@@ -61,18 +61,17 @@ const EnserForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-gray-900">
-            Condición *
+            Condition *
           </label>
           <select
-            {...register('condition', { required: 'La condición es requerida' })}
+            {...register('condition', { required: 'Condition is required' })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900"
           >
-            <option value="">Seleccione una condición</option>
-            <option value="Nuevo">Nuevo</option>
-            <option value="Usado - Excelente">Usado - Excelente</option>
-            <option value="Usado - Bueno">Usado - Bueno</option>
-            <option value="Usado - Regular">Usado - Regular</option>
-            <option value="Para reparar">Para reparar</option>
+            <option value="">Select a condition</option>
+            <option value="new">New</option>
+            <option value="good">Good</option>
+            <option value="fair">Fair</option>
+            <option value="poor">Poor</option>
           </select>
           {errors.condition && (
             <p className="text-sm text-red-600">{errors.condition.message}</p>
@@ -81,7 +80,7 @@ const EnserForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-gray-900">
-            Imagen del Enser
+            Image of the item
           </label>
           <input
             type="file"
@@ -91,7 +90,7 @@ const EnserForm = ({ initialData, onSubmit, isLoading }) => {
           />
           {previewUrl && (
             <div className="mt-3">
-              <p className="text-sm text-gray-600 mb-2">Vista previa:</p>
+              <p className="text-sm text-gray-600 mb-2">Preview:</p>
               <img
                 src={previewUrl}
                 alt="Preview"
@@ -113,10 +112,10 @@ const EnserForm = ({ initialData, onSubmit, isLoading }) => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Guardando...
+                Saving...
               </>
             ) : (
-              initialData ? 'Actualizar Enser' : 'Crear Enser'
+              initialData ? 'Update Item' : 'Create Item'
             )}
           </button>
         </div>

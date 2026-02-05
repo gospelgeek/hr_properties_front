@@ -103,7 +103,7 @@ const RepairsPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
               <p className="text-gray-600">
-                Selecciona una propiedad para ver sus reparaciones
+                Select a property to view its repairs
               </p>
             </div>
           ) : loadingRepairs ? (
@@ -116,7 +116,7 @@ const RepairsPage = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <p className="text-gray-600 mb-4">
-                    No hay reparaciones registradas para esta propiedad
+                    No repairs registered for this property
                   </p>
                   <Link
                     to={`/property/${selectedProperty}/add-repair`}
@@ -125,14 +125,14 @@ const RepairsPage = () => {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    Agregar Reparación
+                    Add Repair
                   </Link>
                 </div>
               ) : (
                 <>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                     <h2 className="text-xl font-semibold text-gray-900">
-                      {repairs.length} Reparación{repairs.length !== 1 ? 'es' : ''}
+                      {repairs.length} Repair{repairs.length !== 1 ? 's' : ''}
                     </h2>
                     <Link
                       to={`/property/${selectedProperty}/add-repair`}
@@ -157,12 +157,12 @@ const RepairsPage = () => {
                         
                         <div className="space-y-1 text-sm mb-4">
                           <p className="text-gray-600">
-                            <span className="font-medium text-gray-700">Fecha:</span>{' '}
+                            <span className="font-medium text-gray-700">Date:</span>{' '}
                             {new Date(repair.date).toLocaleDateString()}
                           </p>
                           {repair.observation && (
                             <p className="text-gray-600">
-                              <span className="font-medium text-gray-700">Observación:</span>{' '}
+                              <span className="font-medium text-gray-700">Observation:</span>{' '}
                               {repair.observation}
                             </p>
                           )}

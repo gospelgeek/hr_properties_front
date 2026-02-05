@@ -61,12 +61,12 @@ const MediaUploadForm = ({ onSubmit, isLoading }) => {
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
         <h2 className="text-2xl font-bold text-gray-900">
-          Subir Archivos Multimedia
+          Upload Media Files
         </h2>
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-gray-900">
-            Seleccionar Archivos (Imágenes, Videos, etc.) *
+            Select Files (Images, Videos, etc.) *
           </label>
           <input
             type="file"
@@ -76,7 +76,7 @@ const MediaUploadForm = ({ onSubmit, isLoading }) => {
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
           <p className="text-sm text-gray-500 mt-1">
-            Puedes seleccionar múltiples archivos a la vez
+            You can select multiple files at once
           </p>
         </div>
 
@@ -84,7 +84,7 @@ const MediaUploadForm = ({ onSubmit, isLoading }) => {
         {previewUrls.length > 0 && (
           <div className="space-y-3">
             <p className="text-sm font-semibold text-gray-900">
-              Archivos seleccionados ({previewUrls.length}):
+              Selected Files ({previewUrls.length}):  
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {previewUrls.map((preview, index) => (
@@ -117,16 +117,16 @@ const MediaUploadForm = ({ onSubmit, isLoading }) => {
                         <p className="text-sm text-gray-900 font-medium truncate">{preview.name}</p>
                         <div className="mt-2">
                           <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            Tipo de Archivo
+                            File Type
                           </label>
                           <select
                             value={mediaTypes[index]}
                             onChange={(e) => handleMediaTypeChange(index, e.target.value)}
                             className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900"
                           >
-                            <option value="image">Imagen</option>
+                            <option value="image">Image</option>
                             <option value="video">Video</option>
-                            <option value="document">Documento</option>
+                            <option value="document">Document</option>
                           </select>
                         </div>
                       </div>
@@ -159,14 +159,14 @@ const MediaUploadForm = ({ onSubmit, isLoading }) => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Subiendo...
+                Uploading...
               </>
             ) : (
               <>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
-                Subir Archivos
+                Upload Files
               </>
             )}
           </button>

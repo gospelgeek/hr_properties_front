@@ -4,7 +4,8 @@ import toast from 'react-hot-toast';
 import Loader from '../components/UI/Loader';
 import PaymentForm from '../components/Finance/PaymentForm';
 import { 
-  getPropertyObligation, 
+  getPropertyObligation,
+  getObligation,
   addPaymentToObligation, 
   getObligationPayments,
   deleteObligationPayment 
@@ -28,18 +29,36 @@ const ObligationDetailPage = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [propData, oblData, paymentsData] = await Promise.all([
-        getProperty(id),
-        getPropertyObligation(id, obligationId),
-        getObligationPayments(id, obligationId)
-      ]);
-      setProperty(propData);
-      setObligation(oblData);
-      setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
+      
+      // If we have propertyId, load property-specific obligation
+      if (id) {
+        const [propData, oblData, paymentsData] = await Promise.all([
+          getProperty(id),
+          getPropertyObligation(id, obligationId),
+          getObligationPayments(id, obligationId)
+        ]);
+        setProperty(propData);
+        setObligation(oblData);
+        setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
+      } else {
+        // Otherwise, load obligation directly and get property info from it
+        const oblData = await getObligation(obligationId);
+        setObligation(oblData);
+        
+        // Load property if obligation has property_id
+        if (oblData.property) {
+          const propData = await getProperty(oblData.property);
+          setProperty(propData);
+          
+          // Load payments using the property ID from the obligation
+          const paymentsData = await getObligationPayments(oblData.property, obligationId);
+          setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
+        }
+      }
     } catch (error) {
       console.error('Error al cargar datos:', error);
       toast.error('Error al cargar la obligación');
-      navigate(`/property/${id}`);
+      navigate(id ? `/property/${id}` : '/obligations');
     } finally {
       setLoading(false);
     }
@@ -48,7 +67,8 @@ const ObligationDetailPage = () => {
   const handleAddPayment = async (data) => {
     try {
       setIsSubmitting(true);
-      await addPaymentToObligation(id, obligationId, data);
+      const propertyId = id || obligation.property;
+      await addPaymentToObligation(propertyId, obligationId, data);
       toast.success('Pago agregado correctamente');
       setShowPaymentForm(false);
       loadData();
@@ -64,7 +84,8 @@ const ObligationDetailPage = () => {
     if (!confirm('¿Estás seguro de eliminar este pago?')) return;
     
     try {
-      await deleteObligationPayment(id, obligationId, paymentId);
+      const propertyId = id || obligation.property;
+      await deleteObligationPayment(propertyId, obligationId, paymentId);
       toast.success('Pago eliminado correctamente');
       loadData();
     } catch (error) {
@@ -101,18 +122,20 @@ const ObligationDetailPage = () => {
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
         <button
-          onClick={() => navigate(`/property/${id}`)}
+          onClick={() => navigate(id ? `/property/${id}` : '/obligations')}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Volver a la propiedad
+          {id ? 'Back to Property' : 'Back to Obligations'}
         </button>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Detalle de Obligación</h1>
-        <p className="text-sm sm:text-base text-gray-600">
-          Propiedad: <span className="font-semibold">{property?.name || property?.address}</span>
-        </p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Obligation Detail</h1>
+        {property && (
+          <p className="text-sm sm:text-base text-gray-600">
+            Property: <span className="font-semibold">{property?.name || property?.address}</span>
+          </p>
+        )}
       </div>
 
       {/* Información de la Obligación */}
@@ -127,25 +150,25 @@ const ObligationDetailPage = () => {
           <span className={`px-3 py-1 text-sm font-medium rounded-full ${
             isCompleted ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
           }`}>
-            {isCompleted ? 'Pagada' : 'Pendiente'}
+            {isCompleted ? 'Paid' : 'Pending'}
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
-            <p className="text-sm text-gray-600 mb-1">Monto Total</p>
+            <p className="text-sm text-gray-600 mb-1">Total Amount</p>
             <p className="text-2xl font-bold text-gray-900">{formatCurrency(obligation.amount)}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600 mb-1">Fecha de Vencimiento</p>
+            <p className="text-sm text-gray-600 mb-1">Due Date</p>
             <p className="text-lg font-semibold text-gray-900">{formatDate(obligation.due_date)}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600 mb-1">Total Pagado</p>
+            <p className="text-sm text-gray-600 mb-1">Total Paid</p>
             <p className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600 mb-1">Pendiente</p>
+            <p className="text-sm text-gray-600 mb-1">Pending</p>
             <p className="text-2xl font-bold text-red-600">{formatCurrency(pending)}</p>
           </div>
         </div>
@@ -153,7 +176,7 @@ const ObligationDetailPage = () => {
         {/* Barra de progreso */}
         <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
-            <p className="text-sm font-medium text-gray-700">Progreso de Pago</p>
+            <p className="text-sm font-medium text-gray-700">Payment Progress</p>
             <p className="text-sm font-semibold text-gray-900">{Math.round(progress)}%</p>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
@@ -166,7 +189,7 @@ const ObligationDetailPage = () => {
 
         <div className="pt-4 border-t border-gray-200">
           <p className="text-sm text-gray-600">
-            <span className="font-medium">Periodicidad:</span> {obligation.temporality}
+            <span className="font-medium">Periodicity:</span> {obligation.temporality}
           </p>
         </div>
       </div>
@@ -185,7 +208,7 @@ const ObligationDetailPage = () => {
                 onClick={() => setShowPaymentForm(false)}
                 className="mt-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors px-4 py-2 text-sm font-medium"
               >
-                Cancelar
+                Cancel
               </button>
             </div>
           ) : (
@@ -196,7 +219,7 @@ const ObligationDetailPage = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Agregar Pago
+              Add Payment
             </button>
           )}
         </div>
@@ -205,7 +228,7 @@ const ObligationDetailPage = () => {
       {/* Lista de Pagos */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Historial de Pagos ({payments.length})
+          Payment History ({payments.length})
         </h3>
         
         {payments.length === 0 ? (
@@ -213,7 +236,7 @@ const ObligationDetailPage = () => {
             <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="text-gray-600">No hay pagos registrados</p>
+            <p className="text-gray-600">No payments recorded</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -224,11 +247,11 @@ const ObligationDetailPage = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <p className="font-semibold text-gray-900">{formatCurrency(payment.amount)}</p>
                       <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
-                        {payment.payment_method_name || 'Pago'}
+                        {payment.payment_method_name || 'Payment Method'}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-1">
-                      Fecha: {formatDate(payment.date)}
+                      Date: {formatDate(payment.date)}
                     </p>
                     {payment.voucher_url && (
                       <a 
@@ -240,14 +263,14 @@ const ObligationDetailPage = () => {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
-                        Ver comprobante
+                        View Voucher
                       </a>
                     )}
                   </div>
                   <button
                     onClick={() => handleDeletePayment(payment.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Eliminar pago"
+                    title="Delete Payment"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
