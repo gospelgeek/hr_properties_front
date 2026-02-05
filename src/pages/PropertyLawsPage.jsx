@@ -261,12 +261,12 @@ const PropertyLawsPage = () => {
                 <div key={law.id} className="bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start gap-3 mb-4">
                     <h3 className="text-lg font-bold text-gray-900">
-                      {law.entity_name || 'Entidad sin nombre'}
+                      {law.entity_name || 'Entity without name'}
                     </h3>
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                       law.is_paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }`}>
-                      {law.is_paid ? 'Pagado' : 'Pendiente'}
+                      {law.is_paid ? 'Paid' : 'Pending'}
                     </span>
                   </div>
 

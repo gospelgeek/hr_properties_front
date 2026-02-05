@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const PropertyCard = ({ property, onDelete, showRestoreButton = false, onRestore }) => {
+const PropertyCard = ({ property, onDelete, showRestoreButton = false, onRestore, isPublic = false }) => {
   const isActive = showRestoreButton ? false : (property.is_active !== false);
   
   return (
@@ -70,7 +70,24 @@ const PropertyCard = ({ property, onDelete, showRestoreButton = false, onRestore
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-2 pt-5 border-t border-gray-100 mt-5">
-          {showRestoreButton ? (
+          {isPublic ? (
+            <>
+              <Link
+                to={`/public-properties/${property.id}`}
+                className="flex-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 text-center font-medium px-4 py-2.5 text-sm"
+              >
+                View Details
+              </Link>
+              <button
+                className="flex-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium px-4 py-2.5 text-sm flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Contact Us
+              </button>
+            </>
+          ) : showRestoreButton ? (
             <>
               <Link
                 to={`/property/${property.id}`}

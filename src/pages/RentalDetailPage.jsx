@@ -48,12 +48,22 @@ const RentalDetailPage = () => {
   const handleAddPayment = async (data) => {
     try {
       setIsSubmitting(true);
-      await addPaymentToRental(id, rentalId, data);
+      // Construir FormData para enviar archivo
+      const formData = new FormData();
+      formData.append('payment_location', data.payment_location);
+      formData.append('payment_method', data.payment_method);
+      formData.append('amount', data.amount);
+      formData.append('date', data.date);
+      if (data.voucher_url && data.voucher_url.length > 0) {
+        formData.append('voucher_url', data.voucher_url[0]);
+      }
+      await addPaymentToRental(id, rentalId, formData);
       toast.success('Payment added successfully');
       setShowPaymentForm(false);
       loadData();
     } catch (error) {
       console.error('Error adding payment:', error);
+      console.log('Error response data:', error.response);
       toast.error(error.response?.data?.detail || 'Error adding payment');
     } finally {
       setIsSubmitting(false);

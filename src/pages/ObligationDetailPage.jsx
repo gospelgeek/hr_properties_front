@@ -4,7 +4,8 @@ import toast from 'react-hot-toast';
 import Loader from '../components/UI/Loader';
 import PaymentForm from '../components/Finance/PaymentForm';
 import { 
-  getPropertyObligation, 
+  getPropertyObligation,
+  getObligation,
   addPaymentToObligation, 
   getObligationPayments,
   deleteObligationPayment 
@@ -28,18 +29,36 @@ const ObligationDetailPage = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [propData, oblData, paymentsData] = await Promise.all([
-        getProperty(id),
-        getPropertyObligation(id, obligationId),
-        getObligationPayments(id, obligationId)
-      ]);
-      setProperty(propData);
-      setObligation(oblData);
-      setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
+      
+      // If we have propertyId, load property-specific obligation
+      if (id) {
+        const [propData, oblData, paymentsData] = await Promise.all([
+          getProperty(id),
+          getPropertyObligation(id, obligationId),
+          getObligationPayments(id, obligationId)
+        ]);
+        setProperty(propData);
+        setObligation(oblData);
+        setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
+      } else {
+        // Otherwise, load obligation directly and get property info from it
+        const oblData = await getObligation(obligationId);
+        setObligation(oblData);
+        
+        // Load property if obligation has property_id
+        if (oblData.property) {
+          const propData = await getProperty(oblData.property);
+          setProperty(propData);
+          
+          // Load payments using the property ID from the obligation
+          const paymentsData = await getObligationPayments(oblData.property, obligationId);
+          setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
+        }
+      }
     } catch (error) {
       console.error('Error al cargar datos:', error);
       toast.error('Error al cargar la obligación');
-      navigate(`/property/${id}`);
+      navigate(id ? `/property/${id}` : '/obligations');
     } finally {
       setLoading(false);
     }
@@ -48,7 +67,8 @@ const ObligationDetailPage = () => {
   const handleAddPayment = async (data) => {
     try {
       setIsSubmitting(true);
-      await addPaymentToObligation(id, obligationId, data);
+      const propertyId = id || obligation.property;
+      await addPaymentToObligation(propertyId, obligationId, data);
       toast.success('Pago agregado correctamente');
       setShowPaymentForm(false);
       loadData();
@@ -64,7 +84,8 @@ const ObligationDetailPage = () => {
     if (!confirm('¿Estás seguro de eliminar este pago?')) return;
     
     try {
-      await deleteObligationPayment(id, obligationId, paymentId);
+      const propertyId = id || obligation.property;
+      await deleteObligationPayment(propertyId, obligationId, paymentId);
       toast.success('Pago eliminado correctamente');
       loadData();
     } catch (error) {
@@ -101,18 +122,20 @@ const ObligationDetailPage = () => {
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
         <button
-          onClick={() => navigate(`/property/${id}`)}
+          onClick={() => navigate(id ? `/property/${id}` : '/obligations')}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Property
+          {id ? 'Back to Property' : 'Back to Obligations'}
         </button>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Obligation Detail</h1>
-        <p className="text-sm sm:text-base text-gray-600">
-          Property: <span className="font-semibold">{property?.name || property?.address}</span>
-        </p>
+        {property && (
+          <p className="text-sm sm:text-base text-gray-600">
+            Property: <span className="font-semibold">{property?.name || property?.address}</span>
+          </p>
+        )}
       </div>
 
       {/* Información de la Obligación */}

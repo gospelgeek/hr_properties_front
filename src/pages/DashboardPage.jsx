@@ -11,13 +11,16 @@ const DashboardPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('DashboardPage montado');
     loadDashboard();
   }, []);
 
   const loadDashboard = async () => {
     try {
       setLoading(true);
+      console.log('Solicitando datos del dashboard...');
       const data = await getDashboard();
+      console.log('Datos recibidos del dashboard:', data);
       setDashboardData(data);
     } catch (error) {
       console.error('Error al cargar dashboard:', error);
@@ -40,8 +43,15 @@ const DashboardPage = () => {
     return item ? item.count : 0;
   };
 
-  if (loading) return <Loader />;
-  if (!dashboardData) return <div>No data available</div>;
+  if (loading) {
+    console.log('Dashboard está cargando...');
+    return <Loader />;
+  }
+  if (!dashboardData) {
+    console.log('No hay datos de dashboard');
+    return <div>No data available</div>;
+  }
+  console.log('Renderizando dashboard con datos:', dashboardData);
 
   return (
     <div>
@@ -54,7 +64,12 @@ const DashboardPage = () => {
  {/* Properties */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Properties - Total: {dashboardData.properties.total}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            Properties - 
+            <span className="ml-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xl shadow-md border-2 border-blue-400">
+              Total: {dashboardData.properties.total}
+            </span>
+          </h2>
           <div className="text-sm text-gray-600">
           </div>
         </div>
@@ -63,7 +78,7 @@ const DashboardPage = () => {
             title="Rental"
             value={getPropertyCountByUse('rental')}
             subtitle="properties"
-            color="blue"
+            color="orange" 
             to="/properties?use=rental"
             icon={
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,11 +86,11 @@ const DashboardPage = () => {
               </svg>
             }
           />
-          <DashboardCard
+          <DashboardCard 
             title="Personal"
             value={getPropertyCountByUse('personal')}
             subtitle="properties"
-            color="green"
+            color="pink"
             to="/properties?use=personal"
             icon={
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,12 +118,12 @@ const DashboardPage = () => {
       {/* Financial Obligations */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Financial Obligations - Total: {dashboardData.obligations.total_count}</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Financial Obligations - Total: {dashboardData.obligations_month.total_count}</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <DashboardCard
-            title="Total Paid"
-            value={formatCurrency(dashboardData.obligations.total_paid)}
+            title="Total Paid Monthly"
+            value={formatCurrency(dashboardData.obligations_month.total_paid)}
             color="green"
             icon={
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,8 +132,8 @@ const DashboardPage = () => {
             }
           />
           <DashboardCard
-            title="Pending"
-            value={formatCurrency(dashboardData.obligations.pending)}
+            title="Pending Monthly"
+            value={formatCurrency(dashboardData.obligations_month.pending)}
             color="red"
             icon={
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,7 +143,7 @@ const DashboardPage = () => {
           />
           <DashboardCard
             title="Due Soon"
-            value={dashboardData.obligations.upcoming_due}
+            value={dashboardData.obligations_month.upcoming_due}
             subtitle="Next 7 days"
             color="yellow"
             icon={
@@ -145,7 +160,7 @@ const DashboardPage = () => {
       console.log(dashboardData)}
       {dashboardData.rentals && (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Rentals Mensuales</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Monthly Rentals</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <DashboardCard
               title="Active"

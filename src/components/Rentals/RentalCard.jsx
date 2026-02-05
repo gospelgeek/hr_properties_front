@@ -25,9 +25,9 @@ const RentalCard = ({ rental, propertyId }) => {
     const checkOut = new Date(rental.check_out);
     const diffDays = Math.ceil((checkOut - today) / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) return { text: 'Finalizado', color: 'bg-gray-100 text-gray-800' };
-    if (diffDays <= 15) return { text: 'Próximo a finalizar', color: 'bg-yellow-100 text-yellow-800' };
-    return { text: 'Activo', color: 'bg-green-100 text-green-800' };
+    if (diffDays < 0) return { text: 'Finished', color: 'bg-gray-100 text-gray-800' };
+    if (diffDays <= 15) return { text: 'Ending Soon', color: 'bg-yellow-100 text-yellow-800' };
+    return { text: 'Active', color: 'bg-green-100 text-green-800' };
   };
 
   const status = getStatus();
@@ -38,14 +38,14 @@ const RentalCard = ({ rental, propertyId }) => {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="font-semibold text-gray-900">
-              {rental.tenant_name || 'Inquilino'}
+              {rental.tenant_name || 'Tenant'}
             </h3>
             <span className={`px-3 py-1 text-xs font-medium rounded-full ${status.color}`}>
               {status.text}
             </span>
           </div>
           <p className="text-sm text-gray-600">
-            {rental.rental_type === 'monthly' ? 'Arriendo Mensual' : 'Airbnb'}
+            {rental.rental_type === 'monthly' ? 'Monthly Rent' : 'Airbnb'}
           </p>
         </div>
       </div>

@@ -43,7 +43,7 @@ const ObligationCard = ({ obligation, propertyId }) => {
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h3 className="font-semibold text-gray-900 mb-1">
-            {obligation.obligation_type_name || 'Obligación'}
+            {obligation.obligation_type_name || 'Obligation'}
           </h3>
           <p className="text-sm text-gray-600">{obligation.entity_name}</p>
         </div>
@@ -88,7 +88,7 @@ const ObligationCard = ({ obligation, propertyId }) => {
 
         {(isOverdue || isDueSoon) && (
           <div className={`text-xs ${isOverdue ? 'text-red-600' : 'text-yellow-600'} font-medium`}>
-            {isOverdue ? `Vencida hace ${Math.abs(daysUntilDue)} días` : `Vence en ${daysUntilDue} días`}
+            {isOverdue ? `Overdue by ${Math.abs(daysUntilDue)} days` : `Due in ${daysUntilDue} days`}
           </div>
         )}
       </div>

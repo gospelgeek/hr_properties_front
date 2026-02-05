@@ -1,7 +1,7 @@
 import React from 'react';
 import PropertyCard from './PropertyCard';
 
-const PropertyList = ({ properties, onDelete, showRestoreButton = false, onRestore }) => {
+const PropertyList = ({ properties, onDelete, showRestoreButton = false, onRestore, isPublic = false }) => {
   if (properties.length === 0) {
     return (
       <div className="text-center py-20">
@@ -19,6 +19,7 @@ const PropertyList = ({ properties, onDelete, showRestoreButton = false, onResto
           onDelete={onDelete}
           showRestoreButton={showRestoreButton}
           onRestore={onRestore}
+          isPublic={isPublic}
         />
       ))}
     </div>

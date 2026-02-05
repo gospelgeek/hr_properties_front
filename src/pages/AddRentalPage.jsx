@@ -38,6 +38,7 @@ const AddRentalPage = () => {
   };
 
   const handleSubmit = async (data) => {
+    console.log('Submitting rental data:', data);
     try {
       setIsSubmitting(true);
       await addRentalToProperty(id, data);
@@ -45,6 +46,7 @@ const AddRentalPage = () => {
       navigate(`/property/${id}`);
     } catch (error) {
       console.error('Error:', error);
+      console.error('Error response:', error.response);
       toast.error(error.response?.data?.detail || 'Error creating rental');
     } finally {
       setIsSubmitting(false);

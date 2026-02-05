@@ -24,8 +24,8 @@ const TenantsPage = () => {
       const data = await getTenants();
       setTenants(data);
     } catch (error) {
-      console.error('Error al cargar inquilinos:', error);
-      toast.error('Error al cargar inquilinos');
+      console.error('Error loading tenants:', error);
+      toast.error('Error loading tenants');
     } finally {
       setLoading(false);
     }
@@ -36,10 +36,10 @@ const TenantsPage = () => {
       setIsSubmitting(true);
       if (editingTenant) {
         await updateTenant(editingTenant.id, data);
-        toast.success('Inquilino actualizado correctamente');
+        toast.success('Tenant updated successfully');
       } else {
         await createTenant(data);
-        toast.success('Inquilino creado correctamente');
+        toast.success('Tenant created successfully');
       }
       setShowForm(false);
       setEditingTenant(null);

@@ -9,6 +9,57 @@ const api = axios.create({
   },
 });
 
+// Interceptor para agregar token de autenticación
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para manejar errores 401 (token expirado)
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken) {
+          throw new Error('No refresh token');
+        }
+        
+        const response = await axios.post(`${API_URL}users/refresh/`, {
+          refresh: refreshToken
+        });
+        
+        const { access } = response.data;
+        localStorage.setItem('access_token', access);
+        
+        originalRequest.headers.Authorization = `Bearer ${access}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 // ═══════════════════════════════════════════════════════════════════════
 // TENANTS (Inquilinos)
 // ═══════════════════════════════════════════════════════════════════════
@@ -98,9 +149,12 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
         },
       }
     );
+    console.log('Response from adding rental with file:', response.data);
     return response.data;
+    
   } else {
     const response = await api.post(`properties/${propertyId}/add_rental/`, rentalData);
+    console.log('Response from adding rental without file:', response.data);
     return response.data;
   }
 };
@@ -136,8 +190,16 @@ export const deletePropertyRental = async (propertyId, rentalId) => {
 // POST /api/properties/{id}/rentals/{rental_id}/add_payment/ - Añadir pago a un rental
 export const addPaymentToRental = async (propertyId, rentalId, paymentData) => {
   console.log('Adding payment data:', paymentData);
-  const response = await api.post(`properties/${propertyId}/rentals/${rentalId}/add_payment/`, paymentData);
-console.log('Response from adding payment:', response.data);
+  const response = await api.post(
+    `properties/${propertyId}/rentals/${rentalId}/add_payment/`,
+    paymentData,
+    {
+      headers: {
+        // No poner Content-Type, axios lo maneja con FormData
+      },
+    }
+  );
+  console.log('Response from adding payment:', response.data);
   return response.data;
 };
 

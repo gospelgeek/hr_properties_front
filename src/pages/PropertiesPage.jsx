@@ -47,6 +47,7 @@ const PropertiesPage = () => {
       if (rentalTypeFilters.length > 0) params.rental_type = rentalTypeFilters.join(',');
       
       const data = await getProperties(params);
+      console.log('Loaded properties with filters:', params, data);
       setProperties(data);
     } catch (error) {
       console.error('Error loading properties:', error);
@@ -135,24 +136,14 @@ console.log({ useFilter, rentalStatusFilters, rentalTypeFilters });
             <label className="block text-sm font-medium text-gray-700 mb-2">Rental Status</label>
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => toggleRentalStatusFilter('all')}
+                onClick={() => toggleRentalStatusFilter('active')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalStatusFilters.includes('all')
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => toggleRentalStatusFilter('occupied')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalStatusFilters.includes('occupied')
+                  rentalStatusFilters.includes('active')
                     ? 'bg-green-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Occupied
+                Active
               </button>
               <button
                 onClick={() => toggleRentalStatusFilter('available')}
@@ -164,6 +155,16 @@ console.log({ useFilter, rentalStatusFilters, rentalTypeFilters });
               >
                 Available
               </button>
+              <button
+                onClick={() => toggleRentalStatusFilter('ending_soon')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  rentalStatusFilters.includes('ending_soon')
+                    ? 'bg-yellow-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Ending Soon
+              </button>
             </div>
           </div>
 
@@ -171,16 +172,6 @@ console.log({ useFilter, rentalStatusFilters, rentalTypeFilters });
           <div className="flex-shrink-0">
             <label className="block text-sm font-medium text-gray-700 mb-2">Rental Type</label>
             <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => toggleRentalTypeFilter('all')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalTypeFilters.includes('all')
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                All
-              </button>
               <button
                 onClick={() => toggleRentalTypeFilter('monthly')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${

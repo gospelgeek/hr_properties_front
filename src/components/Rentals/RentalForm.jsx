@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { getTenants } from '../../api/rentals.api';
+import { getTenants, createTenant } from '../../api/rentals.api';
 import toast from 'react-hot-toast';
+import Modal from '../UI/Modal';
+import TenantForm from './TenantForm';
 
 const RentalForm = ({ initialData, onSubmit, isLoading }) => {
   const [tenants, setTenants] = useState([]);
   const [rentalType, setRentalType] = useState(initialData?.rental_type || 'monthly');
   const [status, setStatus] = useState(initialData?.status || 'available');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreatingTenant, setIsCreatingTenant] = useState(false);
   
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
     defaultValues: initialData || {
@@ -42,13 +46,31 @@ const RentalForm = ({ initialData, onSubmit, isLoading }) => {
     loadTenants();
   }, []);
 
+const handleCreateTenant = async (tenantData) => {
+    try {
+      setIsCreatingTenant(true);
+      const newTenant = await createTenant(tenantData);
+      toast.success('Tenant created successfully');
+      await loadTenants(); // Recargar lista de tenants
+      setValue('tenant', newTenant.id); // Seleccionar automáticamente el nuevo tenant
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error creating tenant:', error);
+      toast.error('Error creating tenant');
+    } finally {
+      setIsCreatingTenant(false);
+    }
+  };
+
   const loadTenants = async () => {
     try {
       const data = await getTenants();
       setTenants(data);
     } catch (error) {
       console.error('Error loading tenants:', error);
-      toast.error('Error loading tenants');
+    
+
+    toast.error('Error loading tenants');
     }
   };
 
@@ -87,6 +109,7 @@ const RentalForm = ({ initialData, onSubmit, isLoading }) => {
   };
 
   return (
+    <>
     <form onSubmit={handleSubmit(handleFormSubmit)} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
       <div className="space-y-6">
         <div>
@@ -107,9 +130,21 @@ const RentalForm = ({ initialData, onSubmit, isLoading }) => {
 
         {status === 'occupied' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tenant *
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Tenant *
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add New Tenant
+              </button>
+            </div>
             <select
               {...register('tenant', { required: status === 'occupied' ? 'You must select a tenant' : false })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -117,7 +152,7 @@ const RentalForm = ({ initialData, onSubmit, isLoading }) => {
               <option value="">Select a tenant...</option>
               {tenants.map((tenant) => (
                 <option key={tenant.id} value={tenant.id}>
-                  {tenant.first_name} {tenant.last_name}
+                  {tenant.name} {tenant.lastname}
                 </option>
               ))}
             </select>
@@ -192,7 +227,7 @@ const RentalForm = ({ initialData, onSubmit, isLoading }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              NNumber of People *
+              Number of People *
             </label>
             <input
               type="number"
@@ -273,10 +308,24 @@ const RentalForm = ({ initialData, onSubmit, isLoading }) => {
           disabled={isLoading}
           className="w-full bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors py-2.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Guardando...' : initialData ? 'Actualizar Arriendo' : 'Crear Arriendo'}
+          {isLoading ? 'Saving...' : initialData ? 'Update Rental' : 'Create Rental'}
         </button>
       </div>
+
+     
     </form>
+     {/* Modal para crear tenant */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Add New Tenant"
+      >
+        <TenantForm
+          onSubmit={handleCreateTenant}
+          isLoading={isCreatingTenant}
+        />
+      </Modal>
+    </>
   );
 };
 

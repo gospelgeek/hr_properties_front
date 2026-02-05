@@ -9,7 +9,12 @@ const DashboardCard = ({ title, value, subtitle, icon, color = 'blue', trend, on
     green: 'bg-green-100 text-green-600',
     red: 'bg-red-100 text-red-600',
     yellow: 'bg-yellow-100 text-yellow-600',
-    purple: 'bg-purple-100 text-purple-600'
+    purple: 'bg-purple-100 text-purple-600',
+    pink: 'bg-pink-200 text-pink-700',
+    orange: 'bg-orange-200 text-orange-700',
+    brown: 'bg-yellow-200 text-yellow-800',
+
+
   };
 
   const handleClick = () => {
@@ -24,8 +29,8 @@ const DashboardCard = ({ title, value, subtitle, icon, color = 'blue', trend, on
 
   return (
     <div 
-      className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 p-6 ${
-        isClickable ? 'cursor-pointer hover:border-blue-300' : ''
+      className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border-2 border-gray-200 p-6 ${
+        isClickable ? 'cursor-pointer hover:border-blue-400 hover:scale-105 transform' : ''
       }`}
       onClick={handleClick}
     >
