@@ -23,6 +23,8 @@ const PropertyFinancialPage = () => {
       ]);
       setProperty(propertyData);
       setFinancials(financialsData);
+      console.log('Loaded financial data:', financialsData);
+      console.log('Loaded property data:', propertyData);
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Error loading financial data');

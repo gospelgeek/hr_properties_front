@@ -12,11 +12,11 @@ const RepairCard = ({ repair, onDelete }) => {
 
         <div className="space-y-2 text-sm">
           <p className="text-base-content/70">
-            <span className="font-semibold">Fecha:</span> {new Date(repair.date).toLocaleDateString()}
+            <span className="font-semibold">Date:</span> {new Date(repair.date).toLocaleDateString()}
           </p>
           {repair.observation && (
             <p className="text-base-content/70">
-              <span className="font-semibold">Observación:</span> {repair.observation}
+              <span className="font-semibold">Observation:</span> {repair.observation}
             </p>
           )}
         </div>
@@ -26,13 +26,13 @@ const RepairCard = ({ repair, onDelete }) => {
             to={`/repairs/${repair.id}`}
             className="btn btn-sm btn-primary"
           >
-            Ver Detalles
+            View Details
           </Link>
           <Link 
             to={`/repairs/edit/${repair.id}`}
             className="btn btn-sm btn-outline btn-primary"
           >
-            Editar
+            Edit
           </Link>
           <button 
             onClick={() => onDelete(repair.id)}

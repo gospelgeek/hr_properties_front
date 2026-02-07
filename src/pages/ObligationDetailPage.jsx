@@ -56,8 +56,8 @@ const ObligationDetailPage = () => {
         }
       }
     } catch (error) {
-      console.error('Error al cargar datos:', error);
-      toast.error('Error al cargar la obligación');
+      console.error('Error loading data:', error);
+      toast.error(error.response?.data?.detail || 'Error loading obligation details');
       navigate(id ? `/property/${id}` : '/obligations');
     } finally {
       setLoading(false);
@@ -69,28 +69,28 @@ const ObligationDetailPage = () => {
       setIsSubmitting(true);
       const propertyId = id || obligation.property;
       await addPaymentToObligation(propertyId, obligationId, data);
-      toast.success('Pago agregado correctamente');
+      toast.success('Payment added successfully');
       setShowPaymentForm(false);
       loadData();
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error.response?.data?.detail || 'Error al agregar pago');
+      toast.error(error.response?.data?.detail || 'Error adding payment');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeletePayment = async (paymentId) => {
-    if (!confirm('¿Estás seguro de eliminar este pago?')) return;
+    if (!confirm('Are you sure you want to delete this payment?')) return;
     
     try {
       const propertyId = id || obligation.property;
       await deleteObligationPayment(propertyId, obligationId, paymentId);
-      toast.success('Pago eliminado correctamente');
+      toast.success('Payment deleted successfully');
       loadData();
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Error al eliminar pago');
+      toast.error(error.response?.data?.detail || 'Error deleting payment');
     }
   };
 

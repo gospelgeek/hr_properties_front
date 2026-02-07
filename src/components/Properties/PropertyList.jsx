@@ -5,7 +5,7 @@ const PropertyList = ({ properties, onDelete, showRestoreButton = false, onResto
   if (properties.length === 0) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-500 text-lg">No hay propiedades para mostrar</p>
+        <p className="text-gray-500 text-lg">No properties to display</p>
       </div>
     );
   }

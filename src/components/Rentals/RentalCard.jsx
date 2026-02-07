@@ -38,7 +38,7 @@ const RentalCard = ({ rental, propertyId }) => {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="font-semibold text-gray-900">
-              {rental.tenant_name || 'Tenant'}
+              {rental.tenant.name || 'Tenant'}
             </h3>
             <span className={`px-3 py-1 text-xs font-medium rounded-full ${status.color}`}>
               {status.text}

@@ -22,8 +22,8 @@ const RepairsPage = () => {
       const data = await getProperties();
       setProperties(data);
     } catch (error) {
-      console.error('Error al cargar propiedades:', error);
-      toast.error('Error al cargar las propiedades');
+      console.error('Error loading properties:', error);
+      toast.error('Error loading properties');
     } finally {
       setLoading(false);
     }
@@ -65,9 +65,9 @@ const RepairsPage = () => {
   return (
     <div>
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Reparaciones</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Repairs</h1>
         <p className="text-sm sm:text-base text-gray-600">
-          Gestiona las reparaciones de tus propiedades
+          Manage repairs for your properties
         </p>
       </div>
 
@@ -75,7 +75,7 @@ const RepairsPage = () => {
         {/* Lista de Propiedades */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Propiedades</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Properties</h2>
             <div className="space-y-2">
               {properties.map((property) => (
                 <button
@@ -141,7 +141,7 @@ const RepairsPage = () => {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
-                      Nueva Reparación
+                      New Repair
                     </Link>
                   </div>
                   
@@ -173,7 +173,7 @@ const RepairsPage = () => {
                             onClick={() => handleDelete(repair.id)}
                             className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-200 font-medium text-sm"
                           >
-                            Eliminar
+                            Delete
                           </button>
                         </div>
                       </div>

@@ -10,6 +10,18 @@ const PublicPropertyDetailPage = () => {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
 
+const useLabels = {
+  rental: "Rental",
+  personal: "Personal",
+  commercial: "Commercial"
+}
+
+const useLabelBuilding = {
+  apartment: "Apartment",
+  house: "House",
+  office: "Office"
+}
+
   useEffect(() => {
     loadProperty();
   }, [id]);
@@ -106,13 +118,45 @@ const PublicPropertyDetailPage = () => {
               </div>
             )}
 
-            {/* Description */}
-            {property.description && (
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{property.description}</p>
-              </div>
-            )}
+                {/* General Information */}
+  <div className="mb-8">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
+    {/* Columna izquierda: cuadros pequeños */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Use Type</div>
+        <div className="text-xl font-semibold text-gray-900">{ useLabels[property.use] || 'Not specified'}</div>
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Building Type</div>
+        <div className="text-xl font-semibold text-gray-900">{useLabelBuilding[property.type_building] || 'Not specified'}</div>
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 ">
+        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">City</div>
+        <div className="text-xl font-semibold text-gray-900">{property.city || 'Not specified'}</div>
+      </div>
+    </div>
+    {/* Columna derecha: mapa */}
+    {property.map_url && (
+      <div>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Location</h2>
+        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200 h-64 max-w-full">
+          <iframe
+            src={property.map_url}
+            width="100%"
+            height="100%"
+            className="w-full h-full rounded-lg"
+            style={{ border: 0,  minHeight: '256px', minWidth: '100%'  }}
+            allowFullScreen=""
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Property Location Map"
+          ></iframe>
+        </div>
+      </div>
+    )}
+  </div>
+</div>
 
             {/* Property Details */}
             {property.details && (
@@ -141,14 +185,25 @@ const PublicPropertyDetailPage = () => {
                       </div>
                     </div>
                   )}
-                  {property.details.area && (
+                  {property.details.floors && (
                     <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                       <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7l9 5 9-5-9-5-9 5zm0 7l9 5 9-5m-18 0l9 5 9-5" />
                       </svg>
                       <div>
-                        <p className="text-sm text-gray-600">Area</p>
-                        <p className="font-semibold text-gray-900">{property.details.area} m²</p>
+                        <p className="text-sm text-gray-600">Floors</p>
+                        <p className="font-semibold text-gray-900">{property.details.floors}</p>
+                      </div>
+                    </div>
+                  )}
+                  {property.details.buildings && (
+                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 21V9a2 2 0 012-2h2a2 2 0 012 2v12m6 0V5a2 2 0 012-2h2a2 2 0 012 2v16" />
+                      </svg>
+                      <div>
+                        <p className="text-sm text-gray-600">Buildings</p>
+                        <p className="font-semibold text-gray-900">{property.details.buildings}</p>
                       </div>
                     </div>
                   )}
@@ -169,15 +224,15 @@ const PublicPropertyDetailPage = () => {
                     <span className="font-medium text-gray-900 capitalize">{property.use}</span>
                   </div>
                 )}
-                {property.rental_status && (
+                {property.status && (
                   <div className="flex justify-between py-2 border-b border-gray-100">
                     <span className="text-gray-600">Status</span>
                     <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                      property.rental_status === 'available' 
+                      property.status === 'available' 
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {property.rental_status === 'available' ? 'Available' : 'Occupied'}
+                      {property.status === 'available' ? 'Available' : 'Occupied'}
                     </span>
                   </div>
                 )}

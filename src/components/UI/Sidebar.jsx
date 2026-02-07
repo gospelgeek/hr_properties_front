@@ -102,7 +102,7 @@ const Sidebar = () => {
           {isAdmin() && (
             <div className="mb-8">
               <h3 className="px-4 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Propiedades
+                Properties
               </h3>
               <div className="space-y-2">
               <MenuItem
@@ -144,7 +144,7 @@ const Sidebar = () => {
         {isAdmin() && (
           <div className="mb-8">
             <h3 className="px-4 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Finanzas
+              Finances
             </h3>
             <div className="space-y-2">
               <MenuItem

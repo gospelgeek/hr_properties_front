@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import PropertyList from '../components/Properties/PropertyList';
 import Loader from '../components/UI/Loader';
 import { getProperties, deleteProperty } from '../api/properties.api';
+import { set } from 'react-hook-form';
 
 const PropertiesPage = () => {
   const [properties, setProperties] = useState([]);
@@ -136,14 +137,14 @@ console.log({ useFilter, rentalStatusFilters, rentalTypeFilters });
             <label className="block text-sm font-medium text-gray-700 mb-2">Rental Status</label>
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => toggleRentalStatusFilter('active')}
+                onClick={() => toggleRentalStatusFilter('occupied')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalStatusFilters.includes('active')
+                  rentalStatusFilters.includes('occupied')
                     ? 'bg-green-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Active
+                Occupied
               </button>
               <button
                 onClick={() => toggleRentalStatusFilter('available')}
@@ -172,6 +173,16 @@ console.log({ useFilter, rentalStatusFilters, rentalTypeFilters });
           <div className="flex-shrink-0">
             <label className="block text-sm font-medium text-gray-700 mb-2">Rental Type</label>
             <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setRentalTypeFilters([])}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  rentalTypeFilters.length === 0
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                All
+              </button>
               <button
                 onClick={() => toggleRentalTypeFilter('monthly')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${

@@ -35,6 +35,7 @@ const RentalDetailPage = () => {
       ]);
       setProperty(propData);
       setRental(rentalData);
+      console.log('rentalData:', rentalData);
       setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -141,7 +142,7 @@ const RentalDetailPage = () => {
         <div className="flex justify-between items-start mb-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-1">
-              {rental.tenant_name || 'Tenant'}
+              {rental.tenant.name|| 'Tenant'}
             </h2>
             <p className="text-gray-600">
               {rental.rental_type === 'monthly' ? 'Monthly Rental' : 'Airbnb'}

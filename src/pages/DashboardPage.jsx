@@ -73,12 +73,13 @@ const DashboardPage = () => {
           <div className="text-sm text-gray-600">
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
           <DashboardCard
             title="Rental"
             value={getPropertyCountByUse('rental')}
             subtitle="properties"
-            color="orange" 
+            color="orange"
+            borderColor="border-orange-400" 
             to="/properties?use=rental"
             icon={
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,6 +92,7 @@ const DashboardPage = () => {
             value={getPropertyCountByUse('personal')}
             subtitle="properties"
             color="pink"
+            borderColor="border-pink-400"
             to="/properties?use=personal"
             icon={
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,6 +105,7 @@ const DashboardPage = () => {
             value={getPropertyCountByUse('commercial')}
             subtitle="properties"
             color="purple"
+            borderColor="border-purple-400"
             to="/properties?use=commercial"
             icon={
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,10 +166,10 @@ const DashboardPage = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Monthly Rentals</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <DashboardCard
-              title="Active"
-              value={dashboardData.rentals.monthly_active || 0}
+              title="Occupied"
+              value={dashboardData.rentals.monthly_occupied || 0}
               color="green"
-              to="/properties?rental_type=monthly&rental_status=active"
+              to="/properties?rental_type=monthly&rental_status=occupied"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -206,10 +209,10 @@ const DashboardPage = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Rentals Airbnb</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <DashboardCard
-              title="Active"
-              value={dashboardData.rentals.airbnb_active || 0}
+              title="Occupied"
+              value={dashboardData.rentals.airbnb_occupied || 0}
               color="green"
-              to="/properties?rental_type=airbnb&rental_status=active"
+              to="/properties?rental_type=airbnb&rental_status=occupied"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

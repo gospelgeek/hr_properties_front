@@ -19,6 +19,7 @@ const RentalsPage = () => {
     try {
       setLoading(true);
       const data = await getRentals();
+      console.log('Loaded rentals:', data);
       setRentals(data);
     } catch (error) {
       console.error('Error loading rentals:', error);
@@ -63,7 +64,7 @@ const RentalsPage = () => {
           onClick={() => navigate('/tenants')}
           className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors px-5 py-3 font-medium"
         >
-          Manage Tenants
+          View other properties
         </button>
       </div>
 
