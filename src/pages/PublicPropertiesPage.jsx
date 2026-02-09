@@ -21,6 +21,7 @@ const PublicPropertiesPage = () => {
       setLoading(true);
       // Filtrar solo propiedades disponibles
       const data = await getProperties({ rental_status: 'available' });
+      console.log('Loaded properties:', data);
       setProperties(data);
     } catch (error) {
       console.error('Error loading properties:', error);

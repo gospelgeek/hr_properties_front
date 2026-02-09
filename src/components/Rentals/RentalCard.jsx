@@ -38,14 +38,14 @@ const RentalCard = ({ rental, propertyId }) => {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="font-semibold text-gray-900">
-              {rental.tenant.name || 'Tenant'}
+              {rental.tenant.name || rental.tenant_name || 'Tenant'}
             </h3>
             <span className={`px-3 py-1 text-xs font-medium rounded-full ${status.color}`}>
               {status.text}
             </span>
           </div>
           <p className="text-sm text-gray-600">
-            {rental.rental_type === 'monthly' ? 'Monthly Rent' : 'Airbnb'}
+            {rental.rental_type === 'monthly' ? 'Monthly Rent' : 'Airbnb'} 
           </p>
         </div>
       </div>

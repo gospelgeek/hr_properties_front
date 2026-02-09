@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getPropertyRepairsCost, getPropertyFinancials } from '../../api/properties.api';
 
-const PropertyDetails = ({ property, onEdit, onDelete }) => {
+const PropertyDetails = ({ property }) => {
   const [showInventory, setShowInventory] = useState(false);
   const [showRepairs, setShowRepairs] = useState(false);
   const [showLaws, setShowLaws] = useState(false);
@@ -111,51 +111,11 @@ const useLabelBuilding = {
         </p>
         {/* Action buttons in header */}
         <div className="flex flex-wrap gap-3 mt-6">
-          <Link 
-            to={`/property/${property.id}/add-repair`}
-            className="bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Add Repair
-          </Link>
-          <Link 
-            to={`/property/${property.id}/add-enser`}
-            className="bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Add Item
-          </Link>
-          <Link 
-            to={`/property/${property.id}/add-law`}
-            className="bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Add Documentation
-          </Link>
-          <Link 
-            to={`/property/${property.id}/upload-media`}
-            className="bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            Upload Files
-          </Link>
-          <Link 
-            to={`/property/${property.id}/laws`}
-            className="bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            View Documents
-          </Link>
+          
+          
+          
+          
+         
           <button
             onClick={handleToggleFinancials}
             className="bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
@@ -259,7 +219,8 @@ const useLabelBuilding = {
         ) : (
           <>
             {/* Financial Information */
-            console.log(financials)}
+            console.log(financials)
+            }
             <div className="mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Financial Balance</h2>
@@ -281,36 +242,67 @@ const useLabelBuilding = {
               ) : financials ? (
                 <div className="space-y-4">
                   {/* Income Row */}
-                  <div className="flex justify-between items-center py-4 border-b border-gray-200 bg-white rounded-lg px-6 shadow-sm">
-                    <div>
-                      <div className="text-base font-semibold text-gray-900">Total Income</div>
-                      {financials.income && (
-                        <div className="text-sm text-gray-500 mt-1">
-                          Rentals: {formatCurrency(financials.income.rental_payments || 0)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-3xl font-bold text-green-600">
-                      {formatCurrency(financials.income.total_income || 0)}
-                    </div>
-                  </div>
+                 {/* Income Section */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex justify-between items-center border-b pb-2 mb-2">
+          <div className="text-base font-semibold text-gray-900">Total Income</div>
+          <div className="text-2xl font-bold text-green-600">
+            {formatCurrency(financials.income?.total || 0)}
+          </div>
+        </div>
+                    
+                        {/* Rental Payments */}
+        {financials.income?.rental_payments?.map(item => (
+          <details key={item.id} className="mb-2">
+            <summary className="cursor-pointer flex justify-between items-center px-2 py-1 rounded hover:bg-blue-50">
+              <span className="text-sm text-gray-700">Rental Payment #{item.id}</span>
+              <span className="font-semibold text-green-700">{formatCurrency(item.amount)}</span>
+            </summary>
+            <div className="ml-4 mt-1 text-xs text-gray-600 bg-blue-50 rounded p-2">
+              {/* Personaliza los campos según tu modelo */}
+              <div>Date: {item.date}</div>
+              <div>Location: {item.payment_location}</div>
+            </div>
+          </details>
+        ))}
+      </div>
 
-                  {/* Expenses Row */}
-                  <div className="flex justify-between items-center py-4 border-b border-gray-200 bg-white rounded-lg px-6 shadow-sm">
-                    <div>
-                      <div className="text-base font-semibold text-gray-900">Total Expenses</div>
-                      {financials.expenses && (
-                        <div className="text-sm text-gray-500 mt-1 space-y-0.5">
-                          <div>Obligations: {formatCurrency(financials.expenses.obligations || 0)}</div>
-                          <div>Repairs: {formatCurrency(financials.expenses.repairs || 0)}</div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-3xl font-bold text-red-600">
-                      {formatCurrency(financials.expenses.total_expenses || 0)}
-                    </div>
-                  </div>
-
+      {/* Expenses Section */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex justify-between items-center border-b pb-2 mb-2">
+          <div className="text-base font-semibold text-gray-900">Total Expenses</div>
+          <div className="text-2xl font-bold text-red-600">
+            {formatCurrency(financials.expenses?.total || 0)}
+          </div>
+        </div>
+         {/* Obligation Payments */}
+        {financials.expenses?.obligation_payments?.map(item => (
+          <details key={item.id} className="mb-2">
+            <summary className="cursor-pointer flex justify-between items-center px-2 py-1 rounded hover:bg-red-50">
+              <span className="text-sm text-gray-700">Obligation Payment #{item.id}</span>
+              <span className="font-semibold text-red-700">{formatCurrency(item.amount)}</span>
+            </summary>
+            <div className="ml-4 mt-1 text-xs text-gray-600 bg-red-50 rounded p-2">
+              <div>{item.obligation_name}</div>
+              <div>Date: {item.date}</div>
+              <div>Payment method: {item.payment_method_name.charAt(0).toUpperCase()+item.payment_method_name.slice(1)}</div>
+            </div>
+          </details>
+        ))}
+         {/* Repairs */}
+        {financials.expenses?.repairs?.map(item => (
+          <details key={item.id} className="mb-2">
+            <summary className="cursor-pointer flex justify-between items-center px-2 py-1 rounded hover:bg-yellow-50">
+              <span className="text-sm text-gray-700">Repair #{item.id}</span>
+              <span className="font-semibold text-red-700">{formatCurrency(item.cost)}</span>
+            </summary>
+            <div className="ml-4 mt-1 text-xs text-gray-600 bg-yellow-50 rounded p-2">
+              <div>Date: {item.date}</div>
+              <div>Description: {item.description}</div>
+            </div>
+          </details>
+        ))}
+      </div>
                   {/* Balance Row */}
                   <div className="flex justify-between items-center py-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg px-6 shadow-md">
                     <div className="text-lg font-bold text-gray-900">Net Balance</div>
@@ -332,200 +324,8 @@ const useLabelBuilding = {
         
         {!showFinancials && (
           <>
-
-        {/* Repairs */}
-        {property.repairs && property.repairs.length > 0 && (
-          <div className="mb-8">
-            <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-              <button
-                onClick={() => setShowRepairs(!showRepairs)}
-                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <h3 className="text-xl font-bold text-gray-900">
-                    Repairs ({property.repairs.length})
-                  </h3>
-                  {repairsCost && (
-                    <span className="px-4 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-semibold">
-                      Total: {formatCurrency(  property.repairs.reduce((sum, repair) => sum + (parseFloat(repair.cost) || 0), 0))}
-                    </span>
-                  )}
-                  {loadingRepairsCost && (
-                    <span className="text-sm text-gray-500">Loading cost...</span>
-                  )}
-                </div>
-                <svg
-                  className={`w-6 h-6 text-gray-600 transition-transform ${
-                    showRepairs ? 'rotate-180' : ''
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {showRepairs && (
-                <div className="px-6 pb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    {property.repairs.map((repair, index) => (
-                      <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                        <div className="flex justify-between items-start gap-3 mb-2">
-                          <h3 className="text-base font-semibold text-gray-900">
-                            {repair.description || 'Repair'}
-                          </h3>
-                          <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
-                            {formatCurrency(parseFloat(repair.cost))}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          <span className="font-medium text-gray-700">Date:</span> {new Date(repair.date).toLocaleDateString()}
-                        </p>
-                        {repair.observation && (
-                          <p className="text-sm text-gray-600">
-                            <span className="font-medium text-gray-700">Observation:</span> {repair.observation}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Inventory/Items */}
-        {property.inventory && property.inventory.length > 0 && (
-          <div className="mb-8">
-            <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-              <button
-                onClick={() => setShowInventory(!showInventory)}
-                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
-              >
-                <h3 className="text-xl font-bold text-gray-900">
-                  Inventory Items ({property.inventory.length})
-                </h3>
-                <svg
-                  className={`w-6 h-6 text-gray-600 transition-transform ${
-                    showInventory ? 'rotate-180' : ''
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {showInventory && (
-                <div className="px-6 pb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    {property.inventory.map((item, index) => (
-                      <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                        <div className="flex justify-between items-start gap-3 mb-2">
-                          <h3 className="text-base font-semibold text-gray-900">
-                            {item.enser?.name || 'Unnamed'}
-                          </h3>
-                          {item.enser?.price && (
-                            <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold">
-                              {formatCurrency(parseFloat(item.enser.price))}
-                            </span>
-                          )}
-                        </div>
-                        {item.enser?.condition && (
-                          <p className="text-sm text-gray-600 mb-2">
-                            <span className="font-medium text-gray-700">Condition:</span> {item.enser.condition}
-                          </p>
-                        )}
-                        {item.url_media && (
-                          <a
-                            href={item.url_media}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            View image
-                          </a>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Laws/Documents */}
-        {property.laws && property.laws.length > 0 && (
-          <div className="mb-8">
-            <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-              <button
-                onClick={() => setShowLaws(!showLaws)}
-                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
-              >
-                <h3 className="text-xl font-bold text-gray-900">
-                  Documents and Regulations ({property.laws.length})
-                </h3>
-                <svg
-                  className={`w-6 h-6 text-gray-600 transition-transform ${
-                    showLaws ? 'rotate-180' : ''
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {showLaws && (
-                <div className="px-6 pb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    {property.laws.map((law, index) => (
-                      <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                        <div className="flex justify-between items-start gap-3 mb-2">
-                          <h3 className="text-base font-semibold text-gray-900">
-                            {law.entity_name || 'Unnamed Entity'}
-                          </h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            law.is_paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {law.is_paid ? 'Paid' : 'Pending'}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          <span className="font-medium text-gray-700">Legal Number:</span> {law.legal_number}
-                        </p>
-                        <p className="text-sm text-gray-600 mb-2">
-                          <span className="font-medium text-gray-700">Amount:</span> {formatCurrency(parseFloat(law.original_amount))}
-                        </p>
-                        {law.url && (
-                          <a
-                            href={law.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                            </svg>
-                            View document
-                          </a>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Multimedia Files */}
-        {property.media && property.media.length > 0 && (
+        {property.media && property.media.length >= 0 && (
           <div className="mb-8">
             <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
               <button
@@ -548,6 +348,15 @@ const useLabelBuilding = {
               </button>
               {showMedia && (
                 <div className="px-6 pb-6">
+                  <Link 
+            to={`/property/${property.id}/upload-media`}
+            className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium px-4 py-2 text-sm inline-flex items-center gap-2 mb-4 mt-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Upload Media
+          </Link>
                   {/* Carousel View */}
                   {selectedMediaIndex !== null ? (
                     <div className="mt-4">
@@ -709,6 +518,225 @@ const useLabelBuilding = {
             </div>
           </div>
         )}
+        {/* Repairs */}
+        {property.repairs && property.repairs.length >= 0 && (
+          <div className="mb-8">
+            <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => setShowRepairs(!showRepairs)}
+                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Repairs ({property.repairs.length})
+                  </h3>
+                  {repairsCost && (
+                    <span className="px-4 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-semibold">
+                      Total: {formatCurrency(  property.repairs.reduce((sum, repair) => sum + (parseFloat(repair.cost) || 0), 0))}
+                    </span>
+                  )}
+                  {loadingRepairsCost && (
+                    <span className="text-sm text-gray-500">Loading cost...</span>
+                  )}
+                </div>
+                <svg
+                  className={`w-6 h-6 text-gray-600 transition-transform ${
+                    showRepairs ? 'rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showRepairs && (
+                <div className="px-6 pb-6">
+                  <Link 
+            to={`/property/${property.id}/add-repair`}
+            className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium px-4 py-2 text-sm inline-flex items-center gap-2 mb-4 mt-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Repair
+          </Link>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {property.repairs.map((repair, index) => (
+                      <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        <div className="flex justify-between items-start gap-3 mb-2">
+                          <h3 className="text-base font-semibold text-gray-900">
+                            {repair.description || 'Repair'}
+                          </h3>
+                          <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                            {formatCurrency(parseFloat(repair.cost))}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">
+                          <span className="font-medium text-gray-700">Date:</span> {new Date(repair.date).toLocaleDateString()}
+                        </p>
+                        {repair.observation && (
+                          <p className="text-sm text-gray-600">
+                            <span className="font-medium text-gray-700">Observation:</span> {repair.observation}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Inventory/Items */}
+        {property.inventory && property.inventory.length >= 0 && (
+          <div className="mb-8">
+            <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => setShowInventory(!showInventory)}
+                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-xl font-bold text-gray-900">
+                  Inventory Items ({property.inventory.length})
+                </h3>
+                <svg
+                  className={`w-6 h-6 text-gray-600 transition-transform ${
+                    showInventory ? 'rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showInventory && (
+                <div className="px-6 pb-6">
+                   <Link 
+            to={`/property/${property.id}/add-enser`}
+            className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium px-4 py-2 text-sm inline-flex items-center gap-2 mb-4 mt-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Item
+          </Link>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {property.inventory.map((item, index) => (
+                      <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        <div className="flex justify-between items-start gap-3 mb-2">
+                          <h3 className="text-base font-semibold text-gray-900">
+                            {item.enser?.name || 'Unnamed'}
+                          </h3>
+                          {item.enser?.price && (
+                            <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold">
+                              {formatCurrency(parseFloat(item.enser.price))}
+                            </span>
+                          )}
+                        </div>
+                        {item.enser?.condition && (
+                          <p className="text-sm text-gray-600 mb-2">
+                            <span className="font-medium text-gray-700">Condition:</span> {item.enser.condition}
+                          </p>
+                        )}
+                        {item.url_media && (
+                          <a
+                            href={item.url_media}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            View image
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Laws/Documents */}
+        {property.laws && property.laws.length >= 0 && (
+          <div className="mb-8">
+            <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => setShowLaws(!showLaws)}
+                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-xl font-bold text-gray-900">
+                  Documents and Regulations ({property.laws.length})
+                </h3>
+                <svg
+                  className={`w-6 h-6 text-gray-600 transition-transform ${
+                    showLaws ? 'rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showLaws && (
+                <div className="px-6 pb-6">
+                  <Link 
+            to={`/property/${property.id}/add-law`}
+            className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium px-4 py-2 text-sm inline-flex items-center gap-2 mb-4 mt-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Documentation
+          </Link>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {property.laws.map((law, index) => (
+                      <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        <div className="flex justify-between items-start gap-3 mb-2">
+                          <h3 className="text-base font-semibold text-gray-900">
+                            {law.entity_name || 'Unnamed Entity'}
+                          </h3>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            law.is_paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {law.is_paid ? 'Paid' : 'Pending'}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">
+                          <span className="font-medium text-gray-700">Legal Number:</span> {law.legal_number}
+                        </p>
+                        <p className="text-sm text-gray-600 mb-2">
+                          <span className="font-medium text-gray-700">Amount:</span> {formatCurrency(parseFloat(law.original_amount))}
+                        </p>
+                        {law.url && (
+                          <a
+                            href={law.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            View document
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+
 
         {/* Footer Info - Only show when not in financials view */}
         {!showFinancials && (

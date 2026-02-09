@@ -20,6 +20,7 @@ const RentalDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+   const [expandedPaymentId, setExpandedPaymentId] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -36,6 +37,7 @@ const RentalDetailPage = () => {
       setProperty(propData);
       setRental(rentalData);
       console.log('rentalData:', rentalData);
+      console.log('paymentsData:', paymentsData);
       setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -123,13 +125,13 @@ const RentalDetailPage = () => {
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
         <button
-          onClick={() => navigate(`/property/${id}`)}
+          onClick={() => navigate(`/rentals/`)}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Volver a la propiedad
+          Back to rentals
         </button>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Rental Detail</h1>
         <p className="text-sm sm:text-base text-gray-600">
@@ -265,61 +267,99 @@ const RentalDetailPage = () => {
 
       {/* Lista de Pagos */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Payment History ({payments.length})
-        </h3>
         
-        {payments.length === 0 ? (
-          <div className="text-center py-8">
-            <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p className="text-gray-600">No payments recorded</p>
-          </div>
-        ) : (
+<div className="flex justify-between items-center mb-4">
+  <h3 className="text-lg font-semibold text-gray-900">
+    Payment History ({payments.length})
+  </h3>
+  {payments.length > 0 && (
+    <span className="text-sm text-gray-700 font-medium">
+      Total paid: {formatCurrency(totalPaid)}
+    </span>
+  )}
+</div>
+{payments.length === 0 ? (
+  <div className="text-center py-8 text-gray-500">
+    <p>No payments recorded yet.</p>
+  </div>
+) : (
           <div className="space-y-3">
             {payments.map((payment) => (
-              <div key={payment.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div
+                key={payment.id}
+                className={`border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer`}
+                onClick={() =>
+                  setExpandedPaymentId(expandedPaymentId === payment.id ? null : payment.id)
+                }
+              >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <p className="font-semibold text-gray-900">{formatCurrency(payment.amount)}</p>
+                      <p className="font-semibold text-gray-900">
+                        {rental.property_name || 'Obligación'}
+                      </p>
                       <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
-                        {payment.payment_method_name || 'Payment Method'}
+                        {rental.rental_type || 'Payment Method'}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-1">
                       Date: {formatDate(payment.date)}
                     </p>
-                    {payment.voucher_url && (
-                      <a 
-                        href={payment.voucher_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    {/* Mostrar nombre de la obligación aquí */}
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <p className="font-semibold text-gray-900">{formatCurrency(payment.amount)}</p>
+                    {/* Botón de eliminar solo en modo expandido */}
+                    {expandedPaymentId === payment.id && (
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleDeletePayment(payment.id);
+                        }}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete Payment"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        View Voucher
-                      </a>
+                      </button>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleDeletePayment(payment.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete Payment"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
                 </div>
+                {/* Detalles adicionales */}
+                {expandedPaymentId === payment.id && (
+                  <div className="mt-4 border-t pt-3 text-sm text-gray-700 space-y-1">
+                    <div>
+                      <span className="font-medium">Tenant:</span> {rental.tenant.name}
+                    </div>
+                    <div>
+                      <span className="font-medium">Check In:</span> {rental.check_in}
+                    </div>
+                    <div>
+                      <span className="font-medium">Check Out:</span> {rental.check_out}
+                    </div>
+                    {payment.voucher_url && (
+                      <div>
+                        <a
+                          href={payment.voucher_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          View Voucher
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
-      </div>
+        </div>
     </div>
   );
 };

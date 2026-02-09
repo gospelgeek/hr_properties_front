@@ -8,7 +8,8 @@ import { getRentals } from '../api/rentals.api';
 const RentalsPage = () => {
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [rentalStatus, setRentalStatus] = useState('all');
+  const [rentalType, setRentalType] = useState('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,25 +31,30 @@ const RentalsPage = () => {
   };
 
   const getFilteredRentals = () => {
-    const today = new Date();
-    
-    if (filter === 'active') {
-      return rentals.filter(rental => {
+    let filtered = rentals;
+
+    // Rental Status filter
+    if (rentalStatus === 'occupied') {
+      filtered = filtered.filter(rental => rental.status === 'occupied');
+    } else if (rentalStatus === 'available') {
+      filtered = filtered.filter(rental => rental.status === 'available');
+    } else if (rentalStatus === 'ending_soon') {
+      const today = new Date();
+      filtered = filtered.filter(rental => {
         const checkOut = new Date(rental.check_out);
-        return checkOut >= today;
+        const diffDays = (checkOut - today) / (1000 * 60 * 60 * 24);
+        return rental.status === 'occupied' && diffDays <= 30 && diffDays >= 0;
       });
-    } else if (filter === 'ended') {
-      return rentals.filter(rental => {
-        const checkOut = new Date(rental.check_out);
-        return checkOut < today;
-      });
-    } else if (filter === 'monthly') {
-      return rentals.filter(rental => rental.rental_type === 'monthly');
-    } else if (filter === 'airbnb') {
-      return rentals.filter(rental => rental.rental_type === 'airbnb');
     }
-    
-    return rentals;
+
+    // Rental Type filter
+    if (rentalType === 'monthly') {
+      filtered = filtered.filter(rental => rental.rental_type === 'monthly');
+    } else if (rentalType === 'airbnb') {
+      filtered = filtered.filter(rental => rental.rental_type === 'airbnb');
+    }
+
+    return filtered;
   };
 
   const filteredRentals = getFilteredRentals();
@@ -60,68 +66,130 @@ const RentalsPage = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Rentals</h1>
           <p className="text-sm sm:text-base text-gray-600">Manage all your rentals</p>
         </div>
-        <button
-          onClick={() => navigate('/tenants')}
-          className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors px-5 py-3 font-medium"
-        >
-          View other properties
-        </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-            filter === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          All
-        </button>
-        <button
-          onClick={() => setFilter('active')}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-            filter === 'active'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Active
-        </button>
-        <button
-          onClick={() => setFilter('ended')}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-            filter === 'ended'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Ended
-        </button>
-        <button
-          onClick={() => setFilter('monthly')}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-            filter === 'monthly'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Monthly
-        </button>
-        <button
-          onClick={() => setFilter('airbnb')}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-            filter === 'airbnb'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Airbnb
-        </button>
+      {/* Filters Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
+          {/* Rental Status - Izquierda */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Rental Status</label>
+            <div className="flex flex-wrap gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="rentalStatus"
+                  value="occupied"
+                  checked={rentalStatus === 'occupied'}
+                  onChange={() => setRentalStatus('occupied')}
+                  className="w-5 h-5 text-green-600 focus:ring-green-500 cursor-pointer"
+                />
+                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  rentalStatus === 'occupied'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-100 text-gray-700'
+                }`}>
+                  Occupied
+                </span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="rentalStatus"
+                  value="available"
+                  checked={rentalStatus === 'available'}
+                  onChange={() => setRentalStatus('available')}
+                  className="w-5 h-5 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  rentalStatus === 'available'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700'
+                }`}>
+                  Available
+                </span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="rentalStatus"
+                  value="ending_soon"
+                  checked={rentalStatus === 'ending_soon'}
+                  onChange={() => setRentalStatus('ending_soon')}
+                  className="w-5 h-5 text-yellow-600 focus:ring-yellow-500 cursor-pointer"
+                />
+                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  rentalStatus === 'ending_soon'
+                    ? 'bg-yellow-600 text-white'
+                    : 'bg-gray-100 text-gray-700'
+                }`}>
+                  Ending soon
+                </span>
+              </label>
+            </div>
+          </div>
+
+          {/* Rental Type - Derecha */}
+          <div className="flex-shrink-0">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Rental Type</label>
+            <div className="flex flex-wrap gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="rentalType"
+                  value="all"
+                  checked={rentalType === 'all'}
+                  onChange={() => setRentalType('all')}
+                  className="w-5 h-5 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  rentalType === 'all'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700'
+                }`}>
+                  All
+                </span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="rentalType"
+                  value="monthly"
+                  checked={rentalType === 'monthly'}
+                  onChange={() => setRentalType('monthly')}
+                  className="w-5 h-5 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  rentalType === 'monthly'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700'
+                }`}>
+                  Monthly
+                </span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="rentalType"
+                  value="airbnb"
+                  checked={rentalType === 'airbnb'}
+                  onChange={() => setRentalType('airbnb')}
+                  className="w-5 h-5 text-pink-600 focus:ring-pink-500 cursor-pointer"
+                />
+                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  rentalType === 'airbnb'
+                    ? 'bg-pink-600 text-white'
+                    : 'bg-gray-100 text-gray-700'
+                }`}>
+                  Airbnb
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
 
+      {/* Content */}
       {loading ? (
         <Loader />
       ) : filteredRentals.length === 0 ? (
@@ -131,9 +199,9 @@ const RentalsPage = () => {
           </svg>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No rentals</h3>
           <p className="text-gray-600 mb-4">
-            {filter === 'all' 
+            {rentalStatus === 'all' 
               ? 'Create rentals from properties of type rental'
-              : `No rentals ${filter === 'active' ? 'active' : filter === 'ended' ? 'ended' : filter}`}
+              : `No rentals ${rentalStatus === 'available' ? 'available' : rentalStatus === 'occupied' ? 'occupied' : rentalStatus}`}
           </p>
           <button
             onClick={() => navigate('/')}

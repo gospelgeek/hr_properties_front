@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Loader from '../components/UI/Loader';
-import { getProperties } from '../api/properties.api';
-import { getRepairsByProperty, deleteRepair } from '../api/repairs.api';
+import { getProperties, getProperty } from '../api/properties.api';
+import { getRepairsByProperty, deleteRepair, getRepair } from '../api/repairs.api';
+import { get } from 'react-hook-form';
 
 const RepairsPage = () => {
   const [properties, setProperties] = useState([]);
+  const [property, setProperty] = useState(null);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [repairs, setRepairs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +22,7 @@ const RepairsPage = () => {
     try {
       setLoading(true);
       const data = await getProperties();
+      console.log('Loaded properties:', data);
       setProperties(data);
     } catch (error) {
       console.error('Error loading properties:', error);
@@ -32,9 +35,10 @@ const RepairsPage = () => {
   const loadRepairs = async (propertyId) => {
     try {
       setLoadingRepairs(true);
-      setSelectedProperty(propertyId);
-      const data = await getRepairsByProperty(propertyId);
-      setRepairs(data);
+      const propertyData = await getProperty(propertyId);
+      console.log('Loaded property for repairs:', propertyData);
+      setSelectedProperty(propertyData);
+      setRepairs(propertyData.repairs || []);
     } catch (error) {
       console.error('Error al cargar reparaciones:', error);
       toast.error('Error al cargar las reparaciones');
@@ -49,7 +53,7 @@ const RepairsPage = () => {
         await deleteRepair(id);
         toast.success('Reparación eliminada correctamente');
         if (selectedProperty) {
-          loadRepairs(selectedProperty);
+          loadRepairs(selectedProperty.id);
         }
       } catch (error) {
         console.error('Error al eliminar reparación:', error);
@@ -82,7 +86,7 @@ const RepairsPage = () => {
                   key={property.id}
                   onClick={() => loadRepairs(property.id)}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium ${
-                    selectedProperty === property.id
+                    selectedProperty?.id === property.id
                       ? 'bg-blue-50 text-blue-600 border border-blue-200'
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-transparent'
                   }`}
@@ -119,7 +123,7 @@ const RepairsPage = () => {
                     No repairs registered for this property
                   </p>
                   <Link
-                    to={`/property/${selectedProperty}/add-repair`}
+                    to={`/property/${selectedProperty.id}/add-repair`}
                     className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +139,7 @@ const RepairsPage = () => {
                       {repairs.length} Repair{repairs.length !== 1 ? 's' : ''}
                     </h2>
                     <Link
-                      to={`/property/${selectedProperty}/add-repair`}
+                      to={`/property/${selectedProperty.id}/add-repair`}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium text-sm flex items-center justify-center gap-2 w-full sm:w-auto"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
