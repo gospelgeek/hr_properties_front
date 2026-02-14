@@ -38,7 +38,7 @@ const AddRentalPage = () => {
   };
 
   const handleSubmit = async (data) => {
-    console.log('Submitting rental data:', data);
+   // console.log('Submitting rental data:', data);
     try {
       setIsSubmitting(true);
       await addRentalToProperty(id, data);

@@ -71,7 +71,7 @@ export const getRepairsByProperty = async (propertyId) => {
 // GET /api/repairs/{id}/ - Obtener reparación por ID
 export const getRepair = async (id) => {
   const response = await api.get(`repairs/${id}/`);
-  console.log('API getRepair response:', response.data);
+  //console.log('API getRepair response:', response.data);
   return response.data;
 };
 

@@ -13,8 +13,8 @@ const LoginPage = () => {
 
   const onClientLogin = async (data) => {
     const result = await loginClient(data.username, data.password);
-    console.log('Client login result:', result);
-    console.log('Client login data:', data);
+    //console.log('Client login result:', result);
+    //console.log('Client login data:', data);
     if (result.success) {
       toast.success('Login successful');
       reset();

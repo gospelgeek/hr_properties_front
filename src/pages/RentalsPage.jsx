@@ -20,7 +20,7 @@ const RentalsPage = () => {
     try {
       setLoading(true);
       const data = await getRentals();
-      console.log('Loaded rentals:', data);
+      //console.log('Loaded rentals:', data);
       setRentals(data);
     } catch (error) {
       console.error('Error loading rentals:', error);

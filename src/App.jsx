@@ -161,6 +161,11 @@ function App() {
                   <RentalsPage />
                 </ProtectedRoute>
               } />
+              <Route path="/rentals/:rentalId" element={
+                <ProtectedRoute>
+                  <RentalDetailPage />
+                </ProtectedRoute>
+              } />
               <Route path="/property/:id/add-rental" element={
                 <ProtectedRoute requireAdmin={true}>
                   <AddRentalPage />

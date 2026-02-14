@@ -22,7 +22,7 @@ const RepairsPage = () => {
     try {
       setLoading(true);
       const data = await getProperties();
-      console.log('Loaded properties:', data);
+      //console.log('Loaded properties:', data);
       setProperties(data);
     } catch (error) {
       console.error('Error loading properties:', error);
@@ -36,28 +36,28 @@ const RepairsPage = () => {
     try {
       setLoadingRepairs(true);
       const propertyData = await getProperty(propertyId);
-      console.log('Loaded property for repairs:', propertyData);
+      //console.log('Loaded property for repairs:', propertyData);
       setSelectedProperty(propertyData);
       setRepairs(propertyData.repairs || []);
     } catch (error) {
-      console.error('Error al cargar reparaciones:', error);
-      toast.error('Error al cargar las reparaciones');
+      console.error('Error loading repairs:', error);
+      toast.error('Error loading repairs');
     } finally {
       setLoadingRepairs(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar esta reparación?')) {
+    if (window.confirm('Are you sure you want to delete this repair?')) {
       try {
         await deleteRepair(id);
-        toast.success('Reparación eliminada correctamente');
+        toast.success('Repair deleted successfully');
         if (selectedProperty) {
           loadRepairs(selectedProperty.id);
         }
       } catch (error) {
-        console.error('Error al eliminar reparación:', error);
-        toast.error('Error al eliminar la reparación');
+        console.error('Error deleting repair:', error);
+        toast.error('Error deleting repair');
       }
     }
   };

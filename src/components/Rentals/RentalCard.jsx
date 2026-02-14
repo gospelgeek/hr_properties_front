@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const RentalCard = ({ rental, propertyId }) => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('es-CO', {
@@ -95,7 +97,13 @@ const RentalCard = ({ rental, propertyId }) => {
       </div>
 
       <button
-        onClick={() => navigate(`/property/${propertyId}/rentals/${rental.id}`)}
+        onClick={() => {
+          // Admin navega con propertyId, cliente directo al rental
+          const path = isAdmin() 
+            ? `/property/${propertyId}/rentals/${rental.id}`
+            : `/rentals/${rental.id}`;
+          navigate(path);
+        }}
         className="w-full bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors py-2 text-sm font-medium"
       >
         View Details and Payments

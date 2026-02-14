@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const ObligationCard = ({ obligation, propertyId }) => {
   const navigate = useNavigate();
-  console.log('ObligationCard renderizado con obligación:', obligation);
+  //console.log('ObligationCard renderizado con obligación:', obligation);
   const totalPaid = obligation.total_paid || 0;
   const totalAmount = obligation.amount || 0;
   const pending = totalAmount - totalPaid;

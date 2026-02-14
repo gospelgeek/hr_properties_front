@@ -26,7 +26,7 @@ const PropertyPage = () => {
     try {
       setLoading(true);
       const data = await getProperty(id);
-      console.log('Loaded property:', data);
+      //console.log('Loaded property:', data);
       setProperty(data);
       
       // Load obligations

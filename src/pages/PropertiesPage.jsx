@@ -74,7 +74,7 @@ useEffect(() => {
       if (rentalTypeFilter) params.rental_type = rentalTypeFilter;
       
       const data = await getProperties(params);
-      console.log('Loaded properties with filters:', params, data);
+      //console.log('Loaded properties with filters:', params, data);
       setProperties(data);
     } catch (error) {
       console.error('Error loading properties:', error);
@@ -103,7 +103,7 @@ useEffect(() => {
   };
 
   const hasActiveFilters = useFilter || rentalStatusFilter || rentalTypeFilter;
-  console.log({ useFilter, rentalStatusFilter, rentalTypeFilter });
+  //console.log({ useFilter, rentalStatusFilter, rentalTypeFilter });
   
   return (
     <div>

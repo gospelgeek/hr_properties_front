@@ -22,10 +22,7 @@ const UploadMediaPage = () => {
         const mediaType = data.mediaTypes[index].toLowerCase();
         formData.append('media_type', mediaType);
         
-        console.log('Uploading:', {
-          fileName: file.name,
-          mediaType: mediaType
-        });
+        //console.log('Uploading:', {fileName: file.name,mediaType: mediaType});
         
         return uploadMedia(id, formData);
       });

@@ -72,7 +72,10 @@ export const getTenants = async () => {
 
 // POST /api/tenants/ - Crear un inquilino
 export const createTenant = async (tenantData) => {
+  //console.log('🚀 Enviando datos al backend (createTenant):', tenantData);
+  //console.log('🚀 Datos stringificados:', JSON.stringify(tenantData, null, 2));
   const response = await api.post('tenants/', tenantData);
+  //console.log('✅ Respuesta del backend:', response.data);
   return response.data;
 };
 
@@ -149,12 +152,12 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
         },
       }
     );
-    console.log('Response from adding rental with file:', response.data);
+    //console.log('Response from adding rental with file:', response.data);
     return response.data;
     
   } else {
     const response = await api.post(`properties/${propertyId}/add_rental/`, rentalData);
-    console.log('Response from adding rental without file:', response.data);
+    //console.log('Response from adding rental without file:', response.data);
     return response.data;
   }
 };
@@ -189,7 +192,7 @@ export const deletePropertyRental = async (propertyId, rentalId) => {
 
 // POST /api/properties/{id}/rentals/{rental_id}/add_payment/ - Añadir pago a un rental
 export const addPaymentToRental = async (propertyId, rentalId, paymentData) => {
-  console.log('Adding payment data:', paymentData);
+  //console.log('Adding payment data:', paymentData);
   const response = await api.post(
     `properties/${propertyId}/rentals/${rentalId}/add_payment/`,
     paymentData,
@@ -199,7 +202,7 @@ export const addPaymentToRental = async (propertyId, rentalId, paymentData) => {
       },
     }
   );
-  console.log('Response from adding payment:', response.data);
+  //console.log('Response from adding payment:', response.data);
   return response.data;
 };
 
@@ -224,5 +227,15 @@ export const updateRentalPayment = async (propertyId, rentalId, paymentId, payme
 // DELETE /api/properties/{id}/rentals/{rental_id}/payments/{payment_id}/ - Eliminar pago
 export const deleteRentalPayment = async (propertyId, rentalId, paymentId) => {
   const response = await api.delete(`properties/${propertyId}/rentals/${rentalId}/payments/${paymentId}/`);
+  return response.data;
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// ENDPOINTS DIRECTOS PARA CLIENTES (sin necesidad de propertyId)
+// ═══════════════════════════════════════════════════════════════════════
+
+// GET /api/rentals/{id}/payments/ - Obtener pagos de un rental (para clientes)
+export const getRentalPaymentsDirect = async (rentalId) => {
+  const response = await api.get(`rentals/${rentalId}/payments/`);
   return response.data;
 };

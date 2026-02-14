@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Loader from '../components/UI/Loader';
 import PaymentForm from '../components/Finance/PaymentForm';
+import { useAuth } from '../context/AuthContext';
 import { 
-  getPropertyRental, 
+  getPropertyRental,
   addPaymentToRental, 
   getRentalPayments,
+  getRentalPaymentsDirect,
   deleteRentalPayment 
 } from '../api/rentals.api';
 import { getProperty } from '../api/properties.api';
@@ -14,6 +16,7 @@ import { getProperty } from '../api/properties.api';
 const RentalDetailPage = () => {
   const { id, rentalId } = useParams();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [property, setProperty] = useState(null);
   const [rental, setRental] = useState(null);
   const [payments, setPayments] = useState([]);
@@ -22,31 +25,52 @@ const RentalDetailPage = () => {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
    const [expandedPaymentId, setExpandedPaymentId] = useState(null);
 
-  useEffect(() => {
-    loadData();
-  }, [id, rentalId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [propData, rentalData, paymentsData] = await Promise.all([
-        getProperty(id),
-        getPropertyRental(id, rentalId),
-        getRentalPayments(id, rentalId)
-      ]);
-      setProperty(propData);
-      setRental(rentalData);
-      console.log('rentalData:', rentalData);
-      console.log('paymentsData:', paymentsData);
-      setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
+      
+      // Si es admin y tiene propertyId, carga todo incluyendo property details
+      if (isAdmin() && id) {
+        const [propData, rentalData, paymentsData] = await Promise.all([
+          getProperty(id),
+          getPropertyRental(id, rentalId),
+          getRentalPayments(id, rentalId)
+        ]);
+        setProperty(propData);
+        setRental(rentalData);
+        //console.log('Admin - rentalData:', rentalData);
+        //console.log('Admin - paymentsData:', paymentsData);
+        setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
+      } else {
+        // Si es cliente, usa solo el endpoint de payments que ya incluye todo
+        const paymentsData = await getRentalPaymentsDirect(rentalId);
+        
+        //console.log('Client - paymentsData completa:', paymentsData);
+        
+        // El endpoint devuelve { payments: [...], count, total_paid, rental: {...} }
+        setRental(paymentsData.rental);
+        
+        // Extraer info de property del objeto rental
+        setProperty({
+          id: paymentsData.rental.property?.id || paymentsData.rental.property,
+          name: paymentsData.rental.property?.address || 'Property',
+          address: paymentsData.rental.property?.address || ''
+        });
+        
+        setPayments(paymentsData.payments || []);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
-      toast.error('Error loading rental');
-      navigate(`/property/${id}`);
+      toast.error(error.response?.data?.detail || 'Error loading rental');
+      navigate(`/rentals`);
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, rentalId, isAdmin, navigate]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleAddPayment = async (data) => {
     try {
@@ -114,9 +138,9 @@ const RentalDetailPage = () => {
     const checkOut = new Date(rental.check_out);
     const diffDays = Math.ceil((checkOut - today) / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) return { text: 'Finalizado', color: 'bg-gray-100 text-gray-800' };
-    if (diffDays <= 15) return { text: 'Próximo a finalizar', color: 'bg-yellow-100 text-yellow-800' };
-    return { text: 'Activo', color: 'bg-green-100 text-green-800' };
+    if (diffDays < 0) return { text: 'Completed', color: 'bg-gray-100 text-gray-800' };
+    if (diffDays <= 15) return { text: 'About to end', color: 'bg-yellow-100 text-yellow-800' };
+    return { text: 'Active', color: 'bg-green-100 text-green-800' };
   };
 
   const status = getStatus();
@@ -125,18 +149,28 @@ const RentalDetailPage = () => {
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
         <button
-          onClick={() => navigate(`/rentals/`)}
+          onClick={() => navigate(id && isAdmin() ? `/property/${id}` : `/rentals/`)}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back to rentals
+          {id && isAdmin() ? 'Back to Property' : 'Back to Rentals'}
         </button>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Rental Detail</h1>
         <p className="text-sm sm:text-base text-gray-600">
           Property: <span className="font-semibold">{property?.name || property?.address}</span>
         </p>
+        {!isAdmin() && (
+          <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-sm text-blue-800">
+              <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              You are viewing this rental in read-only mode. Contact the administrator to make changes.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Rental Information */}
@@ -144,7 +178,7 @@ const RentalDetailPage = () => {
         <div className="flex justify-between items-start mb-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-1">
-              {rental.tenant.name|| 'Tenant'}
+              {rental.tenant_name || rental.tenant.name ||rental.tenant?.email || rental.tenant?.phone1 || 'Tenant'}
             </h2>
             <p className="text-gray-600">
               {rental.rental_type === 'monthly' ? 'Monthly Rental' : 'Airbnb'}
@@ -234,8 +268,8 @@ const RentalDetailPage = () => {
         </div>
       </div>
 
-      {/* Payment Form */}
-      {!isCompleted && status.text !== 'Completed' && (
+      {/* Payment Form - Only for Admin */}
+      {isAdmin() && !isCompleted && status.text !== 'Completed' && (
         <div className="mb-6">
           {showPaymentForm ? (
             <div>
@@ -309,8 +343,8 @@ const RentalDetailPage = () => {
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <p className="font-semibold text-gray-900">{formatCurrency(payment.amount)}</p>
-                    {/* Botón de eliminar solo en modo expandido */}
-                    {expandedPaymentId === payment.id && (
+                    {/* Botón de eliminar solo en modo expandido y si es admin */}
+                    {expandedPaymentId === payment.id && isAdmin() && (
                       <button
                         onClick={e => {
                           e.stopPropagation();
@@ -330,7 +364,7 @@ const RentalDetailPage = () => {
                 {expandedPaymentId === payment.id && (
                   <div className="mt-4 border-t pt-3 text-sm text-gray-700 space-y-1">
                     <div>
-                      <span className="font-medium">Tenant:</span> {rental.tenant.name}
+                      <span className="font-medium">Tenant:</span> {rental.tenant_name ||  rental.tenant.name || rental.tenant?.email || rental.tenant?.phone1 || 'Tenant'}
                     </div>
                     <div>
                       <span className="font-medium">Check In:</span> {rental.check_in}

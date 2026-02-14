@@ -85,8 +85,8 @@ const PropertyLawsPage = () => {
   };
 
   const handleDeleteClick = (law) => {
-    console.log('🔴 handleDeleteClick - Ley a eliminar:', law);
-    console.log('🔴 Estado actual showDeleteDialog:', showDeleteDialog);
+    //console.log('🔴 handleDeleteClick - Ley a eliminar:', law);
+    //console.log('🔴 Estado actual showDeleteDialog:', showDeleteDialog);
     setLawToDelete(law);
     setShowDeleteDialog(true);
     console.log('🔴 Después de setShowDeleteDialog(true)');
@@ -94,7 +94,7 @@ const PropertyLawsPage = () => {
 
   const handleConfirmDelete = async () => {
     console.log('✅ handleConfirmDelete - Confirmando eliminación');
-    console.log('✅ lawToDelete:', lawToDelete);
+    //console.log('✅ lawToDelete:', lawToDelete);
     try {
       await deletePropertyLaw(id, lawToDelete.id);
       toast.success('Document deleted successfully');
@@ -123,7 +123,7 @@ const PropertyLawsPage = () => {
     return <Loader />;
   }
 
-  console.log('🔄 PropertyLawsPage RENDER - showDeleteDialog:', showDeleteDialog, 'editingLaw:', !!editingLaw);
+  //console.log('🔄 PropertyLawsPage RENDER - showDeleteDialog:', showDeleteDialog, 'editingLaw:', !!editingLaw);
 
   return (
     <>

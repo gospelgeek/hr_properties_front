@@ -20,7 +20,7 @@ const DashboardPage = () => {
       setLoading(true);
       console.log('Solicitando datos del dashboard...');
       const data = await getDashboard();
-      console.log('Datos recibidos del dashboard:', data);
+      //console.log('Datos recibidos del dashboard:', data);
       setDashboardData(data);
     } catch (error) {
       console.error('Error al cargar dashboard:', error);
@@ -51,7 +51,7 @@ const DashboardPage = () => {
     console.log('No hay datos de dashboard');
     return <div>No data available</div>;
   }
-  console.log('Renderizando dashboard con datos:', dashboardData);
+  //console.log('Renderizando dashboard con datos:', dashboardData);
 
   return (
     <div>
@@ -160,7 +160,8 @@ const DashboardPage = () => {
 
      
       {/* Rentals Mensuales */
-      console.log(dashboardData)}
+      //console.log(dashboardData)
+      }
       {dashboardData.rentals && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Monthly Rentals - Total: {dashboardData.rentals.monthly_available + dashboardData.rentals.monthly_occupied}</h2>

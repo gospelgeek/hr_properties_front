@@ -17,7 +17,7 @@ const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  console.log('useAuth hook ejecutado:', context);
+  //console.log('useAuth hook ejecutado:', context);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     // Verificar si hay un usuario guardado al cargar
     const storedUser = getUserFromStorage();
     const token = getAccessToken();
-    console.log('Stored user:', storedUser, 'Token:', token);
+    //console.log('Stored user:', storedUser, 'Token:', token);
     if (storedUser && token) {
       setUser(storedUser);
     }
@@ -131,6 +131,6 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated
   };
 
-  console.log('AuthProvider renderizando, value:', value);
+  //console.log('AuthProvider renderizando, value:', value);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

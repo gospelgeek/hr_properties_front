@@ -219,7 +219,7 @@ const useLabelBuilding = {
         ) : (
           <>
             {/* Financial Information */
-            console.log(financials)
+            //console.log(financials)
             }
             <div className="mb-8">
               <div className="flex items-center justify-between mb-6">

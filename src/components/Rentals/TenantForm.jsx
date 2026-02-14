@@ -77,7 +77,12 @@ const TenantForm = ({ initialData, onSubmit, isLoading }) => {
           </label>
           <input
             type="number"
-            {...register('birth_year', { required: 'Birth year is required' })}
+            {...register('birth_year', { 
+              required: 'Birth year is required',
+              valueAsNumber: true,
+              min: { value: 1900, message: 'Birth year must be after 1900' },
+              max: { value: new Date().getFullYear(), message: 'Birth year cannot be in the future' }
+            })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="1990"
           />

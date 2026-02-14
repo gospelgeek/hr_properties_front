@@ -68,7 +68,7 @@ api.interceptors.response.use(
 // GET /api/properties/ - Listar propiedades activas
 export const getProperties = async (params = {}) => {
   const response = await api.get('properties/', { params });
-  console.log('API getProperties response:', response.data);
+  //console.log('API getProperties response:', response.data);
   return response.data;
 };
 
