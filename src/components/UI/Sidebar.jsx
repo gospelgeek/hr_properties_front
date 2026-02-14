@@ -80,9 +80,7 @@ const Sidebar = () => {
           {/* Dashboard - Solo Admin */}
           {isAdmin() && (
             <div className="mb-8">
-              <h3 className="px-4 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Dashboard
-              </h3>
+             
               <div className="space-y-2">
                 <MenuItem
                   to="/dashboard"
@@ -101,9 +99,7 @@ const Sidebar = () => {
           {/* Propiedades - Solo Admin */}
           {isAdmin() && (
             <div className="mb-8">
-              <h3 className="px-4 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Propiedades
-              </h3>
+             
               <div className="space-y-2">
               <MenuItem
                 to="/properties"
@@ -115,27 +111,8 @@ const Sidebar = () => {
               >
                 My Properties
               </MenuItem>
-              <MenuItem
-                to="/create"
-                exactPath={true}
-                icon={
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                }
-              >
-                New Property
-              </MenuItem>
-              <MenuItem
-                to="/deleted"
-                icon={
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                }
-              >
-                Deleted
-              </MenuItem>
+             
+              
             </div>
           </div>
           )}
@@ -143,9 +120,6 @@ const Sidebar = () => {
         {/* Finanzas - Solo Admin */}
         {isAdmin() && (
           <div className="mb-8">
-            <h3 className="px-4 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Finanzas
-            </h3>
             <div className="space-y-2">
               <MenuItem
                 to="/obligations"
@@ -195,9 +169,6 @@ const Sidebar = () => {
         {/* Repairs - Solo Admin */}
         {isAdmin() && (
           <div>
-            <h3 className="px-4 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Repairs
-            </h3>
             <div className="space-y-2">
               <MenuItem
                 to="/repairs"

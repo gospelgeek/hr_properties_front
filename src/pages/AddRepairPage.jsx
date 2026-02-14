@@ -23,8 +23,8 @@ const AddRepairPage = () => {
       const data = await getProperty(id);
       setProperty(data);
     } catch (error) {
-      console.error('Error al cargar propiedad:', error);
-      toast.error('Error al cargar la propiedad');
+      console.error('Error loading property:', error);
+      toast.error('Error loading property');
       navigate('/');
     } finally {
       setLoading(false);
@@ -35,11 +35,11 @@ const AddRepairPage = () => {
     try {
       setIsSubmitting(true);
       await addRepairToProperty(id, data);
-      toast.success('Reparación agregada exitosamente');
+      toast.success('Repair added successfully');
       navigate(`/property/${id}`);
     } catch (error) {
-      console.error('Error al agregar reparación:', error);
-      toast.error('Error al agregar la reparación');
+      console.error('Error adding repair:', error);
+      toast.error(error.response?.data?.detail || 'Error adding repair');
     } finally {
       setIsSubmitting(false);
     }
@@ -56,14 +56,14 @@ const AddRepairPage = () => {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Volver a {property?.name}
+          Back to {property?.name}
         </Link>
       </div>
 
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Agregar Reparación</h1>
+        <h1 className="text-3xl font-bold">Add Repair</h1>
         <p className="text-base-content/70 mt-2">
-          Registra una nueva reparación para {property?.name}
+          Register a new repair for {property?.name}
         </p>
       </div>
       

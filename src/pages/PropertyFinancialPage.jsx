@@ -10,6 +10,10 @@ const PropertyFinancialPage = () => {
   const [financials, setFinancials] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Estado para desplegar items
+  const [expandedIncome, setExpandedIncome] = useState({});
+  const [expandedExpense, setExpandedExpense] = useState({});
+
   useEffect(() => {
     loadData();
   }, [id]);
@@ -23,6 +27,7 @@ const PropertyFinancialPage = () => {
       ]);
       setProperty(propertyData);
       setFinancials(financialsData);
+      //console.log('Financial data loaded:', financialsData);
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Error loading financial data');
@@ -38,6 +43,22 @@ const PropertyFinancialPage = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  // Toggle income item
+  const toggleIncomeItem = (type, id) => {
+    setExpandedIncome(prev => ({
+      ...prev,
+      [`${type}_${id}`]: !prev[`${type}_${id}`]
+    }));
+  };
+
+  // Toggle expense item
+  const toggleExpenseItem = (type, id) => {
+    setExpandedExpense(prev => ({
+      ...prev,
+      [`${type}_${id}`]: !prev[`${type}_${id}`]
+    }));
   };
 
   if (loading) {
@@ -69,54 +90,104 @@ const PropertyFinancialPage = () => {
           <p className="text-gray-600 mt-1">Financial Balance</p>
         </div>
 
-        <div className="p-6">
-          <div className="space-y-4">
-            {/* Income Row */}
+        <div className="p-6 space-y-6">
+          {/* Income Section */}
+          <div>
             <div className="flex justify-between items-center py-4 border-b border-gray-200">
-              <div>
-                <div className="text-base font-semibold text-gray-900">Total Income</div>
-                {financials.income && (
-                  <div className="text-sm text-gray-500 mt-1">
-                    Rentals: {formatCurrency(financials.income.rental_payments || 0)}
-                  </div>
-                )}
-              </div>
+              <div className="text-base font-semibold text-gray-900">Total Income</div>
               <div className="text-3xl font-bold text-green-600">
-                {formatCurrency(financials.income.total_income || 0)}
+                {formatCurrency(financials.income?.total || 0)}
               </div>
             </div>
-
-            {/* Expenses Row */}
-            <div className="flex justify-between items-center py-4 border-b border-gray-200">
-              <div>
-                <div className="text-base font-semibold text-gray-900">Total Expenses</div>
-                {financials.expense_breakdown && (
-                  <div className="text-sm text-gray-500 mt-1 space-y-0.5">
-                    <div>Obligations: {formatCurrency(financials.expense_breakdown.obligations || 0)}</div>
-                    <div>Repairs: {formatCurrency(financials.expense_breakdown.repairs || 0)}</div>
+            {/* Income Items */}
+            {financials.income?.rental_payments?.map(item => (
+              <div key={item.id} className="border-b border-gray-100 py-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-700">Rental Payment #{item.id}</span>
+                  <span className="font-semibold text-green-700">{formatCurrency(item.amount)}</span>
+                  <button
+                    className="ml-2 text-xs text-blue-600 hover:underline"
+                    onClick={() => toggleIncomeItem('rental', item.id)}
+                  >
+                    {expandedIncome[`rental_${item.id}`] ? 'Hide details' : 'View details'}
+                  </button>
+                </div>
+                {expandedIncome[`rental_${item.id}`] && (
+                  <div className="mt-2 text-xs text-gray-600 bg-blue-50 rounded p-2">
+                    {/* Muestra detalles del item, puedes personalizar */}
+                    <div>Amount: {item.amount}</div>
+                    <div>Date: {item.date}</div>
+                    <div>Location: {item.payment_location}</div>
                   </div>
                 )}
               </div>
+            ))}
+          </div>
+
+          {/* Expenses Section */}
+          <div>
+            <div className="flex justify-between items-center py-4 border-b border-gray-200">
+              <div className="text-base font-semibold text-gray-900">Total Expenses</div>
               <div className="text-3xl font-bold text-red-600">
-                {formatCurrency(financials.total_expenses || 0)}
+                {financials.expenses.total || 0}
               </div>
             </div>
-
-            {/* Balance Row */}
-            <div className="flex justify-between items-center py-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg px-6">
-              <div className="text-lg font-bold text-gray-900">Net Balance</div>
-              <div className={`text-4xl font-bold ${
-                (financials.net_balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {formatCurrency(financials.net_balance || 0)}
+            {/* Obligation Payments */}
+            {financials.expenses?.obligation_payments?.map(item => (
+              <div key={item.id} className="border-b border-gray-100 py-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-700">Obligation Payment #{item.id}</span>
+                  <span className="font-semibold text-red-700">{formatCurrency(item.amount)}</span>
+                  <button
+                    className="ml-2 text-xs text-blue-600 hover:underline"
+                    onClick={() => toggleExpenseItem('obligation', item.id)}
+                  >
+                    {expandedExpense[`obligation_${item.id}`] ? 'Hide details' : 'View details'}
+                  </button>
+                </div>
+                {expandedExpense[`obligation_${item.id}`] && (
+                  <div className="mt-2 text-xs text-gray-600 bg-red-50 rounded p-2">
+                    <div>Obligation: {item.obligation_name}</div>
+                    <div>Date: {item.date}</div>
+                    <div>Amount: {formatCurrency(item.amount)}</div>
+                  </div>
+                )}
               </div>
+            ))}
+            {/* Repairs */}
+            {financials.expenses.repairs.map(item => (
+              <div key={item.id} className="border-b border-gray-100 py-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-700">Repair #{item.id}</span>
+                  <span className="font-semibold text-red-700">{formatCurrency(item.cost)}</span>
+                  <button
+                    className="ml-2 text-xs text-blue-600 hover:underline"
+                    onClick={() => toggleExpenseItem('repair', item.id)}
+                  >
+                    {expandedExpense[`repair_${item.id}`] ? 'Hide details' : 'View details'}
+                  </button>
+                </div>
+                {expandedExpense[`repair_${item.id}`] && (
+                  <div className="mt-2 text-xs text-gray-600 bg-yellow-50 rounded p-2">
+                    <div>Date: {item.date}</div>
+                    <div>Description: {item.description}</div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Balance Row */}
+          <div className="flex justify-between items-center py-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg px-6">
+            <div className="text-lg font-bold text-gray-900">Net Balance</div>
+            <div className={`text-4xl font-bold ${
+              (financials.balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {formatCurrency(financials.balance || 0)}
             </div>
           </div>
         </div>
       </div>
-
-      {/* Summary Cards */}
-      
     </div>
   );
 };

@@ -13,13 +13,13 @@ const LoginPage = () => {
 
   const onClientLogin = async (data) => {
     const result = await loginClient(data.username, data.password);
-    
+    //console.log('Client login result:', result);
+    //console.log('Client login data:', data);
     if (result.success) {
       toast.success('Login successful');
       reset();
       navigate('/rentals');
     } else {
-      console.error('Login failed:', result.error);
       toast.error(result.error);
     }
   };
@@ -140,10 +140,10 @@ const LoginPage = () => {
               <div className="space-y-6">
                 <div className="text-center mb-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Acceso Administrativo
+                    Administrative access requires Google login
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Inicia sesión con tu cuenta de Google autorizada
+                    Sign in with your authorized Google account
                   </p>
                 </div>
 
@@ -161,7 +161,7 @@ const LoginPage = () => {
 
                 <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-xs text-yellow-800">
-                    <strong>Nota:</strong> Solo cuentas autorizadas pueden acceder como administrador.
+                    <strong>Note:</strong> Only authorized accounts can access as administrator.
                   </p>
                 </div>
               </div>
@@ -171,7 +171,7 @@ const LoginPage = () => {
 
         {/* Footer */}
         <div className="mt-6 text-center text-sm text-gray-600">
-          <p>¿No tienes acceso? Contacta al administrador</p>
+          <p>Don't have access? Contact the administrator</p>
         </div>
       </div>
     </div>

@@ -49,14 +49,19 @@ const RentalForm = ({ initialData, onSubmit, isLoading }) => {
 const handleCreateTenant = async (tenantData) => {
     try {
       setIsCreatingTenant(true);
+      //console.log('📤 Datos recibidos del formulario TenantForm:', tenantData);
+      //console.log('📤 Tipo de birth_year:', typeof tenantData.birth_year, 'Valor:', tenantData.birth_year);
       const newTenant = await createTenant(tenantData);
+      //console.log('✅ Tenant creado exitosamente:', newTenant);
       toast.success('Tenant created successfully');
       await loadTenants(); // Recargar lista de tenants
       setValue('tenant', newTenant.id); // Seleccionar automáticamente el nuevo tenant
       setIsModalOpen(false);
     } catch (error) {
-      console.error('Error creating tenant:', error);
-      toast.error('Error creating tenant');
+      //console.error('❌ Error completo creating tenant:', error);
+      //console.error('❌ Error response:', error.response?.data);
+      //console.error('❌ Error status:', error.response?.status);
+      toast.error('Error creating tenant: ' + (error.response?.data?.message || error.message));
     } finally {
       setIsCreatingTenant(false);
     }

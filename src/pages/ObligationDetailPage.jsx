@@ -21,6 +21,7 @@ const ObligationDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [expandedPaymentId, setExpandedPaymentId] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -56,8 +57,8 @@ const ObligationDetailPage = () => {
         }
       }
     } catch (error) {
-      console.error('Error al cargar datos:', error);
-      toast.error('Error al cargar la obligación');
+      console.error('Error loading data:', error);
+      toast.error(error.response?.data?.detail || 'Error loading obligation details');
       navigate(id ? `/property/${id}` : '/obligations');
     } finally {
       setLoading(false);
@@ -69,28 +70,28 @@ const ObligationDetailPage = () => {
       setIsSubmitting(true);
       const propertyId = id || obligation.property;
       await addPaymentToObligation(propertyId, obligationId, data);
-      toast.success('Pago agregado correctamente');
+      toast.success('Payment added successfully');
       setShowPaymentForm(false);
       loadData();
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error.response?.data?.detail || 'Error al agregar pago');
+      toast.error(error.response?.data?.detail || 'Error adding payment');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeletePayment = async (paymentId) => {
-    if (!confirm('¿Estás seguro de eliminar este pago?')) return;
+    if (!confirm('Are you sure you want to delete this payment?')) return;
     
     try {
       const propertyId = id || obligation.property;
       await deleteObligationPayment(propertyId, obligationId, paymentId);
-      toast.success('Pago eliminado correctamente');
+      toast.success('Payment deleted successfully');
       loadData();
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Error al eliminar pago');
+      toast.error(error.response?.data?.detail || 'Error deleting payment');
     }
   };
 
@@ -227,25 +228,37 @@ const ObligationDetailPage = () => {
 
       {/* Lista de Pagos */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Payment History ({payments.length})
-        </h3>
-        
-        {payments.length === 0 ? (
-          <div className="text-center py-8">
-            <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p className="text-gray-600">No payments recorded</p>
-          </div>
-        ) : (
+       
+<div className="flex justify-between items-center mb-4">
+  <h3 className="text-lg font-semibold text-gray-900">
+    Payment History ({payments.length})
+  </h3>
+  {payments.length > 0 && (
+    <span className="text-sm text-gray-700 font-medium">
+      Total paid: {formatCurrency(totalPaid)}
+    </span>
+  )}
+</div>
+{payments.length === 0 ? (
+  <div className="text-center py-8 text-gray-500">
+    <p>No payments recorded yet.</p>
+  </div>
+) : (
           <div className="space-y-3">
             {payments.map((payment) => (
-              <div key={payment.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div
+                key={payment.id}
+                className={`border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer`}
+                onClick={() =>
+                  setExpandedPaymentId(expandedPaymentId === payment.id ? null : payment.id)
+                }
+              >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <p className="font-semibold text-gray-900">{formatCurrency(payment.amount)}</p>
+                      <p className="font-semibold text-gray-900">
+                        {obligation.obligation_type_name || 'Obligación'}
+                      </p>
                       <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
                         {payment.payment_method_name || 'Payment Method'}
                       </span>
@@ -253,30 +266,53 @@ const ObligationDetailPage = () => {
                     <p className="text-sm text-gray-600 mb-1">
                       Date: {formatDate(payment.date)}
                     </p>
-                    {payment.voucher_url && (
-                      <a 
-                        href={payment.voucher_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    {/* Mostrar nombre de la obligación aquí */}
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <p className="font-semibold text-gray-900">{formatCurrency(payment.amount)}</p>
+                    {/* Botón de eliminar solo en modo expandido */}
+                    {expandedPaymentId === payment.id && (
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleDeletePayment(payment.id);
+                        }}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete Payment"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        View Voucher
-                      </a>
+                      </button>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleDeletePayment(payment.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete Payment"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
                 </div>
+                {/* Detalles adicionales */}
+                {expandedPaymentId === payment.id && (
+                  <div className="mt-4 border-t pt-3 text-sm text-gray-700 space-y-1">
+                    <div>
+                      <span className="font-medium">Entidad:</span> {obligation.entity_name}
+                    </div>
+                    <div>
+                      <span className="font-medium">Temporality:</span> {obligation.temporality}
+                    </div>
+                    {payment.voucher_url && (
+                      <div>
+                        <a
+                          href={payment.voucher_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          View Voucher
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -287,3 +323,4 @@ const ObligationDetailPage = () => {
 };
 
 export default ObligationDetailPage;
+

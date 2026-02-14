@@ -13,7 +13,7 @@ const CreatePropertyPage = () => {
       setIsLoading(true);
       await createProperty(data);
       toast.success('Property created successfully');
-      navigate('/');
+      navigate('/properties');
     } catch (error) {
       console.error('Error creating property:', error);
       toast.error('Error creating property');

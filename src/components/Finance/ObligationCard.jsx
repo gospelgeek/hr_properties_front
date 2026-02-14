@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const ObligationCard = ({ obligation, propertyId }) => {
   const navigate = useNavigate();
-  
+  //console.log('ObligationCard renderizado con obligación:', obligation);
   const totalPaid = obligation.total_paid || 0;
   const totalAmount = obligation.amount || 0;
   const pending = totalAmount - totalPaid;
@@ -43,9 +43,9 @@ const ObligationCard = ({ obligation, propertyId }) => {
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h3 className="font-semibold text-gray-900 mb-1">
-            {obligation.obligation_type_name || 'Obligation'}
+            {obligation.obligation_type.name.charAt(0).toUpperCase() + obligation.obligation_type.name.slice(1) || 'Obligation'} 
           </h3>
-          <p className="text-sm text-gray-600">{obligation.entity_name}</p>
+          <p className="text-sm text-gray-600">{obligation.entity_name} - {obligation.temporality.charAt(0).toUpperCase() + obligation.temporality.slice(1)}</p>
         </div>
         <span className={`px-3 py-1 text-xs font-medium rounded-full ${
           isCompleted ? 'bg-green-100 text-green-800' :

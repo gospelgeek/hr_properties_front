@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const DashboardCard = ({ title, value, subtitle, icon, color = 'blue', trend, onClick, to }) => {
+const DashboardCard = ({ title, value, subtitle, icon, color = 'blue', borderColor, trend, onClick, to }) => {
   const navigate = useNavigate();
   
   const colorClasses = {
@@ -29,7 +29,7 @@ const DashboardCard = ({ title, value, subtitle, icon, color = 'blue', trend, on
 
   return (
     <div 
-      className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border-2 border-gray-200 p-6 ${
+      className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border-2 ${borderColor || 'border-gray-200'} p-6 ${
         isClickable ? 'cursor-pointer hover:border-blue-400 hover:scale-105 transform' : ''
       }`}
       onClick={handleClick}

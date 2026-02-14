@@ -221,9 +221,9 @@ export const deletePropertyObligation = async (propertyId, obligationId) => {
 
 // POST /api/properties/{property_id}/obligations/{obligation_id}/add_payment/ - Crear pago
 export const addPaymentToObligation = async (propertyId, obligationId, paymentData) => {
-  console.log(paymentData)
+  //console.log(paymentData)
   const response = await api.post(`properties/${propertyId}/obligations/${obligationId}/add_payment/`, paymentData);
-  console.log(response.data)
+  //console.log(response.data)
   return response.data;
 };
 

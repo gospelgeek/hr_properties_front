@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Loader from '../components/UI/Loader';
-import { getProperties } from '../api/properties.api';
-import { getRepairsByProperty, deleteRepair } from '../api/repairs.api';
+import { getProperties, getProperty } from '../api/properties.api';
+import { getRepairsByProperty, deleteRepair, getRepair } from '../api/repairs.api';
+import { get } from 'react-hook-form';
 
 const RepairsPage = () => {
   const [properties, setProperties] = useState([]);
+  const [property, setProperty] = useState(null);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [repairs, setRepairs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,10 +22,11 @@ const RepairsPage = () => {
     try {
       setLoading(true);
       const data = await getProperties();
+      //console.log('Loaded properties:', data);
       setProperties(data);
     } catch (error) {
-      console.error('Error al cargar propiedades:', error);
-      toast.error('Error al cargar las propiedades');
+      console.error('Error loading properties:', error);
+      toast.error('Error loading properties');
     } finally {
       setLoading(false);
     }
@@ -32,28 +35,29 @@ const RepairsPage = () => {
   const loadRepairs = async (propertyId) => {
     try {
       setLoadingRepairs(true);
-      setSelectedProperty(propertyId);
-      const data = await getRepairsByProperty(propertyId);
-      setRepairs(data);
+      const propertyData = await getProperty(propertyId);
+      //console.log('Loaded property for repairs:', propertyData);
+      setSelectedProperty(propertyData);
+      setRepairs(propertyData.repairs || []);
     } catch (error) {
-      console.error('Error al cargar reparaciones:', error);
-      toast.error('Error al cargar las reparaciones');
+      console.error('Error loading repairs:', error);
+      toast.error('Error loading repairs');
     } finally {
       setLoadingRepairs(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar esta reparación?')) {
+    if (window.confirm('Are you sure you want to delete this repair?')) {
       try {
         await deleteRepair(id);
-        toast.success('Reparación eliminada correctamente');
+        toast.success('Repair deleted successfully');
         if (selectedProperty) {
-          loadRepairs(selectedProperty);
+          loadRepairs(selectedProperty.id);
         }
       } catch (error) {
-        console.error('Error al eliminar reparación:', error);
-        toast.error('Error al eliminar la reparación');
+        console.error('Error deleting repair:', error);
+        toast.error('Error deleting repair');
       }
     }
   };
@@ -65,9 +69,9 @@ const RepairsPage = () => {
   return (
     <div>
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Reparaciones</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Repairs</h1>
         <p className="text-sm sm:text-base text-gray-600">
-          Gestiona las reparaciones de tus propiedades
+          Manage repairs for your properties
         </p>
       </div>
 
@@ -75,14 +79,14 @@ const RepairsPage = () => {
         {/* Lista de Propiedades */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Propiedades</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Properties</h2>
             <div className="space-y-2">
               {properties.map((property) => (
                 <button
                   key={property.id}
                   onClick={() => loadRepairs(property.id)}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium ${
-                    selectedProperty === property.id
+                    selectedProperty?.id === property.id
                       ? 'bg-blue-50 text-blue-600 border border-blue-200'
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-transparent'
                   }`}
@@ -119,7 +123,7 @@ const RepairsPage = () => {
                     No repairs registered for this property
                   </p>
                   <Link
-                    to={`/property/${selectedProperty}/add-repair`}
+                    to={`/property/${selectedProperty.id}/add-repair`}
                     className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,13 +139,13 @@ const RepairsPage = () => {
                       {repairs.length} Repair{repairs.length !== 1 ? 's' : ''}
                     </h2>
                     <Link
-                      to={`/property/${selectedProperty}/add-repair`}
+                      to={`/property/${selectedProperty.id}/add-repair`}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium text-sm flex items-center justify-center gap-2 w-full sm:w-auto"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
-                      Nueva Reparación
+                      New Repair
                     </Link>
                   </div>
                   
@@ -173,7 +177,7 @@ const RepairsPage = () => {
                             onClick={() => handleDelete(repair.id)}
                             className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-200 font-medium text-sm"
                           >
-                            Eliminar
+                            Delete
                           </button>
                         </div>
                       </div>

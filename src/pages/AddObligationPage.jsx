@@ -23,8 +23,8 @@ const AddObligationPage = () => {
       const data = await getProperty(id);
       setProperty(data);
     } catch (error) {
-      console.error('Error al cargar propiedad:', error);
-      toast.error('Error al cargar la propiedad');
+      console.error('Error loading property:', error);
+      toast.error('Error loading property');
       navigate('/');
     } finally {
       setLoading(false);
@@ -35,11 +35,11 @@ const AddObligationPage = () => {
     try {
       setIsSubmitting(true);
       await addObligationToProperty(id, data);
-      toast.success('Obligación creada correctamente');
+      toast.success('Obligation added successfully');
       navigate(`/property/${id}`);
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error.response?.data?.detail || 'Error al crear obligación');
+      toast.error(error.response?.data?.detail || 'Error adding obligation');
     } finally {
       setIsSubmitting(false);
     }
@@ -58,11 +58,11 @@ const AddObligationPage = () => {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Volver a la propiedad
+          Back to property
         </button>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Crear Obligación</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Create Obligation</h1>
         <p className="text-sm sm:text-base text-gray-600">
-          Agregar nueva obligación para: <span className="font-semibold">{property.name || property.address}</span>
+          Add to: <span className="font-semibold">{property.name || property.address}</span>
         </p>
       </div>
 

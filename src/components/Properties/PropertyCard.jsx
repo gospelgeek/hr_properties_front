@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const PropertyCard = ({ property, onDelete, showRestoreButton = false, onRestore, isPublic = false }) => {
-  const isActive = showRestoreButton ? false : (property.is_active !== false);
+  const isActive = showRestoreButton ? false : (property.is_deleted !== null);
   
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 overflow-hidden">
@@ -26,13 +26,7 @@ const PropertyCard = ({ property, onDelete, showRestoreButton = false, onRestore
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex-1 min-w-0">
             {property.name || property.address}
           </h2>
-          {!showRestoreButton && (
-            <span className={`px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 ${
-              isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
-              {isActive ? 'Active' : 'Deleted'}
-            </span>
-          )}
+         
         </div>
 
         {property.address && (

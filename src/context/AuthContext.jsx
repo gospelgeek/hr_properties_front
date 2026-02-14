@@ -17,7 +17,7 @@ const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  console.log('useAuth hook ejecutado:', context);
+  //console.log('useAuth hook ejecutado:', context);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     // Verificar si hay un usuario guardado al cargar
     const storedUser = getUserFromStorage();
     const token = getAccessToken();
-    console.log('Usuario guardado:', storedUser, 'Token:', token);
+    //console.log('Stored user:', storedUser, 'Token:', token);
     if (storedUser && token) {
       setUser(storedUser);
     }
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
       return { success: true };
     } catch (error) {
-      console.log('Datos de error en login client:', error.response?.data);
+      console.log('Error logging in with client:', error.response?.data);
       console.error('Login error:', error);
       return { 
         success: false, 
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Google login error:', error);
       return { 
         success: false, 
-        error: error.response?.data?.detail || 'Error al iniciar sesión con Google' 
+        error: error.response?.data?.detail || 'Error logging in with Google' 
       };
     }
   };
@@ -131,6 +131,6 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated
   };
 
-  console.log('AuthProvider renderizando, value:', value);
+  //console.log('AuthProvider renderizando, value:', value);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

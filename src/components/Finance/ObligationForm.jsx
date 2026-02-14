@@ -42,7 +42,7 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
           >
             <option value="">Select type...</option>
             {obligationTypes.map((type) => (
-              <option key={type.id} value={type.id}>{type.name}</option>
+              <option key={type.id} value={type.id}>{type.name.charAt(0).toUpperCase() + type.name.slice(1)}</option>
             ))}
           </select>
           {errors.obligation_type && (
