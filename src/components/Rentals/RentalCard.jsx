@@ -23,6 +23,11 @@ const RentalCard = ({ rental, propertyId }) => {
   };
 
   const getStatus = () => {
+    // Si no hay tenant, la propiedad está disponible
+    if (!rental.tenant || !rental.check_out) {
+      return { text: 'Available', color: 'bg-blue-100 text-blue-800' };
+    }
+
     const today = new Date();
     const checkOut = new Date(rental.check_out);
     const diffDays = Math.ceil((checkOut - today) / (1000 * 60 * 60 * 24));
@@ -40,7 +45,7 @@ const RentalCard = ({ rental, propertyId }) => {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="font-semibold text-gray-900">
-              {rental.tenant.name || rental.tenant_name || 'Tenant'}
+              {rental.tenant ? (rental.tenant.name || rental.tenant_name || 'Tenant') : 'No Tenant'}
             </h3>
             <span className={`px-3 py-1 text-xs font-medium rounded-full ${status.color}`}>
               {status.text}
@@ -53,22 +58,28 @@ const RentalCard = ({ rental, propertyId }) => {
       </div>
 
       <div className="space-y-2 mb-4">
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">Check-in:</span>
-          <span className="font-medium text-gray-900">{formatDate(rental.check_in)}</span>
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">Check-out:</span>
-          <span className="font-medium text-gray-900">{formatDate(rental.check_out)}</span>
-        </div>
+        {rental.check_in && (
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">Check-in:</span>
+            <span className="font-medium text-gray-900">{formatDate(rental.check_in)}</span>
+          </div>
+        )}
+        {rental.check_out && (
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">Check-out:</span>
+            <span className="font-medium text-gray-900">{formatDate(rental.check_out)}</span>
+          </div>
+        )}
         <div className="flex justify-between items-center text-sm">
           <span className="text-gray-600">Amount:</span>
           <span className="font-semibold text-green-600">{formatCurrency(rental.amount)}</span>
         </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-600">People:</span>
-          <span className="font-medium text-gray-900">{rental.people_count}</span>
-        </div>
+        {rental.people_count && (
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">People:</span>
+            <span className="font-medium text-gray-900">{rental.people_count}</span>
+          </div>
+        )}
 
         {rental.rental_type === 'monthly' && rental.monthly_data && (
           <div className="pt-2 border-t border-gray-200">
@@ -85,7 +96,15 @@ const RentalCard = ({ rental, propertyId }) => {
         )}
 
         {rental.rental_type === 'airbnb' && rental.airbnb_data && (
-          <div className="pt-2 border-t border-gray-200">
+          <div className="pt-2 border-t border-gray-200 space-y-2">
+            {rental.airbnb_data.deposit_amount && (
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600">Deposit:</span>
+                <span className="font-medium text-gray-900">
+                  {formatCurrency(rental.airbnb_data.deposit_amount)}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between items-center text-sm">
               <span className="text-gray-600">Payment Status:</span>
               <span className={`font-medium ${rental.airbnb_data.is_paid ? 'text-green-600' : 'text-red-600'}`}>

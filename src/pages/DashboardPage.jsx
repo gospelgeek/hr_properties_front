@@ -51,7 +51,7 @@ const DashboardPage = () => {
     console.log('No hay datos de dashboard');
     return <div>No data available</div>;
   }
-  //console.log('Renderizando dashboard con datos:', dashboardData);
+  console.log('Renderizando dashboard con datos:', dashboardData);
 
   return (
     <div>

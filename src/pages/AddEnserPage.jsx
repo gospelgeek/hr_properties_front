@@ -24,11 +24,11 @@ const AddEnserPage = () => {
       }
       
       await addEnserToProperty(id, formData);
-      toast.success('Enser añadido exitosamente');
+      toast.success('Enser added successfully');
       navigate(`/property/${id}`);
     } catch (error) {
-      console.error('Error al añadir enser:', error);
-      toast.error(error.response?.data?.detail || 'Error al añadir el enser');
+      console.error('Error adding enser:', error);
+      toast.error(error.response?.data?.detail || 'Error adding the enser');
     } finally {
       setIsSubmitting(false);
     }
@@ -45,7 +45,7 @@ const AddEnserPage = () => {
         </Link>
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Añadir Enser a la Propiedad</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Add Enser</h1>
       
       <EnserForm 
         onSubmit={handleSubmit}

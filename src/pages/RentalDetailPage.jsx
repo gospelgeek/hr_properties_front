@@ -134,6 +134,11 @@ const RentalDetailPage = () => {
   const isCompleted = pending <= 0;
 
   const getStatus = () => {
+    // Si no hay tenant o fechas, está disponible
+    if (!rental.tenant || !rental.check_out) {
+      return { text: 'Available', color: 'bg-blue-100 text-blue-800' };
+    }
+
     const today = new Date();
     const checkOut = new Date(rental.check_out);
     const diffDays = Math.ceil((checkOut - today) / (1000 * 60 * 60 * 24));
@@ -148,15 +153,29 @@ const RentalDetailPage = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <button
-          onClick={() => navigate(id && isAdmin() ? `/property/${id}` : `/rentals/`)}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          {id && isAdmin() ? 'Back to Property' : 'Back to Rentals'}
-        </button>
+        <div className="flex justify-between items-center mb-4">
+          <button
+            onClick={() => navigate(id && isAdmin() ? `/property/${id}` : `/rentals/`)}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            {id && isAdmin() ? 'Back to Property' : 'Back to Rentals'}
+          </button>
+          
+          {id && isAdmin() && (
+            <button
+              onClick={() => navigate(`/property/${id}/rentals/${rentalId}/edit`)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit Rental
+            </button>
+          )}
+        </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Rental Detail</h1>
         <p className="text-sm sm:text-base text-gray-600">
           Property: <span className="font-semibold">{property?.name || property?.address}</span>
@@ -178,7 +197,7 @@ const RentalDetailPage = () => {
         <div className="flex justify-between items-start mb-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-1">
-              {rental.tenant_name || rental.tenant.name ||rental.tenant?.email || rental.tenant?.phone1 || 'Tenant'}
+              {rental.tenant_name || rental.tenant?.name || rental.tenant?.email || rental.tenant?.phone1 || 'No Tenant'}
             </h2>
             <p className="text-gray-600">
               {rental.rental_type === 'monthly' ? 'Monthly Rental' : 'Airbnb'}
@@ -190,22 +209,28 @@ const RentalDetailPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <p className="text-sm text-gray-600 mb-1">Check-in</p>
-            <p className="text-lg font-semibold text-gray-900">{formatDate(rental.check_in)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600 mb-1">Check-out</p>
-            <p className="text-lg font-semibold text-gray-900">{formatDate(rental.check_out)}</p>
-          </div>
+          {rental.check_in && (
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Check-in</p>
+              <p className="text-lg font-semibold text-gray-900">{formatDate(rental.check_in)}</p>
+            </div>
+          )}
+          {rental.check_out && (
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Check-out</p>
+              <p className="text-lg font-semibold text-gray-900">{formatDate(rental.check_out)}</p>
+            </div>
+          )}
           <div>
             <p className="text-sm text-gray-600 mb-1">Total Amount</p>
             <p className="text-2xl font-bold text-gray-900">{formatCurrency(rental.amount)}</p>
           </div>
-          <div>
-            <p className="text-sm text-gray-600 mb-1">Number of People</p>
-            <p className="text-lg font-semibold text-gray-900">{rental.people_count}</p>
-          </div>
+          {rental.people_count && (
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Number of People</p>
+              <p className="text-lg font-semibold text-gray-900">{rental.people_count}</p>
+            </div>
+          )}
         </div>
 
         {rental.rental_type === 'monthly' && rental.monthly_data && (
@@ -244,12 +269,22 @@ const RentalDetailPage = () => {
         {rental.rental_type === 'airbnb' && rental.airbnb_data && (
           <div className="pt-4 border-t border-gray-200">
             <h3 className="font-semibold text-gray-900 mb-2">Airbnb Information</h3>
-            <p className="text-sm text-gray-600">
-              Payment Status: 
-              <span className={`ml-2 font-semibold ${rental.airbnb_data.is_paid ? 'text-green-600' : 'text-red-600'}`}>
-                {rental.airbnb_data.is_paid ? 'Paid' : 'Pending'}
-              </span>
-            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {rental.airbnb_data.deposit_amount && (
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Deposit</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {formatCurrency(rental.airbnb_data.deposit_amount)}
+                  </p>
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Payment Status</p>
+                <p className={`text-lg font-semibold ${rental.airbnb_data.is_paid ? 'text-green-600' : 'text-red-600'}`}>
+                  {rental.airbnb_data.is_paid ? 'Paid' : 'Pending'}
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -364,14 +399,18 @@ const RentalDetailPage = () => {
                 {expandedPaymentId === payment.id && (
                   <div className="mt-4 border-t pt-3 text-sm text-gray-700 space-y-1">
                     <div>
-                      <span className="font-medium">Tenant:</span> {rental.tenant_name ||  rental.tenant.name || rental.tenant?.email || rental.tenant?.phone1 || 'Tenant'}
+                      <span className="font-medium">Tenant:</span> {rental.tenant_name || rental.tenant?.name || rental.tenant?.email || rental.tenant?.phone1 || 'No Tenant'}
                     </div>
-                    <div>
-                      <span className="font-medium">Check In:</span> {rental.check_in}
-                    </div>
-                    <div>
-                      <span className="font-medium">Check Out:</span> {rental.check_out}
-                    </div>
+                    {rental.check_in && (
+                      <div>
+                        <span className="font-medium">Check In:</span> {rental.check_in}
+                      </div>
+                    )}
+                    {rental.check_out && (
+                      <div>
+                        <span className="font-medium">Check Out:</span> {rental.check_out}
+                      </div>
+                    )}
                     {payment.voucher_url && (
                       <div>
                         <a

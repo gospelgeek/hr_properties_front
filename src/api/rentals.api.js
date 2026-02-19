@@ -123,16 +123,24 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
   if (rentalData.url_files instanceof File) {
     const formData = new FormData();
     
-    // Agregar todos los campos excepto url_files
+    // Agregar campos obligatorios
     formData.append('status', rentalData.status);
+    formData.append('rental_type', rentalData.rental_type);
+    formData.append('amount', rentalData.amount);
+    
+    // Agregar campos opcionales solo si existen
     if (rentalData.tenant) {
       formData.append('tenant', rentalData.tenant);
     }
-    formData.append('rental_type', rentalData.rental_type);
-    formData.append('check_in', rentalData.check_in);
-    formData.append('check_out', rentalData.check_out);
-    formData.append('amount', rentalData.amount);
-    formData.append('people_count', rentalData.people_count);
+    if (rentalData.check_in) {
+      formData.append('check_in', rentalData.check_in);
+    }
+    if (rentalData.check_out) {
+      formData.append('check_out', rentalData.check_out);
+    }
+    if (rentalData.people_count) {
+      formData.append('people_count', rentalData.people_count);
+    }
     
     // Agregar monthly_data o airbnb_data como JSON string
     if (rentalData.monthly_data) {
@@ -149,6 +157,7 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
       {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
         },
       }
     );
@@ -176,8 +185,58 @@ export const getPropertyRental = async (propertyId, rentalId) => {
 
 // PATCH /api/properties/{id}/rentals/{rental_id}/ - Actualizar rental
 export const updatePropertyRental = async (propertyId, rentalId, rentalData) => {
-  const response = await api.patch(`properties/${propertyId}/rentals/${rentalId}/`, rentalData);
-  return response.data;
+  // Si hay un archivo, usar FormData, de lo contrario usar JSON
+  if (rentalData.url_files instanceof File) {
+    const formData = new FormData();
+    
+    // Agregar todos los campos
+    if (rentalData.status) {
+      formData.append('status', rentalData.status);
+    }
+    if (rentalData.tenant) {
+      formData.append('tenant', rentalData.tenant);
+    }
+    if (rentalData.rental_type) {
+      formData.append('rental_type', rentalData.rental_type);
+    }
+    if (rentalData.check_in) {
+      formData.append('check_in', rentalData.check_in);
+    }
+    if (rentalData.check_out) {
+      formData.append('check_out', rentalData.check_out);
+    }
+    if (rentalData.amount) {
+      formData.append('amount', rentalData.amount);
+    }
+    if (rentalData.people_count) {
+      formData.append('people_count', rentalData.people_count);
+    }
+    
+    // Agregar monthly_data o airbnb_data como JSON string
+    if (rentalData.monthly_data) {
+      formData.append('monthly_data', JSON.stringify(rentalData.monthly_data));
+      formData.append('url_files', rentalData.url_files);
+    }
+    if (rentalData.airbnb_data) {
+      formData.append('airbnb_data', JSON.stringify(rentalData.airbnb_data));
+    }
+    
+    const response = await axios.patch(
+      `${API_URL}properties/${propertyId}/rentals/${rentalId}/`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      }
+    );
+    return response.data;
+    
+  } else {
+    const response = await api.patch(`properties/${propertyId}/rentals/${rentalId}/`, rentalData);
+    return response.data;
+  }
 };
 
 // DELETE /api/properties/{id}/rentals/{rental_id}/ - Eliminar rental
@@ -237,5 +296,11 @@ export const deleteRentalPayment = async (propertyId, rentalId, paymentId) => {
 // GET /api/rentals/{id}/payments/ - Obtener pagos de un rental (para clientes)
 export const getRentalPaymentsDirect = async (rentalId) => {
   const response = await api.get(`rentals/${rentalId}/payments/`);
+  return response.data;
+};
+
+// POST /api/rentals/{id}/end_rental/ - Terminar un rental y liberar la propiedad
+export const endRental = async (rentalId) => {
+  const response = await api.post(`rentals/${rentalId}/end_rental/`);
   return response.data;
 };

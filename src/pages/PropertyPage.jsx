@@ -8,11 +8,13 @@ import ObligationCard from '../components/Finance/ObligationCard';
 import RentalCard from '../components/Rentals/RentalCard';
 import { getProperty, deleteProperty } from '../api/properties.api';
 import { getPropertyObligations } from '../api/finance.api';
-import { getPropertyRentals } from '../api/rentals.api';
+import { getPropertyRentals, endRental } from '../api/rentals.api';
+import { useAuth } from '../context/AuthContext';
 
 const PropertyPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [property, setProperty] = useState(null);
   const [obligations, setObligations] = useState([]);
   const [rentals, setRentals] = useState([]);
@@ -66,6 +68,18 @@ const PropertyPage = () => {
     }
   };
 
+  const handleFinishRental = async (rentalId) => {
+    try {
+      const result = await endRental(rentalId);
+      toast.success(result.message || 'Rental finished successfully');
+      // Reload property and rentals
+      await loadProperty();
+    } catch (error) {
+      console.error('Error finishing rental:', error);
+      toast.error(error.response?.data?.message || 'Error finishing rental');
+    }
+  };
+
   if (loading) {
     return <Loader />;
   }
@@ -89,17 +103,7 @@ const PropertyPage = () => {
         </Link>
       </div>
 
-      <PropertyDetails property={property} />
-
-      <div className="flex flex-col sm:flex-row gap-3 mt-6">
-        <Link
-          to={`/edit/${id}`}
-          className="flex-1 sm:flex-none bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium text-center"
-        >
-          Edit Property
-        </Link>
-        <DeletePropertyButton propertyId={id} onDelete={handleDelete} />
-      </div>
+      <PropertyDetails property={property} onDelete={handleDelete} />
 
       {/* Financial Obligations Section */}
       <div className="mt-8">
@@ -133,21 +137,34 @@ const PropertyPage = () => {
          <div className="mt-8">
     <div className="flex justify-between items-center mb-4">
       <h2 className="text-xl font-bold text-gray-900">Rentals</h2>
-      <Link
-  to={rentals.length === 0 ? `/property/${id}/add-rental` : "#"}
-  className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors ${
-    rentals.length === 0
-      ? "bg-purple-600 text-white hover:bg-purple-700 cursor-pointer"
-      : "bg-gray-400 text-white cursor-not-allowed pointer-events-none"
-  }`}
-  aria-disabled={rentals.length !== 0}
-  tabIndex={rentals.length !== 0 ? -1 : 0}
->
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-  </svg>
-  Add Rental
-</Link>
+      <div className="flex gap-3">
+        <Link
+          to={rentals.length === 0 ? `/property/${id}/add-rental` : "#"}
+          className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors ${
+            rentals.length === 0
+              ? "bg-purple-600 text-white hover:bg-purple-700 cursor-pointer"
+              : "bg-gray-400 text-white cursor-not-allowed pointer-events-none"
+          }`}
+          aria-disabled={rentals.length !== 0}
+          tabIndex={rentals.length !== 0 ? -1 : 0}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add Rental
+        </Link>
+        {isAdmin() && rentals.length > 0 && (
+          <button
+            onClick={() => handleFinishRental(rentals[0].id)}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Finish Rental
+          </button>
+        )}
+      </div>
     </div>
           {rentals.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">

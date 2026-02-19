@@ -8,19 +8,18 @@ import TenantForm from './TenantForm';
 const RentalForm = ({ initialData, onSubmit, isLoading }) => {
   const [tenants, setTenants] = useState([]);
   const [rentalType, setRentalType] = useState(initialData?.rental_type || 'monthly');
-  const [status, setStatus] = useState(initialData?.status || 'available');
+  const [addTenant, setAddTenant] = useState(!!initialData?.tenant);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreatingTenant, setIsCreatingTenant] = useState(false);
   
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
     defaultValues: initialData || {
-      status: 'available',
       tenant: '',
       rental_type: 'monthly',
       check_in: '',
       check_out: '',
       amount: '',
-      people_count: 1,
+      people_count: '',
       deposit_amount: '',
       is_refundable: true,
       url_files: null,
@@ -29,22 +28,21 @@ const RentalForm = ({ initialData, onSubmit, isLoading }) => {
   });
 
   const watchRentalType = watch('rental_type');
-  const watchStatus = watch('status');
 
   useEffect(() => {
     setRentalType(watchRentalType);
   }, [watchRentalType]);
 
   useEffect(() => {
-    setStatus(watchStatus);
-    if (watchStatus === 'available') {
-      setValue('tenant', '');
-    }
-  }, [watchStatus, setValue]);
-
-  useEffect(() => {
     loadTenants();
   }, []);
+
+  // Inicializar addTenant si hay datos iniciales con tenant
+  useEffect(() => {
+    if (initialData?.tenant) {
+      setAddTenant(true);
+    }
+  }, [initialData]);
 
 const handleCreateTenant = async (tenantData) => {
     try {
@@ -81,32 +79,38 @@ const handleCreateTenant = async (tenantData) => {
 
   const handleFormSubmit = (data) => {
     const formattedData = {
-      status: data.status,
-      rental_type: data.rental_type,
-      check_in: data.check_in,
-      check_out: data.check_out,
-      amount: parseFloat(data.amount),
-      people_count: parseInt(data.people_count)
+      status: addTenant ? 'occupied' : 'available',
+      rental_type: rentalType,
+      amount: parseFloat(data.amount)
     };
 
-    // Solo agregar tenant si el status es 'ocupada'
-    if (data.status === 'occupied' && data.tenant) {
+    // Si se agrega tenant, incluir los datos relacionados
+    if (addTenant && data.tenant) {
       formattedData.tenant = parseInt(data.tenant);
+      formattedData.check_in = data.check_in;
+      formattedData.check_out = data.check_out;
+      
+      // Number of people es opcional
+      if (data.people_count) {
+        formattedData.people_count = parseInt(data.people_count);
+      }
+      
+      // File es opcional y solo para monthly
+      if (rentalType === 'monthly' && data.url_files && data.url_files[0]) {
+        formattedData.url_files = data.url_files[0];
+      }
     }
 
-    if (data.rental_type === 'monthly') {
+    if (rentalType === 'monthly') {
       formattedData.monthly_data = {
         deposit_amount: parseFloat(data.deposit_amount),
         is_refundable: data.is_refundable
       };
-      
-      // Si hay un archivo seleccionado
-      if (data.url_files && data.url_files[0]) {
-        formattedData.url_files = data.url_files[0];
-      }
     } else {
       formattedData.airbnb_data = {
-        is_paid: data.is_paid
+        deposit_amount: parseFloat(data.deposit_amount),
+        is_paid: data.is_paid || false,
+        is_refundable: data.is_refundable
       };
     }
 
@@ -119,151 +123,55 @@ const handleCreateTenant = async (tenantData) => {
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Status *
+            Rental Type
           </label>
-          <select
-            {...register('status', { required: 'Status is required' })}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="available">Available</option>
-            <option value="occupied">Occupied</option>
-          </select>
-          {errors.status && (
-            <p className="mt-1 text-sm text-red-600">{errors.status.message}</p>
-          )}
+          <input
+            type="text"
+            value={rentalType ? rentalType.charAt(0).toUpperCase() + rentalType.slice(1) : ''}
+            disabled
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+          />
         </div>
-
-        {status === 'occupied' && (
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Tenant *
-              </label>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Add New Tenant
-              </button>
-            </div>
-            <select
-              {...register('tenant', { required: status === 'occupied' ? 'You must select a tenant' : false })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Select a tenant...</option>
-              {tenants.map((tenant) => (
-                <option key={tenant.id} value={tenant.id}>
-                  {tenant.name} {tenant.lastname}
-                </option>
-              ))}
-            </select>
-            {errors.tenant && (
-              <p className="mt-1 text-sm text-red-600">{errors.tenant.message}</p>
-            )}
-          </div>
-        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Rental Type *
+            Amount *
           </label>
-          <select
-            {...register('rental_type', { required: 'Rental type is required' })}
+          <input
+            type="number"
+            step="0.01"
+            {...register('amount', { required: 'Amount is required', min: { value: 0, message: 'Must be positive' } })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="monthly">Monthly</option>
-            <option value="airbnb">Airbnb</option>
-          </select>
-          {errors.rental_type && (
-            <p className="mt-1 text-sm text-red-600">{errors.rental_type.message}</p>
+            placeholder="0.00"
+          />
+          {errors.amount && (
+            <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Check-in *
-            </label>
-            <input
-              type="date"
-              {...register('check_in', { required: 'Date is required' })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            {errors.check_in && (
-              <p className="mt-1 text-sm text-red-600">{errors.check_in.message}</p>
-            )}
-          </div>
+        <div className="border-t pt-6">
+          <h3 className="text-md font-semibold text-gray-900 mb-4">
+            {rentalType === 'monthly' ? 'Monthly Rental Data' : 'Airbnb Data'}
+          </h3>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Deposit Amount *
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                {...register('deposit_amount', { required: 'Deposit amount is required', min: { value: 0, message: 'Must be positive' } })}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="0.00"
+              />
+              {errors.deposit_amount && (
+                <p className="mt-1 text-sm text-red-600">{errors.deposit_amount.message}</p>
+              )}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Check-out *
-            </label>
-            <input
-              type="date"
-              {...register('check_out', { required: 'Date is required' })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            {errors.check_out && (
-              <p className="mt-1 text-sm text-red-600">{errors.check_out.message}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Amount *
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              {...register('amount', { required: 'Amount is required', min: { value: 0, message: 'Must be positive' } })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="0.00"
-            />
-            {errors.amount && (
-              <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Number of People *
-            </label>
-            <input
-              type="number"
-              {...register('people_count', { required: 'This field is required', min: { value: 1, message: 'Minimum 1' } })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="1"
-            />
-            {errors.people_count && (
-              <p className="mt-1 text-sm text-red-600">{errors.people_count.message}</p>
-            )}
-          </div>
-        </div>
-
-        {rentalType === 'monthly' && (
-          <div className="border-t pt-6">
-            <h3 className="text-md font-semibold text-gray-900 mb-4">Monthly Rental Data</h3>
             
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Deposit Amount *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  {...register('deposit_amount', { required: rentalType === 'monthly', min: 0 })}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
-                />
-              </div>
-
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -271,42 +179,122 @@ const handleCreateTenant = async (tenantData) => {
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label className="text-sm font-medium text-gray-700">
-                  Refundable Deposit
+                  Refundable Deposit *
                 </label>
+              </div>
+            
+          </div>
+        </div>
+
+        <div className="border-t pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <input
+              type="checkbox"
+              checked={addTenant}
+              onChange={(e) => setAddTenant(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label className="text-sm font-medium text-gray-700">
+              Add Tenant
+            </label>
+          </div>
+
+          {addTenant && (
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Tenant *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add New Tenant
+                  </button>
+                </div>
+                <select
+                  {...register('tenant', { required: addTenant ? 'You must select a tenant' : false })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select a tenant...</option>
+                  {tenants.map((tenant) => (
+                    <option key={tenant.id} value={tenant.id}>
+                      {tenant.name} {tenant.lastname}
+                    </option>
+                  ))}
+                </select>
+                {errors.tenant && (
+                  <p className="mt-1 text-sm text-red-600">{errors.tenant.message}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {rentalType === 'monthly' ? 'Move-In' : 'Check-in'} *
+                  </label>
+                  <input
+                    type="date"
+                    {...register('check_in', { required: addTenant ? 'Date is required' : false })}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  {errors.check_in && (
+                    <p className="mt-1 text-sm text-red-600">{errors.check_in.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {rentalType === 'monthly' ? 'Move-Out' : 'Check-out'} *
+                  </label>
+                  <input
+                    type="date"
+                    {...register('check_out', { required: addTenant ? 'Date is required' : false })}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  {errors.check_out && (
+                    <p className="mt-1 text-sm text-red-600">{errors.check_out.message}</p>
+                  )}
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Files (optional)
+                  Number of People (optional)
                 </label>
                 <input
-                  type="file"
-                  {...register('url_files')}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  type="number"
+                  {...register('people_count', { min: { value: 1, message: 'Minimum 1' } })}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="1"
                 />
-                <p className="mt-1 text-xs text-gray-500">Allowed formats: PDF, DOC, DOCX, JPG, PNG</p>
+                {errors.people_count && (
+                  <p className="mt-1 text-sm text-red-600">{errors.people_count.message}</p>
+                )}
               </div>
-            </div>
-          </div>
-        )}
 
-        {rentalType === 'airbnb' && (
-          <div className="border-t pt-6">
-            <h3 className="text-md font-semibold text-gray-900 mb-4">Airbnb Data</h3>
-            
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                {...register('is_paid')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label className="text-sm font-medium text-gray-700">
-                Payment Received
-              </label>
+              {rentalType === 'monthly' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Files (optional)
+                  </label>
+                  <input
+                    type="file"
+                    {...register('url_files')}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Allowed formats: PDF, DOC, DOCX, JPG, PNG</p>
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         <button
           type="submit"

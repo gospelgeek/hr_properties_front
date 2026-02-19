@@ -59,6 +59,15 @@ const PropertyCard = ({ property, onDelete, showRestoreButton = false, onRestore
                 <span className="font-medium">{property.details.bathrooms} bath</span>
               </div>
             )}
+            {property.details.half_bathrooms > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-700">
+                <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 11h6v6a2 2 0 01-2 2h-2a2 2 0 01-2-2v-6z" />
+                </svg>
+                <span className="font-medium">{property.details.half_bathrooms} half bath</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -104,18 +113,8 @@ const PropertyCard = ({ property, onDelete, showRestoreButton = false, onRestore
               >
                 View Details
               </Link>
-              <Link
-                to={`/edit/${property.id}`}
-                className="flex-1 sm:flex-none border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 font-medium px-4 py-2.5 text-sm text-center"
-              >
-                Edit
-              </Link>
-              <button
-                onClick={() => onDelete(property.id)}
-                className="flex-1 sm:flex-none bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium px-4 py-2.5 text-sm"
-              >
-                Delete
-              </button>
+              
+             
             </>
           )}
         </div>
