@@ -25,11 +25,11 @@ const AddLawPage = () => {
       }
       
       await addLawToProperty(id, formData);
-      toast.success('Documentación añadida exitosamente');
+      toast.success('Documentation added successfully');
       navigate(`/property/${id}`);
     } catch (error) {
-      console.error('Error al añadir documentación:', error);
-      toast.error(error.response?.data?.detail || 'Error al añadir la documentación');
+      console.error('Error adding documentation:', error);
+      toast.error(error.response?.data?.detail || 'Error adding the documentation');
     } finally {
       setIsSubmitting(false);
     }
@@ -46,7 +46,7 @@ const AddLawPage = () => {
         </Link>
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Añadir Documentación/Normativa a la Propiedad</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Add Documentation</h1>
       
       <LawForm 
         onSubmit={handleSubmit}

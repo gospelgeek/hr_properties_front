@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getPropertyRepairsCost, getPropertyFinancials } from '../../api/properties.api';
+import DeletePropertyButton from './DeletePropertyButton';
 
-const PropertyDetails = ({ property }) => {
+const PropertyDetails = ({ property, onDelete }) => {
   const [showInventory, setShowInventory] = useState(false);
   const [showRepairs, setShowRepairs] = useState(false);
   const [showLaws, setShowLaws] = useState(false);
@@ -25,7 +26,7 @@ const useLabelBuilding = {
   house: "House",
   office: "Office"
 }
-
+console.log('Rendering PropertyDetails with property:', property);
   useEffect(() => {
     if (property && property.id) {
       loadRepairsCost();
@@ -110,12 +111,7 @@ const useLabelBuilding = {
           <span>{property.address+", "+property.city+", "+property.state+", "+property.zip_code}</span>
         </p>
         {/* Action buttons in header */}
-        <div className="flex flex-wrap gap-3 mt-6">
-          
-          
-          
-          
-         
+        <div className="flex flex-wrap gap-3 mt-6 justify-between items-center">
           <button
             onClick={handleToggleFinancials}
             className="bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
@@ -125,6 +121,19 @@ const useLabelBuilding = {
             </svg>
             {showFinancials ? 'Hide Financials' : 'View Financials'}
           </button>
+          
+          <div className="flex gap-3">
+            <Link
+              to={`/edit/${property.id}`}
+              className="bg-white text-blue-700 rounded-lg hover:bg-white-700 transition-all duration-200 font-medium px-4 py-2 text-sm inline-flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit Property
+            </Link>
+            {onDelete && <DeletePropertyButton propertyId={property.id} onDelete={onDelete} />}
+          </div>
         </div>
       </div>
 
@@ -148,6 +157,10 @@ const useLabelBuilding = {
       <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 ">
         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">City</div>
         <div className="text-xl font-semibold text-gray-900">{property.city || 'Not specified'}</div>
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 ">
+        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Rental Type</div>
+        <div className="text-xl font-semibold text-gray-900">{property.rental_type ? property.rental_type.charAt(0).toUpperCase() + property.rental_type.slice(1) : 'Not specified'}</div>
       </div>
     </div>
     {/* Columna derecha: mapa */}
@@ -187,6 +200,12 @@ const useLabelBuilding = {
                   <div className="text-3xl font-bold text-blue-700">{property.details.bathrooms}</div>
                 </div>
               )}
+              {property.details.half_bathrooms !== null && property.details.half_bathrooms !== undefined && (
+                <div className="bg-blue-50 rounded-lg p-4 text-center border border-blue-100">
+                  <div className="text-sm font-medium text-blue-600 mb-1">Half Bathrooms</div>
+                  <div className="text-3xl font-bold text-blue-700">{property.details.half_bathrooms}</div>
+                </div>
+              )}
               {property.details.floors !== null && property.details.floors !== undefined && (
                 <div className="bg-blue-50 rounded-lg p-4 text-center border border-blue-100">
                   <div className="text-sm font-medium text-blue-600 mb-1">Floors</div>
@@ -195,7 +214,7 @@ const useLabelBuilding = {
               )}
               {property.details.buildings !== null && property.details.buildings !== undefined && (
                 <div className="bg-blue-50 rounded-lg p-4 text-center border border-blue-100">
-                  <div className="text-sm font-medium text-blue-600 mb-1">Buildings</div>
+                  <div className="text-sm font-medium text-blue-600 mb-1">Storage</div>
                   <div className="text-3xl font-bold text-blue-700">{property.details.buildings}</div>
                 </div>
               )}

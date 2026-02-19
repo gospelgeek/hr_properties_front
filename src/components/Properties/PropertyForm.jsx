@@ -5,10 +5,11 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(initialData?.image_url || null);
   
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm({
     defaultValues: initialData ? {
       name: initialData.name || '',
       use: initialData.use || '',
+      rental_type: initialData.rental_type || '',
       address: initialData.address || '',
       map_url: initialData.map_url || '',
       image_url: initialData.image_url || '',
@@ -18,11 +19,14 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
       city: initialData.city || '',
       bedrooms: initialData.details?.bedrooms || '',
       bathrooms: initialData.details?.bathrooms || '',
+      half_bathrooms: initialData.details?.half_bathrooms || '',
       floors: initialData.details?.floors || '',
       observations: initialData.details?.observations || '',
       buildings: initialData.details?.buildings || ''
     } : {}
   });
+
+  const selectedUse = watch('use');
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -51,11 +55,17 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
       details: {
         bedrooms: parseInt(data.bedrooms) || 0,
         bathrooms: parseInt(data.bathrooms) || 0,
+        half_bathrooms: parseInt(data.half_bathrooms) || 0,
         floors: parseInt(data.floors) || 0,
         observations: data.observations || '',
         buildings: parseInt(data.buildings) || 0
       }
     };
+
+    // Add rental_type if use is 'rental'
+    if (data.use === 'rental' && data.rental_type) {
+      formattedData.rental_type = data.rental_type;
+    }
     
     // If there's an image file, we need to send FormData
     if (imageFile) {
@@ -71,9 +81,15 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
       formData.append('state', formattedData.state);
       formData.append('city', formattedData.city);
       
+      // Add rental_type if applicable
+      if (formattedData.rental_type) {
+        formData.append('rental_type', formattedData.rental_type);
+      }
+      
       // Add details fields individually
       formData.append('details.bedrooms', formattedData.details.bedrooms);
       formData.append('details.bathrooms', formattedData.details.bathrooms);
+      formData.append('details.half_bathrooms', formattedData.details.half_bathrooms);
       formData.append('details.floors', formattedData.details.floors);
       formData.append('details.buildings', formattedData.details.buildings);
       formData.append('details.observations', formattedData.details.observations);
@@ -122,6 +138,27 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
             <p className="text-red-600 text-sm mt-1">{errors.use.message}</p>
           )}
         </div>
+
+        {selectedUse === 'rental' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Rental Type *
+            </label>
+            <select
+              {...register('rental_type', { 
+                required: selectedUse === 'rental' ? 'Rental type is required for rental properties' : false 
+              })}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            >
+              <option value="">Select a rental type</option>
+              <option value="monthly">Monthly Rental</option>
+              <option value="airbnb">Airbnb</option>
+            </select>
+            {errors.rental_type && (
+              <p className="text-red-600 text-sm mt-1">{errors.rental_type.message}</p>
+            )}
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -172,17 +209,17 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
+
+                 <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Zip Code
+              City
             </label>
             <input
-              {...register('zip_code')}
+              {...register('city')}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              placeholder="Ej: 58"
+              placeholder="Ex: Boston"
             />
           </div>
-
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -194,18 +231,19 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
               placeholder="Ex: California"
             />
           </div>
-        
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              City
+              Zip Code
             </label>
             <input
-              {...register('city')}
+              {...register('zip_code')}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              placeholder="Ex: Boston"
+              placeholder="Ej: 58"
             />
           </div>
+
+        
         </div>
 
         <div>
@@ -256,6 +294,18 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
+                Half Bathrooms
+              </label>
+              <input
+                type="number"
+                {...register('half_bathrooms')}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="Ej: 2"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Floors
               </label>
               <input
@@ -268,7 +318,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Buildings
+                Storage
               </label>
               <input
                 type="number"

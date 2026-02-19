@@ -28,12 +28,12 @@ const UploadMediaPage = () => {
       });
       
       await Promise.all(uploadPromises);
-      toast.success(`${data.files.length} archivo(s) subido(s) exitosamente`);
+      toast.success(`${data.files.length} file(s) uploaded successfully`);
       navigate(`/property/${id}`);
     } catch (error) {
-      console.error('Error al subir archivos:', error);
+      console.error('Error uploading files:', error);
       console.error('Error details:', error.response?.data);
-      toast.error(error.response?.data?.detail || error.response?.data?.message || 'Error al subir los archivos');
+      toast.error(error.response?.data?.detail || error.response?.data?.message || 'Error uploading files');
     } finally {
       setIsSubmitting(false);
     }
@@ -50,7 +50,7 @@ const UploadMediaPage = () => {
         </Link>
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Subir Archivos a la Propiedad</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Upload Media</h1>
       
       <MediaUploadForm 
         onSubmit={handleSubmit}

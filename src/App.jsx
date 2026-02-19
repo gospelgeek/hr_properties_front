@@ -30,6 +30,7 @@ import ObligationDetailPage from './pages/ObligationDetailPage';
 import TenantsPage from './pages/TenantsPage';
 import RentalsPage from './pages/RentalsPage';
 import AddRentalPage from './pages/AddRentalPage';
+import EditRentalPage from './pages/EditRentalPage';
 import RentalDetailPage from './pages/RentalDetailPage';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -169,6 +170,11 @@ function App() {
               <Route path="/property/:id/add-rental" element={
                 <ProtectedRoute requireAdmin={true}>
                   <AddRentalPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/property/:id/rentals/:rentalId/edit" element={
+                <ProtectedRoute requireAdmin={true}>
+                  <EditRentalPage />
                 </ProtectedRoute>
               } />
               <Route path="/property/:id/rentals/:rentalId" element={

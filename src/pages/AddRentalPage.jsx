@@ -14,28 +14,28 @@ const AddRentalPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    loadProperty();
-  }, [id]);
-
-  const loadProperty = async () => {
-    try {
-      setLoading(true);
-      const data = await getProperty(id);
-      setProperty(data);
-      
-      // Validar que la propiedad sea de rental
-      if (data.use !== 'rental') {
-        toast.error('This property is not of type rental');
-        navigate(`/property/${id}`);
+    const loadProperty = async () => {
+      try {
+        setLoading(true);
+        const data = await getProperty(id);
+        setProperty(data);
+        
+        // Validar que la propiedad sea de rental
+        if (data.use !== 'rental') {
+          toast.error('This property is not of type rental');
+          navigate(`/property/${id}`);
+        }
+      } catch (error) {
+        console.error('Error loading property:', error);
+        toast.error('Error loading property');
+        navigate('/');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading property:', error);
-      toast.error('Error loading property');
-      navigate('/');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    
+    loadProperty();
+  }, [id, navigate]);
 
   const handleSubmit = async (data) => {
    // console.log('Submitting rental data:', data);
@@ -74,7 +74,11 @@ const AddRentalPage = () => {
         </p>
       </div>
 
-      <RentalForm onSubmit={handleSubmit} isLoading={isSubmitting} />
+      <RentalForm 
+        initialData={{ rental_type: property.rental_type || 'monthly' }}
+        onSubmit={handleSubmit} 
+        isLoading={isSubmitting} 
+      />
     </div>
   );
 };

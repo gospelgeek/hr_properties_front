@@ -19,6 +19,7 @@ const PropertiesPage = () => {
 
 // 1. Sincroniza los filtros locales con la URL SOLO al montar el componente
 useEffect(() => {
+  //console.log('searchParams on mount:', searchParams.get('status'));
   const use = searchParams.get('use') || '';
   const rentalStatus = searchParams.get('rental_status') || '';
   const rentalType = searchParams.get('rental_type') || '';
@@ -40,6 +41,7 @@ const loadPropertiesFromParams = async (use, rentalStatus, rentalType) => {
     if (rentalStatus) params.rental_status = rentalStatus;
     if (rentalType) params.rental_type = rentalType;
     const data = await getProperties(params);
+    //console.log('Loaded properties with URL params:', params, data);
     setProperties(data);
   } catch (error) {
     toast.error('Error loading properties');
