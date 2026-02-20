@@ -269,9 +269,9 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bedrooms
-              </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {selectedUse === 'commercial' ? 'Rooms' : 'Bedrooms'}
+                </label>
               <input
                 type="number"
                 {...register('bedrooms')}

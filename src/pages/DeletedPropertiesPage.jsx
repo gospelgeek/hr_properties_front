@@ -32,8 +32,8 @@ const DeletedPropertiesPage = () => {
       toast.success('Property restored successfully');
       loadDeletedProperties(); // Reload the list
     } catch (error) {
-      console.error('Error al restaurar propiedad:', error);
-      toast.error('Error al restaurar la propiedad');
+      console.error('Error restoring property:', error);
+      toast.error(error.response?.data?.detail || 'Error restoring property');
     }
   };
 

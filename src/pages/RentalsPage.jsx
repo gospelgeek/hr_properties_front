@@ -204,7 +204,7 @@ const RentalsPage = () => {
               : `No rentals ${rentalStatus === 'available' ? 'available' : rentalStatus === 'occupied' ? 'occupied' : rentalStatus}`}
           </p>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/properties')}
             className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors px-6 py-2 text-sm font-medium"
           >
             View Properties
