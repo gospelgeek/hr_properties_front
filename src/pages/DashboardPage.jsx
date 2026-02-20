@@ -20,11 +20,11 @@ const DashboardPage = () => {
       setLoading(true);
       console.log('Solicitando datos del dashboard...');
       const data = await getDashboard();
-      //console.log('Datos recibidos del dashboard:', data);
+      console.log('Datos recibidos del dashboard:', data);
       setDashboardData(data);
     } catch (error) {
-      console.error('Error al cargar dashboard:', error);
-      toast.error('Error al cargar estadísticas');
+      console.error('Error loading dashboard:', error);
+      toast.error('Error loading dashboard statistics');
     } finally {
       setLoading(false);
     }

@@ -24,8 +24,8 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
       const data = await getObligationTypes();
       setObligationTypes(data);
     } catch (error) {
-      console.error('Error al cargar tipos de obligación:', error);
-      toast.error('Error al cargar tipos de obligación');
+      console.error('Error loading obligation types:', error);
+      toast.error('Error loading obligation types');
     }
   };
 

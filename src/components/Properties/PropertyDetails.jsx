@@ -190,7 +190,7 @@ console.log('Rendering PropertyDetails with property:', property);
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {property.details.bedrooms !== null && property.details.bedrooms !== undefined && (
                 <div className="bg-blue-50 rounded-lg p-4 text-center border border-blue-100">
-                  <div className="text-sm font-medium text-blue-600 mb-1">Bedrooms</div>
+                  <div className="text-sm font-medium text-blue-600 mb-1">{property.use === 'commercial' ? 'Rooms' : 'Bedrooms'}</div>
                   <div className="text-3xl font-bold text-blue-700">{property.details.bedrooms}</div>
                 </div>
               )}

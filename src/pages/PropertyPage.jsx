@@ -61,7 +61,7 @@ const PropertyPage = () => {
     try {
       await deleteProperty(id);
       toast.success('Property deleted successfully');
-      navigate('/');
+      navigate('/properties');
     } catch (error) {
       console.error('Error deleting property:', error);
       toast.error('Error deleting property');

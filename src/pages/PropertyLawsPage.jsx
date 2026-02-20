@@ -31,8 +31,8 @@ const PropertyLawsPage = () => {
       const lawsData = Array.isArray(data) ? data : (data?.laws || data?.results || []);
       setLaws(lawsData);
     } catch (error) {
-      console.error('Error al cargar documentos:', error);
-      toast.error('Error al cargar los documentos');
+      console.error('Error loading property laws:', error);
+      toast.error('Error loading property laws');
       setLaws([]);
     } finally {
       setLoading(false);
@@ -75,12 +75,12 @@ const PropertyLawsPage = () => {
       }
 
       await updatePropertyLaw(id, editingLaw.id, updateData);
-      toast.success('Documento actualizado exitosamente');
+      toast.success('Document updated successfully');
       handleCancelEdit();
       loadPropertyLaws();
     } catch (error) {
-      console.error('Error al actualizar documento:', error);
-      toast.error('Error al actualizar el documento');
+      console.error('Error updating document:', error);
+      toast.error('Error updating document');
     }
   };
 
