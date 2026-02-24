@@ -41,7 +41,7 @@ const loadPropertiesFromParams = async (use, rentalStatus, rentalType) => {
     if (rentalStatus) params.rental_status = rentalStatus;
     if (rentalType) params.rental_type = rentalType;
     const data = await getProperties(params);
-    console.log('Loaded properties with URL params:', params, data);
+    //console.log('Loaded properties with URL params:', params, data);
     setProperties(data);
   } catch (error) {
     toast.error('Error loading properties');
@@ -53,9 +53,6 @@ const loadPropertiesFromParams = async (use, rentalStatus, rentalType) => {
 // 2. Cuando cambian los filtros locales, actualiza la URL y carga propiedades
 useEffect(() => {
   if (isFirstLoad.current) return; // Evita carga doble al montar
-
-  // Solo carga si al menos uno de los filtros tiene valor
-  if (!useFilter && !rentalStatusFilter && !rentalTypeFilter) return;
 
   const params = {};
   if (useFilter) params.use = useFilter;
@@ -102,6 +99,7 @@ useEffect(() => {
     setRentalStatusFilter('');
     setRentalTypeFilter('');
     setSearchParams({});
+    loadPropertiesFromParams('', '', '');
   };
 
   const hasActiveFilters = useFilter || rentalStatusFilter || rentalTypeFilter;
@@ -149,6 +147,24 @@ useEffect(() => {
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-2">Rental Status</label>
             <div className="flex flex-wrap gap-2">
+              <label className="flex items-center cursor-pointer gap-2">
+                <input
+                  type="radio"
+                  name="rentalStatus"
+                  value=""
+                  checked={rentalStatusFilter === ''}
+                  onChange={() => setRentalStatusFilter('')}
+                  className="w-5 h-5 text-gray-600 focus:ring-gray-500 cursor-pointer"
+                />
+                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  rentalStatusFilter === '' 
+                    ? 'bg-gray-600 text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}>
+                  All
+                </span>
+              </label>
+              
               <label className="flex items-center cursor-pointer gap-2">
                 <input
                   type="radio"
