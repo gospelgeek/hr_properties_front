@@ -17,6 +17,15 @@ const PropertiesPage = () => {
   const [rentalStatusFilter, setRentalStatusFilter] = useState(''); // Para Rental Status
   const [rentalTypeFilter, setRentalTypeFilter] = useState(''); // Para Rental Type
 
+  // Limpiar filtros de rental cuando se selecciona commercial o personal
+  useEffect(() => {
+    if (useFilter === 'commercial' || useFilter === 'personal') {
+      setRentalStatusFilter('');
+      setRentalTypeFilter('');
+    }
+    // eslint-disable-next-line
+  }, [useFilter]);
+
 // 1. Sincroniza los filtros locales con la URL SOLO al montar el componente
 useEffect(() => {
   //console.log('searchParams on mount:', searchParams.get('status'));
@@ -41,7 +50,7 @@ const loadPropertiesFromParams = async (use, rentalStatus, rentalType) => {
     if (rentalStatus) params.rental_status = rentalStatus;
     if (rentalType) params.rental_type = rentalType;
     const data = await getProperties(params);
-    //console.log('Loaded properties with URL params:', params, data);
+    console.log('Loaded properties with URL params:', params, data);
     setProperties(data);
   } catch (error) {
     toast.error('Error loading properties');
@@ -73,7 +82,7 @@ useEffect(() => {
       if (rentalTypeFilter) params.rental_type = rentalTypeFilter;
       
       const data = await getProperties(params);
-      //console.log('Loaded properties with filters:', params, data);
+      console.log('Loaded properties with filters:', params, data);
       setProperties(data);
     } catch (error) {
       console.error('Error loading properties:', error);
@@ -99,7 +108,7 @@ useEffect(() => {
     setRentalStatusFilter('');
     setRentalTypeFilter('');
     setSearchParams({});
-    loadPropertiesFromParams('', '', '');
+    // La carga se disparará automáticamente por el useEffect de filtros
   };
 
   const hasActiveFilters = useFilter || rentalStatusFilter || rentalTypeFilter;
@@ -143,7 +152,8 @@ useEffect(() => {
             </select>
           </div>
 
-          {/* Rental Status Filters */}
+          {/* Rental Status Filters - Solo para propiedades rental */}
+          {(!useFilter || useFilter === 'rental') && (
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-2">Rental Status</label>
             <div className="flex flex-wrap gap-2">
@@ -220,8 +230,10 @@ useEffect(() => {
               </label>
             </div>
           </div>
+          )}
 
-          {/* Rental Type Filters */}
+          {/* Rental Type Filters - Solo para propiedades rental */}
+          {(!useFilter || useFilter === 'rental') && (
           <div className="flex-shrink-0">
             <label className="block text-sm font-medium text-gray-700 mb-2">Rental Type</label>
             <div className="flex flex-wrap gap-2">
@@ -280,6 +292,7 @@ useEffect(() => {
               </label>
             </div>
           </div>
+          )}
         </div>
 
         {/* Clear Filters Button */}
