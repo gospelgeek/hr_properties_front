@@ -41,7 +41,7 @@ const loadPropertiesFromParams = async (use, rentalStatus, rentalType) => {
     if (rentalStatus) params.rental_status = rentalStatus;
     if (rentalType) params.rental_type = rentalType;
     const data = await getProperties(params);
-    //console.log('Loaded properties with URL params:', params, data);
+    console.log('Loaded properties with URL params:', params, data);
     setProperties(data);
   } catch (error) {
     toast.error('Error loading properties');
