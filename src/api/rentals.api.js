@@ -119,8 +119,12 @@ export const getRental = async (id) => {
 
 // POST /api/properties/{id}/add_rental/ - Crear rental para una propiedad
 export const addRentalToProperty = async (propertyId, rentalData) => {
+  console.log('📥 Received rental data:', rentalData);
+  console.log('📥 Is file?', rentalData.url_files instanceof File);
+  
   // Si hay un archivo, usar FormData, de lo contrario usar JSON
   if (rentalData.url_files instanceof File) {
+    console.log('✅ Using FormData for file upload');
     const formData = new FormData();
     
     // Agregar campos obligatorios
@@ -142,13 +146,25 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
       formData.append('people_count', rentalData.people_count);
     }
     
-    // Agregar monthly_data o airbnb_data como JSON string
+    // ⚠️ IMPORTANTE: monthly_data/airbnb_data como STRING JSON
     if (rentalData.monthly_data) {
       formData.append('monthly_data', JSON.stringify(rentalData.monthly_data));
-      formData.append('url_files', rentalData.url_files);
     }
     if (rentalData.airbnb_data) {
       formData.append('airbnb_data', JSON.stringify(rentalData.airbnb_data));
+    }
+    
+    // Agregar el archivo (puede ser 'url_files' o 'monthly_data.url_files' o 'airbnb_data.url_files')
+    if (rentalData.rental_type === 'monthly') {
+      formData.append('monthly_data.url_files', rentalData.url_files);
+    } else {
+      formData.append('airbnb_data.url_files', rentalData.url_files);
+    }
+    
+    // Log FormData contents
+    console.log('📦 FormData contents:');
+    for (let pair of formData.entries()) {
+      console.log(pair[0], ':', pair[1]);
     }
     
     const response = await axios.post(
@@ -161,12 +177,13 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
         },
       }
     );
-    //console.log('Response from adding rental with file:', response.data);
+    console.log('✅ Response from adding rental with file:', response.data);
     return response.data;
     
   } else {
+    console.log('✅ Using JSON for rental without file');
     const response = await api.post(`properties/${propertyId}/add_rental/`, rentalData);
-    //console.log('Response from adding rental without file:', response.data);
+    console.log('✅ Response from adding rental without file:', response.data);
     return response.data;
   }
 };
@@ -212,13 +229,19 @@ export const updatePropertyRental = async (propertyId, rentalId, rentalData) => 
       formData.append('people_count', rentalData.people_count);
     }
     
-    // Agregar monthly_data o airbnb_data como JSON string
+    // ⚠️ IMPORTANTE: monthly_data/airbnb_data como STRING JSON
     if (rentalData.monthly_data) {
       formData.append('monthly_data', JSON.stringify(rentalData.monthly_data));
-      formData.append('url_files', rentalData.url_files);
     }
     if (rentalData.airbnb_data) {
       formData.append('airbnb_data', JSON.stringify(rentalData.airbnb_data));
+    }
+    
+    // Agregar el archivo (puede ser 'url_files' o 'monthly_data.url_files' o 'airbnb_data.url_files')
+    if (rentalData.rental_type === 'monthly') {
+      formData.append('monthly_data.url_files', rentalData.url_files);
+    } else {
+      formData.append('airbnb_data.url_files', rentalData.url_files);
     }
     
     const response = await axios.patch(

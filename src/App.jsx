@@ -36,12 +36,12 @@ import RentalDetailPage from './pages/RentalDetailPage';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function App() {
-  console.log('App.jsx renderizado');
+  //console.log('App.jsx renderizado');
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Router>
         <AuthProvider>
-          {console.log('Dentro de AuthProvider')}
+          {/*console.log('Dentro de AuthProvider')*/}
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />

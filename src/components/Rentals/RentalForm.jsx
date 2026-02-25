@@ -78,6 +78,10 @@ const handleCreateTenant = async (tenantData) => {
   };
 
   const handleFormSubmit = (data) => {
+    console.log('📋 Raw form data:', data);
+    console.log('📋 url_files:', data.url_files);
+    console.log('📋 url_files[0]:', data.url_files?.[0]);
+    
     const formattedData = {
       status: addTenant ? 'occupied' : 'available',
       rental_type: rentalType,
@@ -96,8 +100,9 @@ const handleCreateTenant = async (tenantData) => {
       }
       
       // File es opcional y solo para monthly
-      if (rentalType === 'monthly' && data.url_files && data.url_files[0]) {
+      if (rentalType === 'monthly' && data.url_files && data.url_files.length > 0 && data.url_files[0]) {
         formattedData.url_files = data.url_files[0];
+        console.log('📎 File attached:', data.url_files[0].name, data.url_files[0].type, data.url_files[0].size);
       }
     }
 
@@ -114,6 +119,8 @@ const handleCreateTenant = async (tenantData) => {
       };
     }
 
+    console.log('📤 Formatted data to submit:', formattedData);
+    console.log('📤 Has file?', formattedData.url_files instanceof File);
     onSubmit(formattedData);
   };
 

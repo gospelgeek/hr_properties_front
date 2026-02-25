@@ -16,6 +16,8 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    //console.log('🌐 Full request URL:', config.baseURL + config.url);
+    //console.log('🔗 Query params:', config.params);
     return config;
   },
   (error) => {
@@ -67,8 +69,10 @@ api.interceptors.response.use(
 
 // GET /api/properties/ - Listar propiedades activas
 export const getProperties = async (params = {}) => {
+  console.log('🔍 Frontend sending params to backend:', params);
   const response = await api.get('properties/', { params });
-  //console.log('API getProperties response:', response.data);
+  console.log('📥 Backend response:', response.data);
+  console.log('📊 Number of properties returned:', response.data.length);
   return response.data;
 };
 
