@@ -81,7 +81,7 @@ const paymentMethod = watch('payment_method');
       // Si es cash, muestra el select
       return (
         <select
-          {...register('payment_location', { required: 'The payment location is required' })}
+          {...register('payment_location', { required: 'Payment location is required' })}
           className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
           <option value="">Select location...</option>
@@ -97,7 +97,7 @@ const paymentMethod = watch('payment_method');
           value="Online"
           readOnly
           className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
-          {...register('payment_location', { required: true })}
+          {...register('payment_location', { required: 'Payment location is required' })}
         />
       );
     } else {

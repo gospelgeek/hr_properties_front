@@ -130,14 +130,18 @@ const handleCreateTenant = async (tenantData) => {
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Rental Type
+            Rental Type *
           </label>
           <input
             type="text"
+            {...register('rental_type', { required: 'Rental type is required. Please edit the property to set a rental type.' })}
             value={rentalType ? rentalType.charAt(0).toUpperCase() + rentalType.slice(1) : ''}
             disabled
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
           />
+          {errors.rental_type && (
+            <p className="mt-1 text-sm text-red-600">{errors.rental_type.message}</p>
+          )}
         </div>
 
         <div>

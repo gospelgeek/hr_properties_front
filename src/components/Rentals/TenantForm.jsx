@@ -51,12 +51,11 @@ const TenantForm = ({ initialData, onSubmit, isLoading }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email *
+            Email
           </label>
           <input
             type="email"
             {...register('email', { 
-              required: 'Email is required',
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                 message: 'Invalid email'
