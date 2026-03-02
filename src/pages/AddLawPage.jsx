@@ -29,7 +29,7 @@ const AddLawPage = () => {
       navigate(`/property/${id}`);
     } catch (error) {
       console.error('Error adding documentation:', error);
-      toast.error(error.response?.data?.detail || 'Error adding the documentation');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error adding the documentation');
     } finally {
       setIsSubmitting(false);
     }

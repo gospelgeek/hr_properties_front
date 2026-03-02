@@ -20,7 +20,7 @@ const DeletedPropertiesPage = () => {
       setProperties(data);
     } catch (error) {
       console.error('Error loading deleted properties:', error);
-      toast.error(error.response?.data?.detail || 'Error loading deleted properties');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error loading deleted properties');
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,7 @@ const DeletedPropertiesPage = () => {
       loadDeletedProperties(); // Reload the list
     } catch (error) {
       console.error('Error restoring property:', error);
-      toast.error(error.response?.data?.detail || 'Error restoring property');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error restoring property');
     }
   };
 

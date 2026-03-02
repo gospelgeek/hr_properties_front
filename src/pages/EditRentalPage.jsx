@@ -45,7 +45,7 @@ const EditRentalPage = () => {
     } catch (error) {
       console.error('Error:', error);
       console.error('Error response:', error.response);
-      toast.error(error.response?.data?.detail || 'Error updating rental');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error updating rental');
     } finally {
       setIsSubmitting(false);
     }

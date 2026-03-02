@@ -63,7 +63,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
     };
 
     // Add rental_type if use is 'rental'
-    if (data.use === 'rental' && data.rental_type) {
+    if ((data.use === 'rental' && data.rental_type) || (data.use === 'commercial' && data.rental_type)) {
       formattedData.rental_type = data.rental_type;
     }
     
@@ -139,11 +139,17 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
           )}
         </div>
 
-        {selectedUse === 'rental' && (
+        {(selectedUse === 'rental'|| selectedUse === 'commercial')  && (
           <div>
+            { selectedUse === 'rental' ? (
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rental Type *
+              </label>
+            ) : (
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Rental Type *
+              Rental Type (Optional for commercial properties)
             </label>
+)}
             <select
               {...register('rental_type', { 
                 required: selectedUse === 'rental' ? 'Rental type is required for rental properties' : false 

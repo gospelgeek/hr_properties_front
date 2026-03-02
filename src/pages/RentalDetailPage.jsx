@@ -61,7 +61,7 @@ const RentalDetailPage = () => {
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      toast.error(error.response?.data?.detail || 'Error loading rental');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error loading rental');
       navigate(`/rentals`);
     } finally {
       setLoading(false);
@@ -91,7 +91,7 @@ const RentalDetailPage = () => {
     } catch (error) {
       console.error('Error adding payment:', error);
       console.log('Error response data:', error.response);
-      toast.error(error.response?.data?.detail || 'Error adding payment');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error adding payment');
     } finally {
       setIsSubmitting(false);
     }
@@ -106,7 +106,7 @@ const RentalDetailPage = () => {
       loadData();
     } catch (error) {
       console.error('Error deleting payment:', error);
-      toast.error('Error deleting payment');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error deleting payment');
     }
   };
 

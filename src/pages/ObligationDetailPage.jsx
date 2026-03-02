@@ -58,7 +58,7 @@ const ObligationDetailPage = () => {
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      toast.error(error.response?.data?.detail || 'Error loading obligation details');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error loading obligation details');
       navigate(id ? `/property/${id}` : '/obligations');
     } finally {
       setLoading(false);
@@ -75,7 +75,7 @@ const ObligationDetailPage = () => {
       loadData();
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error.response?.data?.detail || 'Error adding payment');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error adding payment');
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +91,7 @@ const ObligationDetailPage = () => {
       loadData();
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error.response?.data?.detail || 'Error deleting payment');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error deleting payment');
     }
   };
 

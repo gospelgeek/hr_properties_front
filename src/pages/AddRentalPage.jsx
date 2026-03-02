@@ -20,9 +20,9 @@ const AddRentalPage = () => {
         const data = await getProperty(id);
         setProperty(data);
         
-        // Validar que la propiedad sea de rental
-        if (data.use !== 'rental') {
-          toast.error('This property is not of type rental');
+        // Validar que la propiedad sea de rental o commercial
+        if (data.use !== 'rental' && data.use !== 'commercial') {
+          toast.error('This property is not of type rental or commercial');
           navigate(`/property/${id}`);
         }
       } catch (error) {
@@ -47,7 +47,7 @@ const AddRentalPage = () => {
     } catch (error) {
       console.error('Error:', error);
       console.error('Error response:', error.response);
-      toast.error(error.response?.data?.detail || 'Error creating rental');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error creating rental');
     } finally {
       setIsSubmitting(false);
     }

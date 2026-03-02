@@ -39,7 +39,7 @@ const AddObligationPage = () => {
       navigate(`/property/${id}`);
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error.response?.data?.detail || 'Error adding obligation');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error adding obligation');
     } finally {
       setIsSubmitting(false);
     }

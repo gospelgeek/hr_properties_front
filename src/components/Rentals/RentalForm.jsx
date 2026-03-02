@@ -59,7 +59,7 @@ const handleCreateTenant = async (tenantData) => {
       //console.error('❌ Error completo creating tenant:', error);
       //console.error('❌ Error response:', error.response?.data);
       //console.error('❌ Error status:', error.response?.status);
-      toast.error('Error creating tenant: ' + (error.response?.data?.message || error.message));
+      toast.error('Error creating tenant: ' + (error.response?.data?.error || error.response?.data));
     } finally {
       setIsCreatingTenant(false);
     }

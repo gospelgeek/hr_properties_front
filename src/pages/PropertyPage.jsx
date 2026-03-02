@@ -40,7 +40,7 @@ const PropertyPage = () => {
       }
       
       // Load rentals if rental property
-      if (data.use === 'rental') {
+      if (data.use === 'rental' || (data.use === 'commercial' && data.rental_type)) {
         try {
           const rentalsData = await getPropertyRentals(id);
           setRentals(Array.isArray(rentalsData) ? rentalsData : rentalsData.results || []);
@@ -76,7 +76,7 @@ const PropertyPage = () => {
       await loadProperty();
     } catch (error) {
       console.error('Error finishing rental:', error);
-      toast.error(error.response?.data?.message || 'Error finishing rental');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error finishing rental');
     }
   };
 
@@ -133,7 +133,7 @@ const PropertyPage = () => {
       </div>
 
       {/* Rentals Section (only for rental properties) */}
-      {property.use === 'rental' && (
+      {property.use === 'rental' || (property.use === 'commercial' && property.rental_type) && (
          <div className="mt-8">
     <div className="flex justify-between items-center mb-4">
       <h2 className="text-xl font-bold text-gray-900">Rentals</h2>
