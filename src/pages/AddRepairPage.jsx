@@ -39,7 +39,7 @@ const AddRepairPage = () => {
       navigate(`/property/${id}`);
     } catch (error) {
       console.error('Error adding repair:', error);
-      toast.error(error.response?.data?.detail || 'Error adding repair');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error adding repair');
     } finally {
       setIsSubmitting(false);
     }

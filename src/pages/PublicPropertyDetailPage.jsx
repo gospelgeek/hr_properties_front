@@ -149,10 +149,10 @@ const useLabelBuilding = {
         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">City</div>
         <div className="text-xl font-semibold text-gray-900">{property.city || 'Not specified'}</div>
       </div>
-      {property.use === 'rental' && (   
+      {(property.use === 'rental' || property.use === 'commercial')  && (
       <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 ">
         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Rental Type</div>
-        <div className="text-xl font-semibold text-gray-900">{property.rental_type ? property.rental_type.charAt(0).toUpperCase() + property.rental_type.slice(1) : 'Not specified'}</div>
+        <div className="text-xl font-semibold text-gray-900">{property.rental_type ? property.rental_type.charAt(0).toUpperCase() + property.rental_type.slice(1) : 'Not Rented'}</div>
       </div>
 )}
     </div>

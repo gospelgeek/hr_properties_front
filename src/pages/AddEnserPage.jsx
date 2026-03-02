@@ -28,7 +28,7 @@ const AddEnserPage = () => {
       navigate(`/property/${id}`);
     } catch (error) {
       console.error('Error adding enser:', error);
-      toast.error(error.response?.data?.detail || 'Error adding the enser');
+      toast.error(error.response?.data?.error || error.response?.data || 'Error adding the enser');
     } finally {
       setIsSubmitting(false);
     }
