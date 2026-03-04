@@ -21,7 +21,8 @@ const useLabels = {
 const useLabelBuilding = {
   apartment: "Apartment",
   house: "House",
-  office: "Office"
+  office: "Office",
+  daycare: "Daycare"
 }
 
   useEffect(() => {
@@ -227,13 +228,24 @@ const useLabelBuilding = {
                       </div>
                     </div>
                   )}
-                  {property.details.buildings && (
+                  {property.details.storages &&  (
                     <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                       <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 21V9a2 2 0 012-2h2a2 2 0 012 2v12m6 0V5a2 2 0 012-2h2a2 2 0 012 2v16" />
                       </svg>
                       <div>
-                        <p className="text-sm text-gray-600">Storage</p>
+                        <p className="text-sm text-gray-600">Storages</p>
+                        <p className="font-semibold text-gray-900">{property.details.storages}</p>
+                      </div>
+                    </div>
+                  )}
+                   {property.details.buildings && property.use === 'commercial' && (
+                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                      <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 21V9a2 2 0 012-2h2a2 2 0 012 2v12m6 0V5a2 2 0 012-2h2a2 2 0 012 2v16" />
+                      </svg>
+                      <div>
+                        <p className="text-sm text-gray-600">Buildings</p>
                         <p className="font-semibold text-gray-900">{property.details.buildings}</p>
                       </div>
                     </div>

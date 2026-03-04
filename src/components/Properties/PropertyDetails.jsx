@@ -24,7 +24,8 @@ const useLabels = {
 const useLabelBuilding = {
   apartment: "Apartment",
   house: "House",
-  office: "Office"
+  office: "Office",
+  daycare: "Daycare",
 }
 console.log('Rendering PropertyDetails with property:', property);
   useEffect(() => {
@@ -214,9 +215,17 @@ console.log('Rendering PropertyDetails with property:', property);
                   <div className="text-3xl font-bold text-blue-700">{property.details.floors}</div>
                 </div>
               )}
-              {property.details.buildings !== null && property.details.buildings !== undefined && (
+      
+              {property.details.storages !== null && property.details.storages !== undefined &&  (
                 <div className="bg-blue-50 rounded-lg p-4 text-center border border-blue-100">
-                  <div className="text-sm font-medium text-blue-600 mb-1">Storage</div>
+                  <div className="text-sm font-medium text-blue-600 mb-1">Storages</div>
+                  <div className="text-3xl font-bold text-blue-700">{property.details.storages}</div>
+                </div>
+              )}
+
+              {property.details.buildings !== null && property.details.buildings !== undefined && property.use === 'commercial' && (
+                <div className="bg-blue-50 rounded-lg p-4 text-center border border-blue-100">
+                  <div className="text-sm font-medium text-blue-600 mb-1">Buildings</div>
                   <div className="text-3xl font-bold text-blue-700">{property.details.buildings}</div>
                 </div>
               )}
