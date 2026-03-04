@@ -22,6 +22,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
       half_bathrooms: initialData.details?.half_bathrooms || '',
       floors: initialData.details?.floors || '',
       observations: initialData.details?.observations || '',
+      storages: initialData.details?.storages || '',
       buildings: initialData.details?.buildings || ''
     } : {}
   });
@@ -58,12 +59,13 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
         half_bathrooms: parseInt(data.half_bathrooms) || 0,
         floors: parseInt(data.floors) || 0,
         observations: data.observations || '',
+        storages: parseInt(data.storages) || 0,
         buildings: parseInt(data.buildings) || 0
       }
     };
 
     // Add rental_type if use is 'rental'
-    if ((data.use === 'rental' && data.rental_type) || (data.use === 'commercial' && data.rental_type)) {
+    if ((data.use === 'rental' && data.rental_type) || (data.use === 'commercial' && data.rental_type && data.rental_type !== 'none' )) {
       formattedData.rental_type = data.rental_type;
     }
     
@@ -82,7 +84,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
       formData.append('city', formattedData.city);
       
       // Add rental_type if applicable
-      if (formattedData.rental_type) {
+      if (formattedData.rental_type  && formattedData.rental_type !== 'none' ) {
         formData.append('rental_type', formattedData.rental_type);
       }
       
@@ -91,6 +93,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
       formData.append('details.bathrooms', formattedData.details.bathrooms);
       formData.append('details.half_bathrooms', formattedData.details.half_bathrooms);
       formData.append('details.floors', formattedData.details.floors);
+      formData.append('details.storages', formattedData.details.storages);
       formData.append('details.buildings', formattedData.details.buildings);
       formData.append('details.observations', formattedData.details.observations);
       
@@ -159,6 +162,9 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
               <option value="">Select a rental type</option>
               <option value="monthly">Monthly Rental</option>
               <option value="airbnb">Airbnb</option>
+                {selectedUse === 'commercial' && (
+    <option value="none">Not for rent</option>
+  )}
             </select>
             {errors.rental_type && (
               <p className="text-red-600 text-sm mt-1">{errors.rental_type.message}</p>
@@ -264,6 +270,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
             <option value="house">House</option>
             <option value="apartment">Apartment</option>
             <option value="office">Office</option>
+            <option value="daycare">Daycare</option>
           </select>
           {errors.type_building && (
             <p className="text-red-600 text-sm mt-1">{errors.type_building.message}</p>
@@ -321,10 +328,22 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
                 placeholder="Ej: 1"
               />
             </div>
-
+          
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Storage
+                Storages
+              </label>
+              <input
+                type="number"
+                {...register('storages')}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="Ej: 1"
+              />
+            </div>
+{  selectedUse === 'commercial' && (
+             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Buildings
               </label>
               <input
                 type="number"
@@ -333,6 +352,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
                 placeholder="Ej: 1"
               />
             </div>
+)}
           </div>
 
           <div className="mt-6">
