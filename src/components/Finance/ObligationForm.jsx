@@ -106,7 +106,7 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
             <option value="monthly">Monthly</option>
             <option value="bimonthly">Bimonthly</option>
             <option value="quarterly">Quarterly</option>
-            <option value="yearly">Yearly</option>
+            <option value="annual">Annual</option>
             <option value="one_time">One Time</option>
             <option value='weekly'>Weekly</option>
           </select>

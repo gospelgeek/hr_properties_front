@@ -11,7 +11,7 @@ const RentalForm = ({ initialData, onSubmit, isLoading }) => {
   const [addTenant, setAddTenant] = useState(!!initialData?.tenant);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreatingTenant, setIsCreatingTenant] = useState(false);
-  
+  //console.log('Initial data in RentalForm:', initialData);
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
     defaultValues: initialData || {
       tenant: '',
@@ -23,10 +23,10 @@ const RentalForm = ({ initialData, onSubmit, isLoading }) => {
       deposit_amount: '',
       is_refundable: true,
       url_files: null,
-      is_paid: false
+      is_paid: false,
     }
   });
-
+//console.log('Initial data received in RentalForm:', initialData);
   const watchRentalType = watch('rental_type');
 
   useEffect(() => {
@@ -152,6 +152,7 @@ const handleCreateTenant = async (tenantData) => {
             type="number"
             step="0.01"
             {...register('amount', { required: 'Amount is required', min: { value: 0, message: 'Must be positive' } })}
+            value={initialData.amount ? initialData.amount : ''}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="0.00"
           />
@@ -174,6 +175,7 @@ const handleCreateTenant = async (tenantData) => {
                 type="number"
                 step="0.01"
                 {...register('deposit_amount', { required: 'Deposit amount is required', min: { value: 0, message: 'Must be positive' } })}
+                value={initialData?.monthly_data?.deposit_amount }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0.00"
               />
@@ -190,7 +192,7 @@ const handleCreateTenant = async (tenantData) => {
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label className="text-sm font-medium text-gray-700">
-                  Refundable Deposit *
+                  Refundable Deposit 
                 </label>
               </div>
             
@@ -221,6 +223,7 @@ const handleCreateTenant = async (tenantData) => {
                     type="button"
                     onClick={() => setIsModalOpen(true)}
                     className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -231,6 +234,7 @@ const handleCreateTenant = async (tenantData) => {
                 <select
                   {...register('tenant', { required: addTenant ? 'You must select a tenant' : false })}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={initialData.tenant ? initialData.tenant:''}
                 >
                   <option value="">Select a tenant...</option>
                   {tenants.map((tenant) => (

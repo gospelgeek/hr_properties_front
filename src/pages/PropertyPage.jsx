@@ -133,7 +133,7 @@ const PropertyPage = () => {
       </div>
 
       {/* Rentals Section (only for rental properties) */}
-      {property.use === 'rental' || (property.use === 'commercial' && property.rental_type) && (
+      {(property.use == 'rental' || (property.use === 'commercial' && property.rental_type)) && (
          <div className="mt-8">
     <div className="flex justify-between items-center mb-4">
       <h2 className="text-xl font-bold text-gray-900">Rentals</h2>

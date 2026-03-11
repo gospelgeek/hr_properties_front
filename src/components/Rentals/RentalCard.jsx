@@ -21,7 +21,7 @@ const RentalCard = ({ rental, propertyId }) => {
       day: 'numeric'
     });
   };
-
+//console.log('Rendering RentalCard with rental:', rental);
   const getStatus = () => {
     // Si no hay tenant, la propiedad está disponible
     if (!rental.tenant || !rental.check_out) {
@@ -51,6 +51,9 @@ const RentalCard = ({ rental, propertyId }) => {
               {status.text}
             </span>
           </div>
+          <p className="text-sm  text-gray-900 pb-2" >
+            {rental.property_address || 'Property address Not Specified'}
+          </p>
           <p className="text-sm text-gray-600">
             {rental.rental_type === 'monthly' ? 'Monthly Rent' : 'Airbnb'} 
           </p>

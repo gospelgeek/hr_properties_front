@@ -38,7 +38,7 @@ const RentalDetailPage = () => {
         ]);
         setProperty(propData);
         setRental(rentalData);
-        //console.log('Admin - rentalData:', rentalData);
+        console.log('Admin - rentalData:', rentalData);
         //console.log('Admin - paymentsData:', paymentsData);
         setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.results || []);
       } else {
@@ -200,6 +200,9 @@ const RentalDetailPage = () => {
               {rental.tenant_name || rental.tenant?.name || rental.tenant?.email || rental.tenant?.phone1 || 'No Tenant'}
             </h2>
             <p className="text-gray-600">
+              {"Property address: " + rental.property_address || 'Property address Not Specified'}
+            </p>
+            <p className="text-gray-600">
               {rental.rental_type === 'monthly' ? 'Monthly Rental' : 'Airbnb'}
             </p>
           </div>
@@ -225,6 +228,7 @@ const RentalDetailPage = () => {
             <p className="text-sm text-gray-600 mb-1">Total Amount</p>
             <p className="text-2xl font-bold text-gray-900">{formatCurrency(rental.amount)}</p>
           </div>
+          
           {rental.people_count && (
             <div>
               <p className="text-sm text-gray-600 mb-1">Number of People</p>
@@ -233,24 +237,25 @@ const RentalDetailPage = () => {
           )}
         </div>
 
-        {rental.rental_type === 'monthly' && rental.monthly_data && (
+        {rental.rental_type === 'monthly' && rental.monthly_records.length >0 && (
           <div className="pt-4 border-t border-gray-200">
             <h3 className="font-semibold text-gray-900 mb-2">Monthly Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-600 mb-1">Deposit</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {formatCurrency(rental.monthly_data.deposit_amount)}
-                  {rental.monthly_data.is_refundable && (
+                  {formatCurrency(rental.monthly_records[0]?.deposit_amount)}
+                  {rental.monthly_records[0]?.is_refundable && (
                     <span className="ml-2 text-sm text-green-600">(Refundable)</span>
                   )}
                 </p>
               </div>
-              {rental.monthly_data.url_files && (
+              {/*console.log('rental.monthly_records:', rental)*/}
+              {rental.monthly_records[0]?.url_files && (
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Files</p>
                   <a 
-                    href={rental.monthly_data.url_files} 
+                    href={rental.monthly_records[0].url_files} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
@@ -266,22 +271,22 @@ const RentalDetailPage = () => {
           </div>
         )}
 
-        {rental.rental_type === 'airbnb' && rental.airbnb_data && (
+        {rental.rental_type === 'airbnb' && rental.airbnb_records.length > 0 && (
           <div className="pt-4 border-t border-gray-200">
             <h3 className="font-semibold text-gray-900 mb-2">Airbnb Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {rental.airbnb_data.deposit_amount && (
+              {rental.airbnb_records[0]?.deposit_amount && (
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Deposit</p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {formatCurrency(rental.airbnb_data.deposit_amount)}
+                    {formatCurrency(rental.airbnb_records[0].deposit_amount)}
                   </p>
                 </div>
               )}
               <div>
                 <p className="text-sm text-gray-600 mb-1">Payment Status</p>
-                <p className={`text-lg font-semibold ${rental.airbnb_data.is_paid ? 'text-green-600' : 'text-red-600'}`}>
-                  {rental.airbnb_data.is_paid ? 'Paid' : 'Pending'}
+                <p className={`text-lg font-semibold ${rental.airbnb_records[0]?.is_paid ? 'text-green-600' : 'text-red-600'}`}>
+                  {rental.airbnb_records[0]?.is_paid ? 'Paid' : 'Pending'}
                 </p>
               </div>
             </div>

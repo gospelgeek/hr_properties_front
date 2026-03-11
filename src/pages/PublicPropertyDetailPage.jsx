@@ -22,7 +22,8 @@ const useLabelBuilding = {
   apartment: "Apartment",
   house: "House",
   office: "Office",
-  daycare: "Daycare"
+  daycare: "Daycare",
+    land: "Land",
 }
 
   useEffect(() => {

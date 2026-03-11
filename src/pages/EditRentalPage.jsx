@@ -62,9 +62,9 @@ const EditRentalPage = () => {
     check_out: rental.check_out || '',
     amount: rental.amount || '',
     people_count: rental.people_count || '',
-    deposit_amount: rental.monthly_data?.deposit_amount || rental.airbnb_data?.deposit_amount || '',
-    is_refundable: rental.monthly_data?.is_refundable || false,
-    is_paid: rental.airbnb_data?.is_paid || false
+    deposit_amount: rental.monthly_records[0]?.deposit_amount || rental.airbnb_records[0]?.deposit_amount || '',
+    is_refundable: rental.monthly_records[0]?.is_refundable || false,
+    is_paid: rental.airbnb_records[0]?.is_paid || false
   };
 
   return (

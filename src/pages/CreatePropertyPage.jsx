@@ -15,8 +15,8 @@ const CreatePropertyPage = () => {
       toast.success('Property created successfully');
       navigate('/properties');
     } catch (error) {
-      console.error('Error creating property:', error);
-      toast.error('Error creating property');
+      console.error('Error creating property:'+ (error.response?.data?.error || error.response?.data));
+      toast.error('Error creating property: ' + (error.response?.data?.error || error.response?.data));
     } finally {
       setIsLoading(false);
     }
