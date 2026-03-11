@@ -271,6 +271,7 @@ const PropertyForm = ({ initialData, onSubmit, isLoading }) => {
             <option value="apartment">Apartment</option>
             <option value="office">Office</option>
             <option value="daycare">Daycare</option>
+            <option value="land">Land</option>
           </select>
           {errors.type_building && (
             <p className="text-red-600 text-sm mt-1">{errors.type_building.message}</p>

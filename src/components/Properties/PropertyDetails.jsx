@@ -26,6 +26,7 @@ const useLabelBuilding = {
   house: "House",
   office: "Office",
   daycare: "Daycare",
+  land: "Land",
 }
 console.log('Rendering PropertyDetails with property:', property);
   useEffect(() => {
