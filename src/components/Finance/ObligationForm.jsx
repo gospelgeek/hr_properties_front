@@ -41,7 +41,9 @@ const ObligationForm = ({ initialData, onSubmit, isLoading }) => {
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Select type...</option>
-            {obligationTypes.map((type) => (
+            {obligationTypes
+            .filter((type) => type.name === 'tax' || type.name === 'fee' || type.name === 'insurance')
+            .map((type) => (
               <option key={type.id} value={type.id}>{type.name.charAt(0).toUpperCase() + type.name.slice(1)}</option>
             ))}
           </select>

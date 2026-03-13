@@ -144,7 +144,7 @@ const ObligationDetailPage = () => {
         <div className="flex justify-between items-start mb-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-1">
-              {obligation.obligation_type_name || 'Obligación'}
+              {obligation.obligation_type_name || 'Obligation'}
             </h2>
             <p className="text-gray-600">{obligation.entity_name}</p>
           </div>
