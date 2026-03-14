@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Loader from '../components/UI/Loader';
@@ -10,7 +10,34 @@ import {
   getObligationPayments,
   deleteObligationPayment 
 } from '../api/finance.api';
-import { getProperty } from '../api/properties.api';
+import { getProperty, openProtectedMedia } from '../api/properties.api';
+
+const getErrorMessage = (error, fallbackMessage) => {
+  const payload = error?.response?.data;
+
+  if (typeof payload === 'string') {
+    return payload;
+  }
+
+  if (payload?.error && typeof payload.error === 'string') {
+    return payload.error;
+  }
+
+  if (payload && typeof payload === 'object') {
+    const details = Object.entries(payload)
+      .map(([field, messages]) => {
+        if (Array.isArray(messages)) {
+          return `${field}: ${messages.join(', ')}`;
+        }
+        return `${field}: ${String(messages)}`;
+      })
+      .join(' | ');
+
+    if (details) return details;
+  }
+
+  return error?.message || fallbackMessage;
+};
 
 const ObligationDetailPage = () => {
   const { id, obligationId } = useParams();
@@ -23,11 +50,7 @@ const ObligationDetailPage = () => {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [expandedPaymentId, setExpandedPaymentId] = useState(null);
 
-  useEffect(() => {
-    loadData();
-  }, [id, obligationId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -58,24 +81,29 @@ const ObligationDetailPage = () => {
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      toast.error(error.response?.data?.error || error.response?.data || 'Error loading obligation details');
+      toast.error(getErrorMessage(error, 'Error loading obligation details'));
       navigate(id ? `/property/${id}` : '/obligations');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, obligationId, navigate]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleAddPayment = async (data) => {
     try {
       setIsSubmitting(true);
       const propertyId = id || obligation.property;
       await addPaymentToObligation(propertyId, obligationId, data);
+      console.log('data enviada al backend para agregar pago:', data);
       toast.success('Payment added successfully');
       setShowPaymentForm(false);
       loadData();
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error.response?.data?.error || error.response?.data || 'Error adding payment');
+      toast.error(getErrorMessage(error, 'Error adding payment'));
     } finally {
       setIsSubmitting(false);
     }
@@ -91,9 +119,17 @@ const ObligationDetailPage = () => {
       loadData();
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error.response?.data?.error || error.response?.data || 'Error deleting payment');
+      toast.error(getErrorMessage(error, 'Error deleting payment'));
     }
   };
+
+    const handleOpenDocument = async (url) => {
+      try {
+        await openProtectedMedia(url);
+      } catch (error) {
+        console.error('Error opening protected document:', error);
+      }
+    };
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('es-CO', {
@@ -298,17 +334,16 @@ const ObligationDetailPage = () => {
                     </div>
                     {payment.voucher_url && (
                       <div>
-                        <a
-                          href={payment.voucher_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                            type="button"
+                            onClick={() => handleOpenDocument(payment.voucher_url)}
                           className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
                           View Voucher
-                        </a>
+                        </button>
                       </div>
                     )}
                   </div>

@@ -44,8 +44,30 @@ const paymentMethod = watch('payment_method');
   }
 }, [paymentMethod, paymentMethods, setValue])
 
+
+const handlePaymentSubmit = async (data) => {
+  try {
+    const formData = new FormData();
+    formData.append('payment_method', data.payment_method);
+    formData.append('payment_location', data.payment_location);
+    formData.append('amount', data.amount);
+    formData.append('date', data.date);
+
+    // Si hay archivo, lo agregas
+    if (data.voucher_url && data.voucher_url[0]) {
+      formData.append('voucher_url', data.voucher_url[0]);
+    }
+
+    // Llama a la API con formData
+    console.log('Submitting payment with data:',[...formData]);
+    await onSubmit(formData);
+  } catch (error) {
+    toast.error(error?.message || 'Error al registrar el pago');
+  }
+};
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <form onSubmit={handleSubmit(handlePaymentSubmit)} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Payment</h3>
       
       <div className="space-y-4">
@@ -59,7 +81,9 @@ const paymentMethod = watch('payment_method');
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Select method...</option>
-            {paymentMethods.map((method) => (
+            {paymentMethods
+            .filter((method)=> method.name == 'cash' || method.name == 'transfer' || method.name == 'card' || method.name == 'check' || method.name == 'zelle')
+            .map((method) => (
               <option key={method.id} value={method.id}>{method.name.charAt(0).toUpperCase()+method.name.slice(1)}</option>
             ))}
           </select>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-const RentalCard = ({ rental, propertyId }) => {
+const RentalCard = ({ rental, propertyId, propertyUse }) => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
 
@@ -39,20 +39,40 @@ const RentalCard = ({ rental, propertyId }) => {
 
   const status = getStatus();
 
+  const getUseBadge = () => {
+    const useValue = String(propertyUse || '').toLowerCase();
+
+    if (useValue === 'rental') {
+      return { text: 'Rental', color: 'bg-indigo-100 text-indigo-800' };
+    }
+
+    if (useValue === 'personal') {
+      return { text: 'Personal', color: 'bg-emerald-100 text-emerald-800' };
+    }
+
+    if (useValue === 'commercial') {
+      return { text: 'Commercial', color: 'bg-amber-100 text-amber-800' };
+    }
+
+    return status;
+  };
+
+  const badge = propertyUse ? getUseBadge() : status;
+
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 p-5">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="font-semibold text-gray-900">
-              {rental.tenant ? (rental.tenant.name || rental.tenant_name || 'Tenant') : 'No Tenant'}
+            <h3 className="text-lg font-semibold text-gray-900">
+               {rental.property_name || 'Property address Not Specified'}
             </h3>
-            <span className={`px-3 py-1 text-xs font-medium rounded-full ${status.color}`}>
-              {status.text}
+            <span className={`px-3 py-1 text-xs font-medium rounded-full ${badge.color}`}>
+              {badge.text}
             </span>
           </div>
-          <p className="text-sm  text-gray-900 pb-2" >
-            {rental.property_address || 'Property address Not Specified'}
+          <p className="text-sm font-semibold text-gray-900 pb-2" >
+           {rental.tenant ? (rental.tenant.name || rental.tenant_name || 'Tenant') : 'No Tenant'}
           </p>
           <p className="text-sm text-gray-600">
             {rental.rental_type === 'monthly' ? 'Monthly Rent' : 'Airbnb'} 
@@ -63,13 +83,13 @@ const RentalCard = ({ rental, propertyId }) => {
       <div className="space-y-2 mb-4">
         {rental.check_in && (
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600">Check-in:</span>
+            <span className="text-gray-600">{rental.rental_type === 'monthly' ? 'Move-in:' : 'Start Date:'}</span>
             <span className="font-medium text-gray-900">{formatDate(rental.check_in)}</span>
           </div>
         )}
         {rental.check_out && (
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600">Check-out:</span>
+            <span className="text-gray-600">{rental.rental_type === 'monthly' ? 'Move-out:' : 'End Date:'}</span>
             <span className="font-medium text-gray-900">{formatDate(rental.check_out)}</span>
           </div>
         )}

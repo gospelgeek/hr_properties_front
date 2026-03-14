@@ -11,7 +11,7 @@ import {
   getRentalPaymentsDirect,
   deleteRentalPayment 
 } from '../api/rentals.api';
-import { getProperty } from '../api/properties.api';
+import { getProperty, openProtectedMedia } from '../api/properties.api';
 
 const RentalDetailPage = () => {
   const { id, rentalId } = useParams();
@@ -109,6 +109,15 @@ const RentalDetailPage = () => {
       toast.error(error.response?.data?.error || error.response?.data || 'Error deleting payment');
     }
   };
+
+  const handleOpenDocument = async (url) => {
+    try {
+      await openProtectedMedia(url);
+    } catch (error) {
+      console.error('Error opening protected document:', error);
+    }
+  };
+
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('es-CO', {
@@ -254,17 +263,16 @@ const RentalDetailPage = () => {
               {rental.monthly_records[0]?.url_files && (
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Files</p>
-                  <a 
-                    href={rental.monthly_records[0].url_files} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
+                  <button
+                            type="button"
+                            onClick={() => handleOpenDocument(rental.monthly_records[0].url_files)}
                     className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                     View Files
-                  </a>
+                  </button>
                 </div>
               )}
             </div>
@@ -418,17 +426,16 @@ const RentalDetailPage = () => {
                     )}
                     {payment.voucher_url && (
                       <div>
-                        <a
-                          href={payment.voucher_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                            type="button"
+                            onClick={() => handleOpenDocument(payment.voucher_url)}
                           className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
                           View Voucher
-                        </a>
+                        </button>
                       </div>
                     )}
                   </div>

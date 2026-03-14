@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Loader from '../components/UI/Loader';
 import ConfirmDialog from '../components/UI/ConfirmDialog';
-import { getPropertyLaws, deletePropertyLaw, updatePropertyLaw } from '../api/properties.api';
+import { getPropertyLaws, deletePropertyLaw, updatePropertyLaw, openProtectedMedia } from '../api/properties.api';
 
 const PropertyLawsPage = () => {
   const { id } = useParams();
@@ -113,6 +113,15 @@ const PropertyLawsPage = () => {
     setShowDeleteDialog(false);
     setLawToDelete(null);
   }, []);
+
+  const handleOpenDocument = async (url) => {
+    try {
+      await openProtectedMedia(url);
+    } catch (error) {
+      console.error('Error opening protected document:', error);
+      toast.error('Unable to open document');
+    }
+  };
 
   const deleteDialogMessage = useMemo(
     () => `Are you sure you want to delete the document "${lawToDelete?.entity_name}"? This action cannot be undone.`,
@@ -292,17 +301,16 @@ const PropertyLawsPage = () => {
                     </div>
 
                     {law.url && (
-                      <a
-                        href={law.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDocument(law.url)}
                         className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium mt-2"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                         View attached document
-                      </a>
+                      </button>
                     )}
                   </div>
 

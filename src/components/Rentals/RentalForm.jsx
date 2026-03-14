@@ -50,15 +50,15 @@ const handleCreateTenant = async (tenantData) => {
       //console.log('📤 Datos recibidos del formulario TenantForm:', tenantData);
       //console.log('📤 Tipo de birth_year:', typeof tenantData.birth_year, 'Valor:', tenantData.birth_year);
       const newTenant = await createTenant(tenantData);
-      //console.log('✅ Tenant creado exitosamente:', newTenant);
+      //console.log('Tenant creado exitosamente:', newTenant);
       toast.success('Tenant created successfully');
       await loadTenants(); // Recargar lista de tenants
       setValue('tenant', newTenant.id); // Seleccionar automáticamente el nuevo tenant
       setIsModalOpen(false);
     } catch (error) {
-      //console.error('❌ Error completo creating tenant:', error);
-      //console.error('❌ Error response:', error.response?.data);
-      //console.error('❌ Error status:', error.response?.status);
+      //console.error('Error completo creating tenant:', error);
+      //console.error(' Error response:', error.response?.data);
+      //console.error(' Error status:', error.response?.status);
       toast.error('Error creating tenant: ' + (error.response?.data?.error || error.response?.data));
     } finally {
       setIsCreatingTenant(false);
@@ -78,9 +78,9 @@ const handleCreateTenant = async (tenantData) => {
   };
 
   const handleFormSubmit = (data) => {
-    console.log('📋 Raw form data:', data);
-    console.log('📋 url_files:', data.url_files);
-    console.log('📋 url_files[0]:', data.url_files?.[0]);
+    //console.log('📋 Raw form data:', data);
+    //console.log('📋 url_files:', data.url_files);
+    //console.log('📋 url_files[0]:', data.url_files?.[0]);
     
     const formattedData = {
       status: addTenant ? 'occupied' : 'available',
@@ -119,8 +119,8 @@ const handleCreateTenant = async (tenantData) => {
       };
     }
 
-    console.log('📤 Formatted data to submit:', formattedData);
-    console.log('📤 Has file?', formattedData.url_files instanceof File);
+    console.log(' Formatted data to submit:', formattedData);
+    console.log('Has file?', formattedData.url_files instanceof File);
     onSubmit(formattedData);
   };
 
