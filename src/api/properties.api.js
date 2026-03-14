@@ -2,6 +2,48 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_BASE_LOCAL || 'http://127.0.0.1:8000/api/';
 
+const getApiOrigin = () => {
+  try {
+    return new URL(API_URL).origin;
+  } catch {
+    return window.location.origin;
+  }
+};
+
+const normalizeProtectedMediaUrl = (rawUrl) => {
+  if (!rawUrl || typeof rawUrl !== 'string') return rawUrl;
+
+  const apiOrigin = getApiOrigin();
+
+  // Relative media paths should always be requested from the API origin.
+  if (rawUrl.startsWith('/')) {
+    return `${apiOrigin}${rawUrl}`;
+  }
+
+  if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+    return `${apiOrigin}/${rawUrl.replace(/^\/+/, '')}`;
+  }
+
+  try {
+    const parsed = new URL(rawUrl);
+
+    // Backends sometimes return localhost URLs in production payloads.
+    if ((parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost') && parsed.pathname.startsWith('/media/')) {
+      return `${apiOrigin}${parsed.pathname}${parsed.search}`;
+    }
+
+    // Avoid mixed-content errors when frontend runs on HTTPS.
+    if (window.location.protocol === 'https:' && parsed.protocol === 'http:') {
+      parsed.protocol = 'https:';
+      return parsed.toString();
+    }
+
+    return parsed.toString();
+  } catch {
+    return rawUrl;
+  }
+};
+
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -187,7 +229,8 @@ export const getPropertyFinancials = async (id) => {
 
 // GET protected media with auth header and open it in a new tab
 export const openProtectedMedia = async (url) => {
-  const response = await api.get(url, { responseType: 'blob' });
+  const normalizedUrl = normalizeProtectedMediaUrl(url);
+  const response = await api.get(normalizedUrl, { responseType: 'blob' });
   const blobUrl = URL.createObjectURL(response.data);
   window.open(blobUrl, '_blank', 'noopener,noreferrer');
 

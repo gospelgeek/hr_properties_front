@@ -767,7 +767,7 @@ console.log('docs', docs)
         )}
 
         {/* Laws/Documents */}
-        {((property.laws?.length || 0) > 0 || uniqueRentalDocuments.length > 0) && (
+        {((property.laws?.length || 0) >= 0 || uniqueRentalDocuments.length > 0) && (
           <div className="mb-8">
             <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
               <button
