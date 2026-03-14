@@ -97,7 +97,7 @@ const ObligationDetailPage = () => {
       setIsSubmitting(true);
       const propertyId = id || obligation.property;
       await addPaymentToObligation(propertyId, obligationId, data);
-      console.log('data enviada al backend para agregar pago:', data);
+      //console.log('data enviada al backend para agregar pago:', data);
       toast.success('Payment added successfully');
       setShowPaymentForm(false);
       loadData();

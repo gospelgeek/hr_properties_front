@@ -72,8 +72,8 @@ api.interceptors.response.use(
 export const getProperties = async (params = {}) => {
   console.log('🔍 Frontend sending params to backend:', params);
   const response = await api.get('properties/', { params });
-  console.log('📥 Backend response:', response.data);
-  console.log('📊 Number of properties returned:', response.data.length);
+  //console.log('📥 Backend response:', response.data);
+ // console.log('📊 Number of properties returned:', response.data.length);
   return response.data;
 };
 
