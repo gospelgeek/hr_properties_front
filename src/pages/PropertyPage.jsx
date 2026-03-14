@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import PropertyDetails from '../components/Properties/PropertyDetails';
@@ -20,11 +20,7 @@ const PropertyPage = () => {
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadProperty();
-  }, [id]);
-
-  const loadProperty = async () => {
+  const loadProperty = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getProperty(id);
@@ -55,7 +51,11 @@ const PropertyPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
+
+  useEffect(() => {
+    loadProperty();
+  }, [loadProperty]);
 
   const handleDelete = async () => {
     try {
@@ -103,7 +103,7 @@ const PropertyPage = () => {
         </Link>
       </div>
 
-      <PropertyDetails property={property} onDelete={handleDelete} />
+      <PropertyDetails property={property} rentals={rentals} onDelete={handleDelete} />
 
       {/* Financial Obligations Section */}
       <div className="mt-8">
@@ -173,7 +173,7 @@ const PropertyPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {rentals.map((rental) => (
-                <RentalCard key={rental.id} rental={rental} propertyId={id} />
+                <RentalCard key={rental.id} rental={rental} propertyId={id} propertyUse={property.use} />
               ))}
             </div>
           )}

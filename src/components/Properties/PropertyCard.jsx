@@ -3,7 +3,23 @@ import { Link } from 'react-router-dom';
 
 const PropertyCard = ({ property, onDelete, showRestoreButton = false, onRestore, isPublic = false }) => {
   const isActive = showRestoreButton ? false : (property.is_deleted !== null);
-  
+   const getUseBadge = () => {
+    const useValue = String(property.use || '').toLowerCase();
+
+    if (useValue === 'rental') {
+      return { text: 'Rental', color: 'bg-indigo-100 text-indigo-800' };
+    }
+
+    if (useValue === 'personal') {
+      return { text: 'Personal', color: 'bg-emerald-100 text-emerald-800' };
+    }
+
+    if (useValue === 'commercial') {
+      return { text: 'Commercial', color: 'bg-amber-100 text-amber-800' };
+    }
+
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 overflow-hidden">
       {/* Property Image */}
@@ -26,7 +42,9 @@ const PropertyCard = ({ property, onDelete, showRestoreButton = false, onRestore
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex-1 min-w-0">
             {property.name || property.address}
           </h2>
-         
+          <span className={`px-3 py-1 text-xs font-medium rounded-full ${getUseBadge().color}`}>
+              {getUseBadge().text}
+            </span>
         </div>
 
         {property.address && (

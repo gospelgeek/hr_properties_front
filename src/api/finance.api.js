@@ -4,14 +4,22 @@ const API_URL = import.meta.env.VITE_API_BASE_LOCAL || 'http://127.0.0.1:8000/ap
 
 const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // Interceptor para agregar token de autenticación
 api.interceptors.request.use(
   (config) => {
+    const isFormData = config.data instanceof FormData;
+
+    // Important: let the browser set multipart boundaries for FormData requests.
+    if (isFormData && config.headers) {
+      delete config.headers['Content-Type'];
+    }
+
+    if (!isFormData && config.data && config.headers && !config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

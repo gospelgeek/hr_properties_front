@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { getPropertyRepairsCost, getPropertyFinancials } from '../../api/properties.api';
+import { getPropertyRepairsCost, getPropertyFinancials, openProtectedMedia } from '../../api/properties.api';
 import DeletePropertyButton from './DeletePropertyButton';
 
-const PropertyDetails = ({ property, onDelete }) => {
+const PropertyDetails = ({ property, rentals = [], onDelete }) => {
   const [showInventory, setShowInventory] = useState(false);
   const [showRepairs, setShowRepairs] = useState(false);
   const [showLaws, setShowLaws] = useState(false);
@@ -29,13 +29,80 @@ const useLabelBuilding = {
   land: "Land",
 }
 console.log('Rendering PropertyDetails with property:', property);
-  useEffect(() => {
-    if (property && property.id) {
-      loadRepairsCost();
-    }
-  }, [property]);
 
-  const loadRepairsCost = async () => {
+  const handleOpenDocument = async (url) => {
+    try {
+      await openProtectedMedia(url);
+    } catch (error) {
+      console.error('Error opening protected document:', error);
+    }
+  };
+
+  const rentalDocuments = rentals.flatMap((rental) => {
+    const docs = [];
+
+    if (rental?.monthly_records?.length > 0) {
+      rental.monthly_records.forEach((record, index) => {
+        if (record?.url_files) {
+          docs.push({
+            id: `monthly-${rental.id}-${index}`,
+            source: 'Rental',
+            title: rental.property_name || `Rental #${rental.id}`,
+            tenant_name: rental.tenant.name,
+            subtitle: 'Monthly document',
+            url: record.url_files,
+          });
+        }
+      });
+    }
+
+    if (rental?.airbnb_records?.length > 0) {
+      rental.airbnb_records.forEach((record, index) => {
+        if (record?.url_files) {
+          docs.push({
+            id: `airbnb-${rental.id}-${index}`,
+            source: 'Rental',
+            title: rental.property_name || `Rental #${rental.id}`,
+            tenant_name: rental.tenant.name,
+            subtitle: 'Airbnb document',
+            url: record.url_files,
+          });
+        }
+      });
+    }
+
+    if (rental?.monthly_data?.url_files) {
+      docs.push({
+        id: `monthly-data-${rental.id}`,
+        source: 'Rental',
+        title: rental.property_name || `Rental #${rental.id}`,
+        tenant_name: rental.tenant.name,
+        subtitle: 'Monthly document',
+        url: rental.monthly_data.url_files,
+      });
+    }
+
+    if (rental?.airbnb_data?.url_files) {
+      docs.push({
+        id: `airbnb-data-${rental.id}`,
+        source: 'Rental',
+        title: rental.property_name || `Rental #${rental.id}`,
+        tenant_name: rental.tenant.name,
+        subtitle: 'Airbnb document',
+        url: rental.airbnb_data.url_files,
+      });
+    }
+console.log('docs', docs)
+    return docs;
+  });
+
+  const uniqueRentalDocuments = rentalDocuments.filter(
+    (doc, index, arr) => doc.url && arr.findIndex((item) => item.url === doc.url) === index
+  );
+
+  const totalDocumentsCount = (property.laws?.length || 0) + uniqueRentalDocuments.length;
+
+  const loadRepairsCost = useCallback(async () => {
     try {
       setLoadingRepairsCost(true);
       const data = await getPropertyRepairsCost(property.id);
@@ -45,7 +112,13 @@ console.log('Rendering PropertyDetails with property:', property);
     } finally {
       setLoadingRepairsCost(false);
     }
-  };
+  }, [property?.id]);
+
+  useEffect(() => {
+    if (property?.id) {
+      loadRepairsCost();
+    }
+  }, [property?.id, loadRepairsCost]);
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
@@ -694,7 +767,7 @@ console.log('Rendering PropertyDetails with property:', property);
         )}
 
         {/* Laws/Documents */}
-        {property.laws && property.laws.length >= 0 && (
+        {((property.laws?.length || 0) > 0 || uniqueRentalDocuments.length > 0) && (
           <div className="mb-8">
             <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
               <button
@@ -702,7 +775,7 @@ console.log('Rendering PropertyDetails with property:', property);
                 className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
               >
                 <h3 className="text-xl font-bold text-gray-900">
-                  Documents and Regulations ({property.laws.length})
+                  Documents and Regulations ({totalDocumentsCount})
                 </h3>
                 <svg
                   className={`w-6 h-6 text-gray-600 transition-transform ${
@@ -727,7 +800,7 @@ console.log('Rendering PropertyDetails with property:', property);
             Add Documentation
           </Link>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    {property.laws.map((law, index) => (
+                    {(property.laws || []).map((law, index) => (
                       <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                         <div className="flex justify-between items-start gap-3 mb-2">
                           <h3 className="text-base font-semibold text-gray-900">
@@ -746,20 +819,54 @@ console.log('Rendering PropertyDetails with property:', property);
                           <span className="font-medium text-gray-700">Amount:</span> {formatCurrency(parseFloat(law.original_amount))}
                         </p>
                         {law.url && (
-                          <a
-                            href={law.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDocument(law.url)}
                             className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                             View document
-                          </a>
+                          </button>
                         )}
                       </div>
                     ))}
+
+                    {uniqueRentalDocuments.map((doc) => (
+                      <div key={doc.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        <div className="flex justify-between items-start gap-3 mb-2">
+                          <h3 className="text-base font-semibold text-gray-900">
+                            {doc.title}
+                          </h3>
+                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+                            {doc.source}
+                          </span>
+                        </div>
+                         <h2 className="text-base font-semibold text-gray-900">
+                            {doc.tenant_name}
+                          </h2>
+                        <p className="text-sm text-gray-600 mb-2">
+                          <span className="font-medium text-gray-700">Type:</span> {doc.subtitle}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDocument(doc.url)}
+                          className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          View rental document
+                        </button>
+                      </div>
+                    ))}
+
+                    {totalDocumentsCount === 0 && (
+                      <div className="col-span-full text-sm text-gray-500">
+                        No documents available.
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

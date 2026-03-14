@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_BASE_LOCAL || 'http://127.0.0.1:8000/api/';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -13,6 +13,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -71,8 +72,8 @@ api.interceptors.response.use(
 export const getProperties = async (params = {}) => {
   console.log('🔍 Frontend sending params to backend:', params);
   const response = await api.get('properties/', { params });
-  console.log('📥 Backend response:', response.data);
-  console.log('📊 Number of properties returned:', response.data.length);
+  //console.log('📥 Backend response:', response.data);
+ // console.log('📊 Number of properties returned:', response.data.length);
   return response.data;
 };
 
@@ -152,7 +153,7 @@ export const addLawToProperty = async (propertyId, lawData) => {
 
 // GET /api/property-laws/{propertyId}/ - Obtener todas las leyes de una propiedad
 export const getPropertyLaws = async (propertyId) => {
-  const response = await api.get(`properties/${propertyId}/laws/`);
+  const response = await api.get(`properties/${propertyId}/laws/`) ;
   return response.data;
 };
 
@@ -182,4 +183,14 @@ export const getPropertyRepairsCost = async (id) => {
 export const getPropertyFinancials = async (id) => {
   const response = await api.get(`properties/${id}/financials/`);
   return response.data;
+};
+
+// GET protected media with auth header and open it in a new tab
+export const openProtectedMedia = async (url) => {
+  const response = await api.get(url, { responseType: 'blob' });
+  const blobUrl = URL.createObjectURL(response.data);
+  window.open(blobUrl, '_blank', 'noopener,noreferrer');
+
+  // Delay revoke to avoid interrupting browser loading in the new tab
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
 };
