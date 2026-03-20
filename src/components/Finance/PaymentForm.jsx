@@ -55,9 +55,9 @@ const handlePaymentSubmit = async (data) => {
       formData.append("amount", Number(data.amount));
       formData.append("date", data.date);
       formData.append("voucher_url", data.voucher_url[0]);
-     for (let pair of formData.entries()) {
-  console.log(pair[0], pair[1]);
-}
+     //for (let pair of formData.entries()) {
+     //  console.log(pair[0], pair[1]);
+     //}
       await onSubmit(formData);
     } else {
       // Si no hay archivo, envía JSON
@@ -67,7 +67,7 @@ const handlePaymentSubmit = async (data) => {
         amount: Number(data.amount),
         date: data.date,
       };
-      console.log('📤 JSON payload being sent to backend:', payload);
+      //console.log('📤 JSON payload being sent to backend:', payload);
       await onSubmit(payload);
     }
   } catch (error) {

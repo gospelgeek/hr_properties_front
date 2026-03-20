@@ -211,7 +211,7 @@ const PropertyCard = ({
             <div className="flex flex-col flex-1 w-full max-h-full">
               <div className="flex flex-col flex-1">
                 <div className="flex justify-between items-start mb-4">
-                  {console.log(property)}
+                  
                   {rental.length === 0 && property.use !== "personal" ? (
                     <h3 className="text-base font-semibold text-gray-600">
                       Available

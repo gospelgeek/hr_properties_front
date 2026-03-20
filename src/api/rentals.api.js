@@ -163,12 +163,12 @@ export const getRental = async (id) => {
 
 // POST /api/properties/{id}/add_rental/ - Crear rental para una propiedad
 export const addRentalToProperty = async (propertyId, rentalData) => {
-  console.log('📥 Received rental data:', rentalData);
-  console.log('📥 Is file?', rentalData.url_files instanceof File);
+  //console.log('📥 Received rental data:', rentalData);
+  //console.log('📥 Is file?', rentalData.url_files instanceof File);
   
   // Si hay un archivo, usar FormData, de lo contrario usar JSON
   if (rentalData.url_files instanceof File) {
-    console.log('✅ Using FormData for file upload');
+    //console.log('✅ Using FormData for file upload');
     const formData = new FormData();
     
     // Agregar campos obligatorios
@@ -206,10 +206,10 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
     }
     
     // Log FormData contents
-    console.log('📦 FormData contents:');
-    for (let pair of formData.entries()) {
-      console.log(pair[0], ':', pair[1]);
-    }
+    //console.log('📦 FormData contents:');
+    //for (let pair of formData.entries()) {
+    //  console.log(pair[0], ':', pair[1]);
+    //}
     
     const response = await axios.post(
       `${API_URL}properties/${propertyId}/add_rental/`,
@@ -221,13 +221,13 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
         },
       }
     );
-    console.log('✅ Response from adding rental with file:', response.data);
+    //console.log('✅ Response from adding rental with file:', response.data);
     return response.data;
     
   } else {
-    console.log('✅ Using JSON for rental without file');
+    //console.log('✅ Using JSON for rental without file');
     const response = await api.post(`properties/${propertyId}/add_rental/`, rentalData);
-    console.log('✅ Response from adding rental without file:', response.data);
+    //console.log('✅ Response from adding rental without file:', response.data);
     return response.data;
   }
 };

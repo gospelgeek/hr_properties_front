@@ -92,7 +92,7 @@ console.log('Rendering PropertyDetails with property:', property);
         url: rental.airbnb_data.url_files,
       });
     }
-console.log('docs', docs)
+//console.log('docs', docs)
     return docs;
   });
 

@@ -85,9 +85,9 @@ const RentalDetailPage = () => {
       setIsSubmitting(true);
       // Si data ya es FormData,mandar directo
     if (data instanceof FormData) {
-      for (let pair of data.entries()) {
-        console.log("FormData entry:", pair[0], pair[1]);
-      }
+      //for (let pair of data.entries()) {
+        //console.log("FormData entry:", pair[0], pair[1]);
+      //}
       await addPaymentToRental(id, rentalId, data);
     } else {
       // Si no, es JSON normal
