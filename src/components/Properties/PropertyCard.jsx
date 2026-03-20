@@ -220,6 +220,10 @@ const PropertyCard = ({
                     <h3 className="text-base font-semibold text-gray-600">
                       Personal Use
                     </h3>
+                  ) : property.use === 'rental' ? (
+                    <h3 className="text-base font-semibold text-gray-600">
+                      Rented and no tenant information available
+                    </h3>
                   ) : (
                     <div className=" mb-2 ">
                       <div className="flex items-center gap-3 pb-2">

@@ -47,22 +47,31 @@ const paymentMethod = watch('payment_method');
 
 const handlePaymentSubmit = async (data) => {
   try {
-    const formData = new FormData();
-    formData.append('payment_method', data.payment_method);
-    formData.append('payment_location', data.payment_location);
-    formData.append('amount', data.amount);
-    formData.append('date', data.date);
-
-    // Si hay archivo, lo agregas
-    if (data.voucher_url && data.voucher_url[0]) {
-      formData.append('voucher_url', data.voucher_url[0]);
+    // Si hay archivo, usa FormData
+    if (data.voucher_url && data.voucher_url.length > 0 && data.voucher_url[0]) {
+      const formData = new FormData();
+      formData.append("payment_method", Number(data.payment_method));
+      formData.append("payment_location", data.payment_location);
+      formData.append("amount", Number(data.amount));
+      formData.append("date", data.date);
+      formData.append("voucher_url", data.voucher_url[0]);
+     for (let pair of formData.entries()) {
+  console.log(pair[0], pair[1]);
+}
+      await onSubmit(formData);
+    } else {
+      // Si no hay archivo, envía JSON
+      const payload = {
+        payment_method: Number(data.payment_method),
+        payment_location: data.payment_location,
+        amount: Number(data.amount),
+        date: data.date,
+      };
+      console.log('📤 JSON payload being sent to backend:', payload);
+      await onSubmit(payload);
     }
-
-    // Llama a la API con formData
-    console.log('Submitting payment with data:',[...formData]);
-    await onSubmit(formData);
   } catch (error) {
-    toast.error(error?.message || 'Error al registrar el pago');
+    toast.error(error?.message || "Error al registrar el pago");
   }
 };
 

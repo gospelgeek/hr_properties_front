@@ -83,31 +83,32 @@ const RentalDetailPage = () => {
   const handleAddPayment = async (data) => {
     try {
       setIsSubmitting(true);
-      // Construir FormData para enviar archivo
-      const formData = new FormData();
-      formData.append("payment_location", data.payment_location);
-      formData.append("payment_method", data.payment_method);
-      formData.append("amount", data.amount);
-      formData.append("date", data.date);
-      if (data.voucher_url && data.voucher_url.length > 0) {
-        formData.append("voucher_url", data.voucher_url[0]);
+      // Si data ya es FormData,mandar directo
+    if (data instanceof FormData) {
+      for (let pair of data.entries()) {
+        console.log("FormData entry:", pair[0], pair[1]);
       }
-      await addPaymentToRental(id, rentalId, formData);
-      toast.success("Payment added successfully");
-      setShowPaymentForm(false);
-      loadData();
-    } catch (error) {
-      console.error("Error adding payment:", error);
-      console.log("Error response data:", error.response);
-      toast.error(
-        error.response?.data?.error ||
-          error.response?.data ||
-          "Error adding payment",
-      );
-    } finally {
-      setIsSubmitting(false);
+      await addPaymentToRental(id, rentalId, data);
+    } else {
+      // Si no, es JSON normal
+      await addPaymentToRental(id, rentalId, data);
     }
-  };
+
+    toast.success("Payment added successfully");
+    setShowPaymentForm(false);
+    loadData();
+  } catch (error) {
+    console.error("Error adding payment:", error);
+    console.log("Error response data:", error.response);
+    toast.error(
+      error.response?.data?.error ||
+        error.response?.data ||
+        "Error adding payment",
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleDeletePayment = async (paymentId) => {
     if (!confirm("Are you sure you want to delete this payment?")) return;
@@ -493,7 +494,7 @@ const RentalDetailPage = () => {
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-1">
-                      Date: {formatDate(payment.date)}
+                      Date: {payment.date}
                     </p>
                     {/* Mostrar nombre de la obligación aquí */}
                   </div>

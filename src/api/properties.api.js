@@ -235,5 +235,5 @@ export const openProtectedMedia = async (url) => {
   window.open(blobUrl, '_blank', 'noopener,noreferrer');
 
   // Delay revoke to avoid interrupting browser loading in the new tab
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 120_000);
 };
