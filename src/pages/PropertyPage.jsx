@@ -31,6 +31,7 @@ const PropertyPage = () => {
       try {
         const oblData = await getPropertyObligations(id);
         setObligations(Array.isArray(oblData) ? oblData : oblData.results || []);
+        console.log('Loaded obligations:', oblData);
       } catch (err) {
         console.error('Error loading obligations:', err);
       }
@@ -103,7 +104,7 @@ const PropertyPage = () => {
         </Link>
       </div>
 
-      <PropertyDetails property={property} rentals={rentals} onDelete={handleDelete} />
+      <PropertyDetails property={property} rentals={rentals} obligations={obligations} onDelete={handleDelete} onDataChanged={loadProperty} />
 
       {/* Financial Obligations Section */}
       <div className="mt-8">
@@ -128,6 +129,7 @@ const PropertyPage = () => {
             {obligations.map((obligation) => (
               <ObligationCard key={obligation.id} obligation={obligation} propertyId={id} />
             ))}
+            {console.log('Rendering obligations:', obligations)}
           </div>
         )}
       </div>

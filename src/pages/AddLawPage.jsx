@@ -16,9 +16,9 @@ const AddLawPage = () => {
       // Create FormData for file upload
       const formData = new FormData();
       formData.append('entity_name', data.entity_name);
-      formData.append('legal_number', data.legal_number);
-      formData.append('original_amount', data.original_amount);
-      formData.append('is_paid', data.is_paid || false);
+      formData.append('legal_number', data.legal_number || '');
+      formData.append('original_amount', data.original_amount || '');
+      formData.append('is_paid', data.is_paid || '');
       
       if (data.media) {
         formData.append('media', data.media);

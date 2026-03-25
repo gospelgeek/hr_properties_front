@@ -9,6 +9,50 @@ const api = axios.create({
   },
 });
 
+const getApiOrigin = () => {
+  try {
+    return new URL(API_URL).origin;
+  } catch {
+    return window.location.origin;
+  }
+};
+
+
+
+const normalizeProtectedMediaUrl = (rawUrl) => {
+  if (!rawUrl || typeof rawUrl !== 'string') return rawUrl;
+
+  const apiOrigin = getApiOrigin();
+
+  // Relative media paths should always be requested from the API origin.
+  if (rawUrl.startsWith('/')) {
+    return `${apiOrigin}${rawUrl}`;
+  }
+
+  if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+    return `${apiOrigin}/${rawUrl.replace(/^\/+/, '')}`;
+  }
+
+  try {
+    const parsed = new URL(rawUrl);
+
+    // Backends sometimes return localhost URLs in production payloads.
+    if ((parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost') && parsed.pathname.startsWith('/media/')) {
+      return `${apiOrigin}${parsed.pathname}${parsed.search}`;
+    }
+
+    // Avoid mixed-content errors when frontend runs on HTTPS.
+    if (window.location.protocol === 'https:' && parsed.protocol === 'http:') {
+      parsed.protocol = 'https:';
+      return parsed.toString();
+    }
+
+    return parsed.toString();
+  } catch {
+    return rawUrl;
+  }
+};
+
 // Interceptor para agregar token de autenticación
 api.interceptors.request.use(
   (config) => {
@@ -119,12 +163,12 @@ export const getRental = async (id) => {
 
 // POST /api/properties/{id}/add_rental/ - Crear rental para una propiedad
 export const addRentalToProperty = async (propertyId, rentalData) => {
-  console.log('📥 Received rental data:', rentalData);
-  console.log('📥 Is file?', rentalData.url_files instanceof File);
+  //console.log('📥 Received rental data:', rentalData);
+  //console.log('📥 Is file?', rentalData.url_files instanceof File);
   
   // Si hay un archivo, usar FormData, de lo contrario usar JSON
   if (rentalData.url_files instanceof File) {
-    console.log('✅ Using FormData for file upload');
+    //console.log('✅ Using FormData for file upload');
     const formData = new FormData();
     
     // Agregar campos obligatorios
@@ -162,10 +206,10 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
     }
     
     // Log FormData contents
-    console.log('📦 FormData contents:');
-    for (let pair of formData.entries()) {
-      console.log(pair[0], ':', pair[1]);
-    }
+    //console.log('📦 FormData contents:');
+    //for (let pair of formData.entries()) {
+    //  console.log(pair[0], ':', pair[1]);
+    //}
     
     const response = await axios.post(
       `${API_URL}properties/${propertyId}/add_rental/`,
@@ -177,13 +221,13 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
         },
       }
     );
-    console.log('✅ Response from adding rental with file:', response.data);
+    //console.log('✅ Response from adding rental with file:', response.data);
     return response.data;
     
   } else {
-    console.log('✅ Using JSON for rental without file');
+    //console.log('✅ Using JSON for rental without file');
     const response = await api.post(`properties/${propertyId}/add_rental/`, rentalData);
-    console.log('✅ Response from adding rental without file:', response.data);
+    //console.log('✅ Response from adding rental without file:', response.data);
     return response.data;
   }
 };
@@ -268,6 +312,12 @@ export const deletePropertyRental = async (propertyId, rentalId) => {
   return response.data;
 };
 
+// POST /api/properties/{id}/rentals/{rental_id}/remove_document/ - Eliminar solo documento mensual del rental
+export const removeRentalMonthlyDocument = async (propertyId, rentalId) => {
+  const response = await api.post(`properties/${propertyId}/rentals/${rentalId}/remove_document/`, {});
+  return response.data;
+};
+
 // ═══════════════════════════════════════════════════════════════════════
 // PAGOS DE RENTALS
 // ═══════════════════════════════════════════════════════════════════════
@@ -275,17 +325,24 @@ export const deletePropertyRental = async (propertyId, rentalId) => {
 // POST /api/properties/{id}/rentals/{rental_id}/add_payment/ - Añadir pago a un rental
 export const addPaymentToRental = async (propertyId, rentalId, paymentData) => {
   //console.log('Adding payment data:', paymentData);
-  const response = await api.post(
-    `properties/${propertyId}/rentals/${rentalId}/add_payment/`,
-    paymentData,
-    {
-      headers: {
-        // No poner Content-Type, axios lo maneja con FormData
-      },
-    }
-  );
-  //console.log('Response from adding payment:', response.data);
-  return response.data;
+ if (paymentData instanceof FormData) {
+    
+    const response = await axios.post(
+      `${API_URL}properties/${propertyId}/rentals/${rentalId}/add_payment/`,
+     paymentData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      }
+    );
+    return response.data;
+  } else {
+    const response = await api.post(`properties/${propertyId}/rentals/${rentalId}/add_payment/`, paymentData);
+    return response.data;
+  }
+
 };
 
 // GET /api/properties/{id}/rentals/{rental_id}/payments/ - Listar pagos de un rental
@@ -326,4 +383,16 @@ export const getRentalPaymentsDirect = async (rentalId) => {
 export const endRental = async (rentalId) => {
   const response = await api.post(`rentals/${rentalId}/end_rental/`);
   return response.data;
+};
+
+
+// GET protected media with auth header and open it in a new tab
+export const openProtectedMedia = async (url) => {
+  const normalizedUrl = normalizeProtectedMediaUrl(url);
+  const response = await api.get(normalizedUrl, { responseType: 'blob' });
+  const blobUrl = URL.createObjectURL(response.data);
+  window.open(blobUrl, '_blank', 'noopener,noreferrer');
+
+  // Delay revoke to avoid interrupting browser loading in the new tab
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 120_000);
 };

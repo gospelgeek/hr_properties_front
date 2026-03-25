@@ -1,7 +1,23 @@
-import React from 'react';
+import {useState,useEffect, use} from 'react';
 import PropertyCard from './PropertyCard';
-
+import { getPropertyRental, getRental, getPropertyRentals } from '../../api/rentals.api';
 const PropertyList = ({ properties, onDelete, showRestoreButton = false, onRestore, isPublic = false }) => {
+
+
+  const [rentals, setRentals] = useState([]);
+
+useEffect(() => {
+  async function fetchRentals() {
+    const rentalsByProperty = {};
+    for (const property of properties) {
+      // Suponiendo que getPropertyRental retorna un array de rentals para una propiedad
+      rentalsByProperty[property.id] = await getPropertyRentals(property.id);
+    }
+    setRentals(rentalsByProperty);
+  }
+  fetchRentals();
+}, [properties]);
+
   if (properties.length === 0) {
     return (
       <div className="text-center py-20">
@@ -16,6 +32,7 @@ const PropertyList = ({ properties, onDelete, showRestoreButton = false, onResto
         <PropertyCard
           key={property.id}
           property={property}
+          rental={rentals[property.id] || []}
           onDelete={onDelete}
           showRestoreButton={showRestoreButton}
           onRestore={onRestore}

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { getPropertyRepairsCost, getPropertyFinancials, openProtectedMedia } from '../../api/properties.api';
+import toast from 'react-hot-toast';
+import { getPropertyRepairsCost, getPropertyFinancials, openProtectedMedia, deletePropertyLaw, deletePropertyMedia, setMainPropertyImage } from '../../api/properties.api';
+import { removeRentalMonthlyDocument } from '../../api/rentals.api';
 import DeletePropertyButton from './DeletePropertyButton';
 
-const PropertyDetails = ({ property, rentals = [], onDelete }) => {
+const PropertyDetails = ({ property, rentals = [], obligations = [], onDelete, onDataChanged }) => {
   const [showInventory, setShowInventory] = useState(false);
   const [showRepairs, setShowRepairs] = useState(false);
   const [showLaws, setShowLaws] = useState(false);
@@ -14,6 +16,7 @@ const PropertyDetails = ({ property, rentals = [], onDelete }) => {
   const [showFinancials, setShowFinancials] = useState(false);
   const [financials, setFinancials] = useState(null);
   const [loadingFinancials, setLoadingFinancials] = useState(false);
+  const [settingMainImageId, setSettingMainImageId] = useState(null);
 
 const useLabels = {
   rental: "Rental",
@@ -38,6 +41,110 @@ console.log('Rendering PropertyDetails with property:', property);
     }
   };
 
+  const refreshPropertyData = async () => {
+    if (typeof onDataChanged === 'function') {
+      await onDataChanged();
+    }
+  };
+
+  const handleDeletePropertyMedia = async (mediaId) => {
+    if (!mediaId) {
+      toast.error('Media ID not found');
+      return;
+    }
+
+    const isConfirmed = window.confirm('Are you sure you want to delete this media file?');
+    if (!isConfirmed) return;
+
+    try {
+      await deletePropertyMedia(property.id, mediaId);
+      toast.success('Media file deleted successfully');
+      setSelectedMediaIndex(null);
+      await refreshPropertyData();
+    } catch (error) {
+      console.error('Error deleting media file:', error);
+      toast.error(error.response?.data?.error || 'Error deleting media file');
+    }
+  };
+
+  const handleDeleteLaw = async (lawId) => {
+    if (!lawId) {
+      toast.error('Law ID not found');
+      return;
+    }
+
+    const isConfirmed = window.confirm('Are you sure you want to delete this law/document?');
+    if (!isConfirmed) return;
+
+    try {
+      await deletePropertyLaw(property.id, lawId);
+      toast.success('Law/document deleted successfully');
+      await refreshPropertyData();
+    } catch (error) {
+      console.error('Error deleting law:', error);
+      toast.error(error.response?.data?.error || 'Error deleting law');
+    }
+  };
+
+  const handleDeleteRentalMonthlyDocument = async (rentalId) => {
+    if (!rentalId) {
+      toast.error('Rental ID not found');
+      return;
+    }
+
+    const isConfirmed = window.confirm('Are you sure you want to delete this monthly rental document?');
+    if (!isConfirmed) return;
+
+    try {
+      await removeRentalMonthlyDocument(property.id, rentalId);
+      toast.success('Monthly rental document deleted successfully');
+      await refreshPropertyData();
+    } catch (error) {
+      console.error('Error deleting rental document:', error);
+      toast.error(error.response?.data?.error || 'Error deleting rental document');
+    }
+  };
+
+  const isMainImageMedia = (media) => {
+    if (!media?.url || !property?.image_url) return false;
+
+    try {
+      const mediaPath = new URL(media.url, window.location.origin).pathname;
+      const imagePath = new URL(property.image_url, window.location.origin).pathname;
+      return mediaPath === imagePath;
+    } catch {
+      return media.url === property.image_url;
+    }
+  };
+
+  const handleSetMainImage = async (media) => {
+    if (!media?.id) {
+      toast.error('Media ID not found');
+      return;
+    }
+
+    if (media.media_type !== 'image') {
+      toast.error('Only image files can be the main image');
+      return;
+    }
+
+    if (isMainImageMedia(media)) {
+      return;
+    }
+
+    try {
+      setSettingMainImageId(media.id);
+      await setMainPropertyImage(property.id, media.id);
+      toast.success('Main image updated successfully');
+      await refreshPropertyData();
+    } catch (error) {
+      console.error('Error setting main image:', error);
+      toast.error(error.response?.data?.error || 'Error setting main image');
+    } finally {
+      setSettingMainImageId(null);
+    }
+  };
+
   const rentalDocuments = rentals.flatMap((rental) => {
     const docs = [];
 
@@ -46,11 +153,13 @@ console.log('Rendering PropertyDetails with property:', property);
         if (record?.url_files) {
           docs.push({
             id: `monthly-${rental.id}-${index}`,
+            rentalId: rental.id,
             source: 'Rental',
             title: rental.property_name || `Rental #${rental.id}`,
-            tenant_name: rental.tenant.name,
+            tenant_name: rental.tenant?.name,
             subtitle: 'Monthly document',
             url: record.url_files,
+            canDeleteMonthlyDocument: true,
           });
         }
       });
@@ -61,11 +170,13 @@ console.log('Rendering PropertyDetails with property:', property);
         if (record?.url_files) {
           docs.push({
             id: `airbnb-${rental.id}-${index}`,
+            rentalId: rental.id,
             source: 'Rental',
             title: rental.property_name || `Rental #${rental.id}`,
-            tenant_name: rental.tenant.name,
+            tenant_name: rental.tenant?.name,
             subtitle: 'Airbnb document',
             url: record.url_files,
+            canDeleteMonthlyDocument: false,
           });
         }
       });
@@ -74,33 +185,49 @@ console.log('Rendering PropertyDetails with property:', property);
     if (rental?.monthly_data?.url_files) {
       docs.push({
         id: `monthly-data-${rental.id}`,
+        rentalId: rental.id,
         source: 'Rental',
         title: rental.property_name || `Rental #${rental.id}`,
-        tenant_name: rental.tenant.name,
+        tenant_name: rental.tenant?.name,
         subtitle: 'Monthly document',
         url: rental.monthly_data.url_files,
+        canDeleteMonthlyDocument: true,
       });
     }
 
     if (rental?.airbnb_data?.url_files) {
       docs.push({
         id: `airbnb-data-${rental.id}`,
+        rentalId: rental.id,
         source: 'Rental',
         title: rental.property_name || `Rental #${rental.id}`,
-        tenant_name: rental.tenant.name,
+        tenant_name: rental.tenant?.name,
         subtitle: 'Airbnb document',
         url: rental.airbnb_data.url_files,
+        canDeleteMonthlyDocument: false,
       });
     }
-console.log('docs', docs)
+//console.log('docs', docs)
     return docs;
   });
+
+   const obligationPaymentDocuments = obligations
+    .flatMap(ob => ob.payments || [])
+    .filter(payment => payment.voucher_url)
+    .map(payment => ({
+      url: payment.voucher_url,
+      name: `${payment.obligation_name || ''} - ${payment.date || ''}`
+    }));
+
+    const uniqueObligationPaymentDocuments = obligationPaymentDocuments.filter(
+      (doc, index, arr) => arr.findIndex((item) => item.url === doc.url) === index
+    );
 
   const uniqueRentalDocuments = rentalDocuments.filter(
     (doc, index, arr) => doc.url && arr.findIndex((item) => item.url === doc.url) === index
   );
 
-  const totalDocumentsCount = (property.laws?.length || 0) + uniqueRentalDocuments.length;
+  const totalDocumentsCount = (property.laws?.length || 0) + uniqueRentalDocuments.length + uniqueObligationPaymentDocuments.length;
 
   const loadRepairsCost = useCallback(async () => {
     try {
@@ -541,17 +668,41 @@ console.log('docs', docs)
                               </span>
                             </div>
                             {property.media[selectedMediaIndex].url && (
-                              <a
-                                href={property.media[selectedMediaIndex].url}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                              <button
+                              type='button'
+                                onClick={() => handleOpenDocument(property.media[selectedMediaIndex].url)}
                                 className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                 </svg>
                                 Open in new tab
-                              </a>
+                              </button>
+                            )}
+                            {property.media[selectedMediaIndex]?.media_type === 'image' && property.media[selectedMediaIndex]?.id && (
+                              <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                                <input
+                                  type="radio"
+                                  name="main-image-carousel"
+                                  checked={isMainImageMedia(property.media[selectedMediaIndex])}
+                                  disabled={settingMainImageId === property.media[selectedMediaIndex].id}
+                                  onChange={() => handleSetMainImage(property.media[selectedMediaIndex])}
+                                  className="h-4 w-4 text-blue-600"
+                                />
+                                Main image
+                              </label>
+                            )}
+                            {property.media[selectedMediaIndex]?.id && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeletePropertyMedia(property.media[selectedMediaIndex].id)}
+                                className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Delete file
+                              </button>
                             )}
                           </div>
                           {property.media[selectedMediaIndex].uploaded_at && (
@@ -567,7 +718,7 @@ console.log('docs', docs)
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                       {property.media.map((media, index) => (
                         <div 
-                          key={index} 
+                          key={media.id || index} 
                           className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
                           onClick={() => setSelectedMediaIndex(index)}
                         >
@@ -603,7 +754,7 @@ console.log('docs', docs)
                           )}
                           
                           {/* Type Badge */}
-                          <div className="p-2">
+                          <div className="p-2 flex items-center justify-between gap-2">
                             <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                               media.media_type === 'image' ? 'bg-blue-100 text-blue-800' :
                               media.media_type === 'video' ? 'bg-purple-100 text-purple-800' :
@@ -612,6 +763,34 @@ console.log('docs', docs)
                               {media.media_type === 'image' ? 'Image' :
                                media.media_type === 'video' ? 'Video' : 'Document'}
                             </span>
+                            {media.media_type === 'image' && media.id && (
+                              <label
+                                className="inline-flex items-center gap-1 text-xs text-gray-700"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <input
+                                  type="radio"
+                                  name="main-image-grid"
+                                  checked={isMainImageMedia(media)}
+                                  disabled={settingMainImageId === media.id}
+                                  onChange={() => handleSetMainImage(media)}
+                                  className="h-3.5 w-3.5 text-blue-600"
+                                />
+                                Main image
+                              </label>
+                            )}
+                            {media.id && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeletePropertyMedia(media.id);
+                                }}
+                                className="text-red-600 hover:text-red-700 text-xs font-medium"
+                              >
+                                Delete
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -745,17 +924,16 @@ console.log('docs', docs)
                           </p>
                         )}
                         {item.url_media && (
-                          <a
-                            href={item.url_media}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDocument(item.url_media)}
                             className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             View image
-                          </a>
+                          </button>
                         )}
                       </div>
                     ))}
@@ -801,23 +979,28 @@ console.log('docs', docs)
           </Link>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     {(property.laws || []).map((law, index) => (
-                      <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                      <div key={law.id || index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                         <div className="flex justify-between items-start gap-3 mb-2">
                           <h3 className="text-base font-semibold text-gray-900">
                             {law.entity_name || 'Unnamed Entity'}
                           </h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            law.is_paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {law.is_paid ? 'Paid' : 'Pending'}
-                          </span>
+                          {law.id && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteLaw(law.id)}
+                              className="text-red-600 hover:text-red-700 text-xs font-medium"
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
+                        {law.legal_number ?(
                         <p className="text-sm text-gray-600 mb-2">
                           <span className="font-medium text-gray-700">Legal Number:</span> {law.legal_number}
                         </p>
-                        <p className="text-sm text-gray-600 mb-2">
-                          <span className="font-medium text-gray-700">Amount:</span> {formatCurrency(parseFloat(law.original_amount))}
-                        </p>
+): <p className="text-sm text-gray-600 mb-2">
+                          <span className="font-medium text-gray-700">--</span>
+                        </p>}
                         {law.url && (
                           <button
                             type="button"
@@ -858,6 +1041,40 @@ console.log('docs', docs)
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                           </svg>
                           View rental document
+                        </button>
+                        {doc.canDeleteMonthlyDocument && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteRentalMonthlyDocument(doc.rentalId)}
+                            className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium ml-4"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete document
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    {uniqueObligationPaymentDocuments.map((doc) => (
+                      <div key={doc.url} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 max-w-sm">
+                        <div className="flex justify-between items-start gap-3 mb-2">
+                          <h3 className="text-base font-semibold text-gray-900">
+                            {doc.name}
+                          </h3>
+                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+                            Payment Receipt
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDocument(doc.url)}
+                          className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          View payment receipt
                         </button>
                       </div>
                     ))}

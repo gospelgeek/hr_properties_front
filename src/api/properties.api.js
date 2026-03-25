@@ -173,6 +173,20 @@ export const uploadMedia = async (id, formData) => {
   return response.data;
 };
 
+// DELETE /api/properties/{id}/media/{mediaId}/ - Eliminar archivo multimedia de propiedad
+export const deletePropertyMedia = async (propertyId, mediaId) => {
+  const response = await api.delete(`properties/${propertyId}/media/${mediaId}/`);
+  return response.data;
+};
+
+// POST /api/properties/{id}/set_main_image/ - Establecer imagen principal desde media_id
+export const setMainPropertyImage = async (propertyId, mediaId) => {
+  const response = await api.post(`properties/${propertyId}/set_main_image/`, {
+    media_id: mediaId,
+  });
+  return response.data;
+};
+
 // POST /api/properties/{id}/add_enser/ - Añadir enser a propiedad
 export const addEnserToProperty = async (propertyId, enserData) => {
   const config = enserData instanceof FormData 
@@ -230,10 +244,16 @@ export const getPropertyFinancials = async (id) => {
 // GET protected media with auth header and open it in a new tab
 export const openProtectedMedia = async (url) => {
   const normalizedUrl = normalizeProtectedMediaUrl(url);
-  const response = await api.get(normalizedUrl, { responseType: 'blob' });
-  const blobUrl = URL.createObjectURL(response.data);
-  window.open(blobUrl, '_blank', 'noopener,noreferrer');
+  window.dispatchEvent(new CustomEvent('protected-media-loading', { detail: { isLoading: true } }));
 
-  // Delay revoke to avoid interrupting browser loading in the new tab
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+  try {
+    const response = await api.get(normalizedUrl, { responseType: 'blob' });
+    const blobUrl = URL.createObjectURL(response.data);
+    window.open(blobUrl, '_blank', 'noopener,noreferrer');
+
+    // Delay revoke to avoid interrupting browser loading in the new tab
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 120_000);
+  } finally {
+    window.dispatchEvent(new CustomEvent('protected-media-loading', { detail: { isLoading: false } }));
+  }
 };

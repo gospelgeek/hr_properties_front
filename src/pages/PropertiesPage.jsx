@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import PropertyList from '../components/Properties/PropertyList';
-import Loader from '../components/UI/Loader';
-import { getProperties, deleteProperty } from '../api/properties.api';
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast";
+import PropertyList from "../components/Properties/PropertyList";
+import Loader from "../components/UI/Loader";
+import { getProperties, deleteProperty } from "../api/properties.api";
 
 const PropertiesPage = () => {
   const [properties, setProperties] = useState([]);
@@ -11,70 +11,73 @@ const PropertiesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const isFirstLoad = useRef(true); // Para evitar doble carga al montar
-  
+
   // Filters state - SEPARADOS CORRECTAMENTE
-  const [useFilter, setUseFilter] = useState('');
-  const [rentalStatusFilter, setRentalStatusFilter] = useState(''); // Para Rental Status
-  const [rentalTypeFilter, setRentalTypeFilter] = useState(''); // Para Rental Type
+  const [useFilter, setUseFilter] = useState("");
+  const [rentalStatusFilter, setRentalStatusFilter] = useState(""); // Para Rental Status
+  const [rentalTypeFilter, setRentalTypeFilter] = useState(""); // Para Rental Type
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
 
   // Limpiar filtros de rental cuando se selecciona commercial o personal
   useEffect(() => {
-    if (useFilter === 'commercial' || useFilter === 'personal') {
-      setRentalStatusFilter('');
-      setRentalTypeFilter('');
+    if (useFilter === "commercial" || useFilter === "personal") {
+      setRentalStatusFilter("");
+      setRentalTypeFilter("");
     }
     // eslint-disable-next-line
   }, [useFilter]);
 
-// 1. Sincroniza los filtros locales con la URL SOLO al montar el componente
-useEffect(() => {
-  //console.log('searchParams on mount:', searchParams.get('status'));
-  const use = searchParams.get('use') || '';
-  const rentalStatus = searchParams.get('rental_status') || '';
-  const rentalType = searchParams.get('rental_type') || '';
-  
-  setUseFilter(use);
-  setRentalStatusFilter(rentalStatus);
-  setRentalTypeFilter(rentalType);
-  // 🚩 Carga propiedades aquí con los filtros de la URL
-  loadPropertiesFromParams(use, rentalStatus, rentalType);
-  isFirstLoad.current = false; // Ya se hizo la carga inicial
-  // eslint-disable-next-line
-}, []);
+  // 1. Sincroniza los filtros locales con la URL SOLO al montar el componente
+  useEffect(() => {
+    //console.log('searchParams on mount:', searchParams.get('status'));
+    const use = searchParams.get("use") || "";
+    const rentalStatus = searchParams.get("rental_status") || "";
+    const rentalType = searchParams.get("rental_type") || "";
 
-const loadPropertiesFromParams = async (use, rentalStatus, rentalType) => {
-  try {
-    setLoading(true);
+    setUseFilter(use);
+    setRentalStatusFilter(rentalStatus);
+    setRentalTypeFilter(rentalType);
+    // 🚩 Carga propiedades aquí con los filtros de la URL
+    loadPropertiesFromParams(use, rentalStatus, rentalType);
+    isFirstLoad.current = false; // Ya se hizo la carga inicial
+    // eslint-disable-next-line
+  }, []);
+
+  const loadPropertiesFromParams = async (use, rentalStatus, rentalType) => {
+    try {
+      setLoading(true);
+      const params = {};
+      if (use) params.use = use;
+      if (rentalStatus) params.rental_status = rentalStatus;
+      if (rentalType) params.rental_type = rentalType;
+      //console.log('🎯 PropertiesPage: Calling API with params:', params);
+      const data = await getProperties(params);
+      //console.log('✅ PropertiesPage: Received data:', data);
+      //console.log('📊 PropertiesPage: Properties count:', data.length);
+      setProperties(data);
+    } catch (error) {
+      //console.error('❌ Error loading properties:', error);
+      toast.error("Error loading properties");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 2. Cuando cambian los filtros locales, actualiza la URL y carga propiedades
+  useEffect(() => {
+    if (isFirstLoad.current) return; // Evita carga doble al montar
+
     const params = {};
-    if (use) params.use = use;
-    if (rentalStatus) params.rental_status = rentalStatus;
-    if (rentalType) params.rental_type = rentalType;
-    //console.log('🎯 PropertiesPage: Calling API with params:', params);
-    const data = await getProperties(params);
-    //console.log('✅ PropertiesPage: Received data:', data);
-    //console.log('📊 PropertiesPage: Properties count:', data.length);
-    setProperties(data);
-  } catch (error) {
-    //console.error('❌ Error loading properties:', error);
-    toast.error('Error loading properties');
-  } finally {
-    setLoading(false);
-  }
-};
+    if (useFilter) params.use = useFilter;
+    if (rentalStatusFilter) params.rental_status = rentalStatusFilter;
+    if (rentalTypeFilter) params.rental_type = rentalTypeFilter;
 
-// 2. Cuando cambian los filtros locales, actualiza la URL y carga propiedades
-useEffect(() => {
-  if (isFirstLoad.current) return; // Evita carga doble al montar
-
-  const params = {};
-  if (useFilter) params.use = useFilter;
-  if (rentalStatusFilter) params.rental_status = rentalStatusFilter;
-  if (rentalTypeFilter) params.rental_type = rentalTypeFilter;
-  
-  setSearchParams(params);
-  loadPropertiesFromParams(useFilter, rentalStatusFilter, rentalTypeFilter);
-  // eslint-disable-next-line
-}, [useFilter, rentalStatusFilter, rentalTypeFilter]);
+    setSearchParams(params);
+    loadPropertiesFromParams(useFilter, rentalStatusFilter, rentalTypeFilter);
+    // eslint-disable-next-line
+  }, [useFilter, rentalStatusFilter, rentalTypeFilter]);
 
   const loadProperties = async () => {
     try {
@@ -83,54 +86,152 @@ useEffect(() => {
       if (useFilter) params.use = useFilter;
       if (rentalStatusFilter) params.rental_status = rentalStatusFilter;
       if (rentalTypeFilter) params.rental_type = rentalTypeFilter;
-      
+
       const data = await getProperties(params);
-      console.log('Loaded properties with filters:', params, data);
+      console.log("Loaded properties with filters:", params, data);
       setProperties(data);
     } catch (error) {
-      console.error('Error loading properties:', error);
-      toast.error('Error loading properties');
+      console.error("Error loading properties:", error);
+      toast.error("Error loading properties");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    if (value.trim() === "") {
+      setSuggestions([]);
+      // Vuelve a cargar todas las propiedades
+      loadProperties();
+      return;
+    }
+
+    // Filtra por nombre o dirección (puedes ajustar según tu estructura)
+    const filtered = properties.filter((prop) => {
+      const search = value.toLowerCase();
+
+      // Búsqueda por nombre, dirección, ciudad, estado y combinaciones
+      const matchesName = prop.name?.toLowerCase().includes(search);
+      const matchesAddress = prop.address?.toLowerCase().includes(search);
+      const matchesCity = prop.city?.toLowerCase().includes(search);
+      const matchesState = prop.state?.toLowerCase().includes(search);
+      const matchesCityState =
+        prop.city && prop.state
+          ? `${prop.city.toLowerCase()}, ${prop.state.toLowerCase()}`.includes(
+              search,
+            ) ||
+            `${prop.state.toLowerCase()}, ${prop.city.toLowerCase()}`.includes(
+              search,
+            )
+          : false;
+
+      return (
+        matchesName ||
+        matchesAddress ||
+        matchesCity ||
+        matchesState ||
+        matchesCityState
+      );
+    });
+
+    setSuggestions(filtered.slice(0, 7)); // Limita a 7 sugerencias
+  };
+
   const handleDelete = async (id) => {
     try {
       await deleteProperty(id);
-      toast.success('Property deleted successfully');
+      toast.success("Property deleted successfully");
       loadProperties(); // Reload list
     } catch (error) {
-      console.error('Error deleting property:', error);
-      toast.error('Error deleting property');
+      console.error("Error deleting property:", error);
+      toast.error("Error deleting property");
     }
   };
 
   const clearAllFilters = () => {
-    setUseFilter('');
-    setRentalStatusFilter('');
-    setRentalTypeFilter('');
+    setUseFilter("");
+    setRentalStatusFilter("");
+    setRentalTypeFilter("");
     setSearchParams({});
     // La carga se disparará automáticamente por el useEffect de filtros
   };
 
   const hasActiveFilters = useFilter || rentalStatusFilter || rentalTypeFilter;
   //console.log({ useFilter, rentalStatusFilter, rentalTypeFilter });
-  
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6 sm:mb-8">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">My Properties</h1>
-          <p className="text-sm sm:text-base text-gray-600">Manage all your properties</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            My Properties
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600">
+            Manage all your properties
+          </p>
+        </div>
+        <div className="mb-4 relative flex-1 max-w-xs sm:max-w-md">
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg
+              className="w-5 h-5 text-blue-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="11" cy="11" r="8" strokeWidth="2" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
+            </svg>
+          </span>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            placeholder="Search by name or address..."
+            className="w-80 sm:w-96 pl-10 pr-4 py-2.5 rounded-lg bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 shadow-md placeholder-gray-500 text-sm font-medium transition-all duration-200 outline-none"
+          />
+          {suggestions.length > 0 && (
+            <ul className="absolute z-10 bg-white border border-gray-200 rounded-lg w-full mt-1 shadow-lg">
+              {suggestions.map((prop) => (
+                <li
+                  key={prop.id}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setSearchTerm(prop.name || prop.address);
+                    setSuggestions([]);
+                    setProperties([prop]);
+                  }}
+                >
+                  <span className="font-medium">{prop.name}</span>
+                  <span className="text-gray-500 text-xs ml-2">
+                    {prop.address}
+                    {prop.city ? `, ${prop.city}` : ""}
+                    {prop.state ? `, ${prop.state}` : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <div className="flex gap-3">
           <button
-            onClick={() => navigate('/create')}
+            onClick={() => navigate("/create")}
             className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 shadow-sm hover:shadow-md whitespace-nowrap"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             <span>New Property</span>
           </button>
@@ -142,7 +243,9 @@ useEffect(() => {
         <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
           {/* Property Use Filter */}
           <div className="flex-shrink-0">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Property Type
+            </label>
             <select
               value={useFilter}
               onChange={(e) => setUseFilter(e.target.value)}
@@ -156,145 +259,163 @@ useEffect(() => {
           </div>
 
           {/* Rental Status Filters - Solo para propiedades rental */}
-          {(!useFilter || useFilter === 'rental') && (
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Rental Status</label>
-            <div className="flex flex-wrap gap-2">
-              <label className="flex items-center cursor-pointer gap-2">
-                <input
-                  type="radio"
-                  name="rentalStatus"
-                  value=""
-                  checked={rentalStatusFilter === ''}
-                  onChange={() => setRentalStatusFilter('')}
-                  className="w-5 h-5 text-gray-600 focus:ring-gray-500 cursor-pointer"
-                />
-                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalStatusFilter === '' 
-                    ? 'bg-gray-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
-                  All
-                </span>
+          {(!useFilter || useFilter === "rental") && (
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rental Status
               </label>
-              
-              <label className="flex items-center cursor-pointer gap-2">
-                <input
-                  type="radio"
-                  name="rentalStatus"
-                  value="occupied"
-                  checked={rentalStatusFilter === 'occupied'}
-                  onChange={() => setRentalStatusFilter('occupied')}
-                  className="w-5 h-5 text-green-600 focus:ring-green-500 cursor-pointer"
-                />
-                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalStatusFilter === 'occupied' 
-                    ? 'bg-green-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
-                  Occupied
-                </span>
-              </label>
-              
-              <label className="flex items-center cursor-pointer gap-2">
-                <input
-                  type="radio"
-                  name="rentalStatus"
-                  value="available"
-                  checked={rentalStatusFilter === 'available'}
-                  onChange={() => setRentalStatusFilter('available')}
-                  className="w-5 h-5 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                />
-                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalStatusFilter === 'available' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
-                  Available
-                </span>
-              </label>
-              
-              <label className="flex items-center cursor-pointer gap-2">
-                <input
-                  type="radio"
-                  name="rentalStatus"
-                  value="ending_soon"
-                  checked={rentalStatusFilter === 'ending_soon'}
-                  onChange={() => setRentalStatusFilter('ending_soon')}
-                  className="w-5 h-5 text-yellow-600 focus:ring-yellow-500 cursor-pointer"
-                />
-                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalStatusFilter === 'ending_soon' 
-                    ? 'bg-yellow-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
-                  Ending soon
-                </span>
-              </label>
+              <div className="flex flex-wrap gap-2">
+                <label className="flex items-center cursor-pointer gap-2">
+                  <input
+                    type="radio"
+                    name="rentalStatus"
+                    value=""
+                    checked={rentalStatusFilter === ""}
+                    onChange={() => setRentalStatusFilter("")}
+                    className="w-5 h-5 text-gray-600 focus:ring-gray-500 cursor-pointer"
+                  />
+                  <span
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      rentalStatusFilter === ""
+                        ? "bg-gray-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    All
+                  </span>
+                </label>
+
+                <label className="flex items-center cursor-pointer gap-2">
+                  <input
+                    type="radio"
+                    name="rentalStatus"
+                    value="occupied"
+                    checked={rentalStatusFilter === "occupied"}
+                    onChange={() => setRentalStatusFilter("occupied")}
+                    className="w-5 h-5 text-green-600 focus:ring-green-500 cursor-pointer"
+                  />
+                  <span
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      rentalStatusFilter === "occupied"
+                        ? "bg-green-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Occupied
+                  </span>
+                </label>
+
+                <label className="flex items-center cursor-pointer gap-2">
+                  <input
+                    type="radio"
+                    name="rentalStatus"
+                    value="available"
+                    checked={rentalStatusFilter === "available"}
+                    onChange={() => setRentalStatusFilter("available")}
+                    className="w-5 h-5 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      rentalStatusFilter === "available"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Available
+                  </span>
+                </label>
+
+                <label className="flex items-center cursor-pointer gap-2">
+                  <input
+                    type="radio"
+                    name="rentalStatus"
+                    value="ending_soon"
+                    checked={rentalStatusFilter === "ending_soon"}
+                    onChange={() => setRentalStatusFilter("ending_soon")}
+                    className="w-5 h-5 text-yellow-600 focus:ring-yellow-500 cursor-pointer"
+                  />
+                  <span
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      rentalStatusFilter === "ending_soon"
+                        ? "bg-yellow-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Ending soon
+                  </span>
+                </label>
+              </div>
             </div>
-          </div>
           )}
 
           {/* Rental Type Filters - Solo para propiedades rental */}
-          {(!useFilter || useFilter === 'rental') && (
-          <div className="flex-shrink-0">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Rental Type</label>
-            <div className="flex flex-wrap gap-2">
-              <label className="flex items-center cursor-pointer gap-2">
-                <input
-                  type="radio"
-                  name="rentalType"
-                  value=""
-                  checked={rentalTypeFilter === ''}
-                  onChange={() => setRentalTypeFilter('')}
-                  className="w-5 h-5 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                />
-                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalTypeFilter === '' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
-                  All
-                </span>
+          {(!useFilter || useFilter === "rental") && (
+            <div className="flex-shrink-0">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rental Type
               </label>
-              
-              <label className="flex items-center cursor-pointer gap-2">
-                <input
-                  type="radio"
-                  name="rentalType"
-                  value="monthly"
-                  checked={rentalTypeFilter === 'monthly'}
-                  onChange={() => setRentalTypeFilter('monthly')}
-                  className="w-5 h-5 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                />
-                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalTypeFilter === 'monthly' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
-                  Monthly
-                </span>
-              </label>
-              
-              <label className="flex items-center cursor-pointer gap-2">
-                <input
-                  type="radio"
-                  name="rentalType"
-                  value="airbnb"
-                  checked={rentalTypeFilter === 'airbnb'}
-                  onChange={() => setRentalTypeFilter('airbnb')}
-                  className="w-5 h-5 text-pink-600 focus:ring-pink-500 cursor-pointer"
-                />
-                <span className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  rentalTypeFilter === 'airbnb' 
-                    ? 'bg-pink-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
-                  Airbnb
-                </span>
-              </label>
+              <div className="flex flex-wrap gap-2">
+                <label className="flex items-center cursor-pointer gap-2">
+                  <input
+                    type="radio"
+                    name="rentalType"
+                    value=""
+                    checked={rentalTypeFilter === ""}
+                    onChange={() => setRentalTypeFilter("")}
+                    className="w-5 h-5 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      rentalTypeFilter === ""
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    All
+                  </span>
+                </label>
+
+                <label className="flex items-center cursor-pointer gap-2">
+                  <input
+                    type="radio"
+                    name="rentalType"
+                    value="monthly"
+                    checked={rentalTypeFilter === "monthly"}
+                    onChange={() => setRentalTypeFilter("monthly")}
+                    className="w-5 h-5 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <span
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      rentalTypeFilter === "monthly"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Monthly
+                  </span>
+                </label>
+
+                <label className="flex items-center cursor-pointer gap-2">
+                  <input
+                    type="radio"
+                    name="rentalType"
+                    value="airbnb"
+                    checked={rentalTypeFilter === "airbnb"}
+                    onChange={() => setRentalTypeFilter("airbnb")}
+                    className="w-5 h-5 text-pink-600 focus:ring-pink-500 cursor-pointer"
+                  />
+                  <span
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      rentalTypeFilter === "airbnb"
+                        ? "bg-pink-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Airbnb
+                  </span>
+                </label>
+              </div>
             </div>
-          </div>
           )}
         </div>
 
@@ -305,8 +426,18 @@ useEffect(() => {
               onClick={clearAllFilters}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
               Clear all filters
             </button>
