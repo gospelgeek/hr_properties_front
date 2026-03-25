@@ -53,7 +53,7 @@ const handleCreateTenant = async (tenantData) => {
       //console.log('Tenant creado exitosamente:', newTenant);
       toast.success('Tenant created successfully');
       await loadTenants(); // Recargar lista de tenants
-      setValue('tenant', newTenant.id); // Seleccionar automáticamente el nuevo tenant
+      setValue('tenant', String(newTenant.id), { shouldDirty: true, shouldValidate: true }); // Seleccionar automáticamente el nuevo tenant
       setIsModalOpen(false);
     } catch (error) {
       //console.error('Error completo creating tenant:', error);
@@ -152,7 +152,6 @@ const handleCreateTenant = async (tenantData) => {
             type="number"
             step="0.01"
             {...register('amount', { required: 'Amount is required', min: { value: 0, message: 'Must be positive' } })}
-            value={initialData.amount ? initialData.amount : ''}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="0.00"
           />
@@ -175,7 +174,6 @@ const handleCreateTenant = async (tenantData) => {
                 type="number"
                 step="0.01"
                 {...register('deposit_amount', { required: 'Deposit amount is required', min: { value: 0, message: 'Must be positive' } })}
-                value={initialData?.monthly_data?.deposit_amount }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0.00"
               />
@@ -234,7 +232,6 @@ const handleCreateTenant = async (tenantData) => {
                 <select
                   {...register('tenant', { required: addTenant ? 'You must select a tenant' : false })}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={initialData.tenant ? initialData.tenant:''}
                 >
                   <option value="">Select a tenant...</option>
                   {tenants.map((tenant) => (

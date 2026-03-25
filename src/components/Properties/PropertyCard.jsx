@@ -4,12 +4,10 @@ import casaImg from "../../assets/casa.png";
 const PropertyCard = ({
   property,
   rental = [],
-  onDelete,
   showRestoreButton = false,
   onRestore,
   isPublic = false,
 }) => {
-  const isActive = showRestoreButton ? false : property.is_deleted !== null;
   const getUseBadge = () => {
     const useValue = String(property.use || "").toLowerCase();
 
@@ -21,13 +19,24 @@ const PropertyCard = ({
       return { text: "Personal", color: "bg-emerald-100 text-emerald-800" };
     }
 
+    if (useValue === "commercial" && property.rental_type) {
+      return { text: "Commercial Rental", color: "bg-pink-100 text-pink-800" };
+    }
+
     if (useValue === "commercial") {
       return { text: "Commercial", color: "bg-amber-100 text-amber-800" };
     }
-    if (useValue === "commercial" && property.use === "rental") {
-      return { text: "Commercial Rental", color: "bg-pink-100 text-pink-800" };
-    }
+
+    return { text: "Unknown", color: "bg-gray-100 text-gray-700" };
   };
+
+  const useBadge = getUseBadge();
+  const rentals = Array.isArray(rental) ? rental : [];
+  const activeRental =
+    rentals.find((item) => String(item?.status || "").toLowerCase() === "occupied") ||
+    rentals[0] ||
+    null;
+  const tenant = activeRental?.tenant || null;
 
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 overflow-hidden flex flex-col h-full">
@@ -53,9 +62,9 @@ const PropertyCard = ({
             {property.name || property.address}
           </h2>
           <span
-            className={`px-3 py-1 text-xs font-medium rounded-full ${getUseBadge().color}`}
+            className={`px-3 py-1 text-xs font-medium rounded-full ${useBadge.color}`}
           >
-            {getUseBadge().text}
+            {useBadge.text}
           </span>
         </div>
 
@@ -212,7 +221,7 @@ const PropertyCard = ({
               <div className="flex flex-col flex-1">
                 <div className="flex justify-between items-start mb-4">
                   
-                  {rental.length === 0 && property.use !== "personal" ? (
+                  {!activeRental && property.use !== "personal" ? (
                     <h3 className="text-base font-semibold text-gray-600">
                       Available
                     </h3>
@@ -220,7 +229,7 @@ const PropertyCard = ({
                     <h3 className="text-base font-semibold text-gray-600">
                       Personal Use
                     </h3>
-                  ) : property.use === 'rental' ? (
+                  ) : activeRental && !tenant ? (
                     <h3 className="text-base font-semibold text-gray-600">
                       Rented and no tenant information available
                     </h3>
@@ -228,12 +237,12 @@ const PropertyCard = ({
                     <div className=" mb-2 ">
                       <div className="flex items-center gap-3 pb-2">
                         <span className="text-base font-semibold text-gray-600">
-                          Tenant: {rental[0].tenant.name}
+                          Tenant: {tenant?.name || "No tenant name"}
                         </span>
                         {/* Correo */}
-                        {rental[0].tenant.email ?(
+                        {tenant?.email ?(
                           <a
-                            href={`https://mail.google.com/mail/?view=cm&to=${rental[0].tenant.email}`}
+                            href={`https://mail.google.com/mail/?view=cm&to=${tenant.email}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             title="Email"
@@ -262,9 +271,9 @@ const PropertyCard = ({
                           <span className="text-gray-400 italic text-sm">No email</span>
                         )}
                         {/* WhatsApp */}
-                        {rental[0].tenant.phone1 && (
+                        {tenant?.phone1 && (
                           <a
-                            href={`https://wa.me/${rental[0].tenant.phone1}`}
+                            href={`https://wa.me/${tenant.phone1}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             title="WhatsApp"
@@ -279,9 +288,9 @@ const PropertyCard = ({
                           </a>
                         )}
                         {/* SMS */}
-                        {rental[0].tenant.phone1 && (
+                        {tenant?.phone1 && (
                           <a
-                            href={`sms:${rental[0].tenant.phone1}`}
+                            href={`sms:${tenant.phone1}`}
                             title="SMS"
                           >
                             <svg
@@ -300,9 +309,9 @@ const PropertyCard = ({
                           </a>
                         )}
                         {/* Teléfono */}
-                        {rental[0].tenant.phone1 && (
+                        {tenant?.phone1 && (
                           <a
-                            href={`tel:${rental[0].tenant.phone1}`}
+                            href={`tel:${tenant.phone1}`}
                             title="Call"
                           >
                             <svg
@@ -343,7 +352,7 @@ const PropertyCard = ({
                               d="M16 17l2 2 2-2"
                             />
                           </svg>
-                          {rental[0].check_in}
+                          {activeRental?.check_in}
                         </span>
                         <span className="flex items-center">
                           {/* Icono de check-out (puerta de salida) */}
@@ -366,11 +375,11 @@ const PropertyCard = ({
                               d="M8 17l-2-2 2-2"
                             />
                           </svg>
-                          {rental[0].check_out}
+                          {activeRental?.check_out}
                         </span>
                       </div>
                       <h2 className="text-base font-semibold text-gray-600 pb-2">
-                        Amount: {rental[0].amount}
+                        Amount: {activeRental?.amount}
                       </h2>
                     </div>
                   )}
