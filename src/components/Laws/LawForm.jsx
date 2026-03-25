@@ -54,40 +54,13 @@ const LawForm = ({ initialData, onSubmit, isLoading }) => {
           </label>
           <input
             type="text"
-            {...register('legal_number', { required: 'The legal number is required' })}
+            {...register('legal_number')}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400"
             placeholder="Eg: 123243"
           />
           {errors.legal_number && (
             <p className="text-sm text-red-600">{errors.legal_number.message}</p>
           )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-900">
-            Original Amount *
-          </label>
-          <input
-            type="number"
-            step="0.01"
-            {...register('original_amount', { required: 'The original amount is required' })}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400"
-            placeholder="Eg: 500000000.00"
-          />
-          {errors.original_amount && (
-            <p className="text-sm text-red-600">{errors.original_amount.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              {...register('is_paid')}
-              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-            />
-            <span className="text-sm font-semibold text-gray-900">Is Paid?</span>
-          </label>
         </div>
 
         <div className="space-y-2">

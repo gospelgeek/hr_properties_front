@@ -17,11 +17,13 @@ const PaymentForm = ({ onSubmit, isLoading, maxAmount }) => {
 const paymentMethod = watch('payment_method');
   useEffect(() => {
     loadPaymentMethods();
+
   }, []);
 
   const loadPaymentMethods = async () => {
     try {
       const data = await getPaymentMethods();
+      console.log('Loaded payment methods:', data);
       setPaymentMethods(data);
     } catch (error) {
       console.error('Error loading payment methods:', error);
@@ -91,7 +93,7 @@ const handlePaymentSubmit = async (data) => {
           >
             <option value="">Select method...</option>
             {paymentMethods
-            .filter((method)=> method.name == 'cash' || method.name == 'transfer' || method.name == 'card' || method.name == 'check' || method.name == 'zelle')
+            .filter((method)=> method.name == 'cash' || method.name == 'transfer' || method.name == 'card' || method.name == 'check' || method.name == 'zelle' || method.name == 'checking account')
             .map((method) => (
               <option key={method.id} value={method.id}>{method.name.charAt(0).toUpperCase()+method.name.slice(1)}</option>
             ))}

@@ -3,12 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Loader from '../components/UI/Loader';
 import PaymentForm from '../components/Finance/PaymentForm';
+import PaymentEditModal from '../components/Finance/PaymentEditModal';
+import ObligationEditModal from '../components/Finance/ObligationEditModal';
 import { 
   getPropertyObligation,
   getObligation,
   addPaymentToObligation, 
   getObligationPayments,
-  deleteObligationPayment 
+  deleteObligationPayment,
+  updatePropertyObligation,
+  updateObligationPayment
 } from '../api/finance.api';
 import { getProperty, openProtectedMedia } from '../api/properties.api';
 
@@ -49,6 +53,11 @@ const ObligationDetailPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [expandedPaymentId, setExpandedPaymentId] = useState(null);
+const [editingObligation, setEditingObligation] = useState(null);
+const [isSavingObligation, setIsSavingObligation] = useState(false);
+const [editingPayment, setEditingPayment] = useState(null);
+const [isSavingPayment, setIsSavingPayment] = useState(false);
+
 
   const loadData = useCallback(async () => {
     try {
@@ -123,6 +132,57 @@ const ObligationDetailPage = () => {
     }
   };
 
+const handleEditObligation = () => setEditingObligation(obligation);
+const handleEditPayment = (payment) => setEditingPayment(payment);
+
+  const handleSaveObligation = async (updatedObligation) => {
+  try {
+    const propertyId = id || obligation?.property;
+    if (!propertyId || !obligationId) {
+      toast.error('Missing property or obligation reference');
+      return;
+    }
+
+    setIsSavingObligation(true);
+    const payload = {
+      obligation_type: Number(updatedObligation.obligation_type),
+      entity_name: updatedObligation.entity_name,
+      amount: Number(updatedObligation.amount),
+      due_date: updatedObligation.due_date,
+      temporality: updatedObligation.temporality,
+    };
+
+    await updatePropertyObligation(propertyId, obligationId, payload);
+    await loadData();
+    toast.success("Obligación actualizada");
+    setEditingObligation(null); // Cierra el modal
+  } catch (error) {
+    toast.error(getErrorMessage(error, 'Error updating obligation'));
+  } finally {
+    setIsSavingObligation(false);
+  }
+};
+
+  const handleSavePayment = async (updatedPayment) => {
+    try {
+      const propertyId = id || obligation?.property;
+      if (!propertyId || !obligationId || !editingPayment?.id) {
+        toast.error('Missing payment reference');
+        return;
+      }
+
+      setIsSavingPayment(true);
+      await updateObligationPayment(propertyId, obligationId, editingPayment.id, updatedPayment);
+      await loadData();
+      toast.success('Payment updated successfully');
+      setEditingPayment(null);
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Error updating payment'));
+    } finally {
+      setIsSavingPayment(false);
+    }
+  };
+
     const handleOpenDocument = async (url) => {
       try {
         await openProtectedMedia(url);
@@ -167,7 +227,30 @@ const ObligationDetailPage = () => {
           </svg>
           {id ? 'Back to Property' : 'Back to Obligations'}
         </button>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Obligation Detail</h1>
+
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Obligation Detail</h1>
+          <button
+            onClick={handleEditObligation}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            Edit Obligation
+          </button>
+        </div>
+
         {property && (
           <p className="text-sm sm:text-base text-gray-600">
             Property: <span className="font-semibold">{property?.name || property?.address}</span>
@@ -306,20 +389,38 @@ const ObligationDetailPage = () => {
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <p className="font-semibold text-gray-900">{formatCurrency(payment.amount)}</p>
-                    {/* Botón de eliminar solo en modo expandido */}
+
                     {expandedPaymentId === payment.id && (
-                      <button
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleDeletePayment(payment.id);
-                        }}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete Payment"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                      <div className="flex items-center gap-1">
+                        {console.log('Payment to edit:', payment)}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditPayment(payment);
+                          }}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit Payment"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeletePayment(payment.id);
+                          }}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete Payment"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -353,6 +454,24 @@ const ObligationDetailPage = () => {
           </div>
         )}
       </div>
+
+      {editingObligation && (
+        <ObligationEditModal
+          obligation={editingObligation}
+          onClose={() => setEditingObligation(null)}
+          onSave={handleSaveObligation}
+          isLoading={isSavingObligation}
+        />
+      )}
+
+      {editingPayment && (
+        <PaymentEditModal
+          payment={editingPayment}
+          onClose={() => setEditingPayment(null)}
+          onSave={handleSavePayment}
+          isLoading={isSavingPayment}
+        />
+      )}
     </div>
   );
 };

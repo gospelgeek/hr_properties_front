@@ -312,6 +312,12 @@ export const deletePropertyRental = async (propertyId, rentalId) => {
   return response.data;
 };
 
+// POST /api/properties/{id}/rentals/{rental_id}/remove_document/ - Eliminar solo documento mensual del rental
+export const removeRentalMonthlyDocument = async (propertyId, rentalId) => {
+  const response = await api.post(`properties/${propertyId}/rentals/${rentalId}/remove_document/`, {});
+  return response.data;
+};
+
 // ═══════════════════════════════════════════════════════════════════════
 // PAGOS DE RENTALS
 // ═══════════════════════════════════════════════════════════════════════

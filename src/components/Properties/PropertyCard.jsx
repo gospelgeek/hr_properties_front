@@ -231,7 +231,7 @@ const PropertyCard = ({
                           Tenant: {rental[0].tenant.name}
                         </span>
                         {/* Correo */}
-                        {rental[0].tenant.email && (
+                        {rental[0].tenant.email ?(
                           <a
                             href={`https://mail.google.com/mail/?view=cm&to=${rental[0].tenant.email}`}
                             target="_blank"
@@ -258,6 +258,8 @@ const PropertyCard = ({
                               />
                             </svg>
                           </a>
+                        ):(
+                          <span className="text-gray-400 italic text-sm">No email</span>
                         )}
                         {/* WhatsApp */}
                         {rental[0].tenant.phone1 && (

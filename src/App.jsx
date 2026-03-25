@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -41,6 +41,26 @@ import RentalDetailPage from "./pages/RentalDetailPage";
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function App() {
+  const [mediaLoadingCount, setMediaLoadingCount] = useState(0);
+
+  useEffect(() => {
+    const handleMediaLoading = (event) => {
+      const isLoading = Boolean(event?.detail?.isLoading);
+      setMediaLoadingCount((prev) => {
+        if (isLoading) {
+          return prev + 1;
+        }
+        return Math.max(0, prev - 1);
+      });
+    };
+
+    window.addEventListener("protected-media-loading", handleMediaLoading);
+
+    return () => {
+      window.removeEventListener("protected-media-loading", handleMediaLoading);
+    };
+  }, []);
+
   //console.log('App.jsx renderizado');
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
@@ -294,6 +314,15 @@ function App() {
               },
             }}
           />
+
+          {mediaLoadingCount > 0 && (
+            <div className="fixed inset-0 z-[9999] bg-black/30 backdrop-blur-[1px] flex items-center justify-center pointer-events-auto">
+              <div className="bg-white rounded-xl shadow-xl border border-gray-200 px-5 py-4 flex items-center gap-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-200 border-t-blue-600"></div>
+                <p className="text-sm font-medium text-gray-800">Opening document...</p>
+              </div>
+            </div>
+          )}
         </AuthProvider>
       </Router>
     </GoogleOAuthProvider>

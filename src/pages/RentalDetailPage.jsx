@@ -4,12 +4,14 @@ import toast from "react-hot-toast";
 import Loader from "../components/UI/Loader";
 import PaymentForm from "../components/Finance/PaymentForm";
 import { useAuth } from "../context/AuthContext";
+import PaymentEditModal from "../components/Finance/PaymentEditModal";
 import {
   getPropertyRental,
   addPaymentToRental,
   getRentalPayments,
   getRentalPaymentsDirect,
   deleteRentalPayment,
+  updateRentalPayment
 } from "../api/rentals.api";
 import { getProperty, openProtectedMedia } from "../api/properties.api";
 
@@ -24,6 +26,8 @@ const RentalDetailPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [expandedPaymentId, setExpandedPaymentId] = useState(null);
+  const [editingPayment, setEditingPayment] = useState(null);
+  const [isSavingPayment, setIsSavingPayment] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -124,6 +128,26 @@ const RentalDetailPage = () => {
           error.response?.data ||
           "Error deleting payment",
       );
+    }
+  };
+const handleEditPayment = (payment) => setEditingPayment(payment);
+   const handleSavePayment = async (updatedPayment) => {
+    try {
+      const propertyId = id || rental?.property;
+      if (!propertyId || !rentalId || !editingPayment?.id) {
+        toast.error('Missing payment reference');
+        return;
+      }
+
+      setIsSavingPayment(true);
+      await updateRentalPayment(propertyId, rentalId, editingPayment.id, updatedPayment);
+      await loadData();
+      toast.success('Payment updated successfully');
+      setEditingPayment(null);
+    } catch (error) {
+      toast.error(error, 'Error updating payment');
+    } finally {
+      setIsSavingPayment(false);
     }
   };
 
@@ -504,6 +528,22 @@ const RentalDetailPage = () => {
                     </p>
                     {/* Botón de eliminar solo en modo expandido y si es admin */}
                     {expandedPaymentId === payment.id && isAdmin() && (
+                      <div className="flex items-center gap-1">
+                        {console.log('Payment to edit:', payment)}
+                       <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditPayment(payment);
+                          }}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit Payment"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -526,6 +566,7 @@ const RentalDetailPage = () => {
                           />
                         </svg>
                       </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -593,6 +634,14 @@ const RentalDetailPage = () => {
           </div>
         )}
       </div>
+        {editingPayment && (
+        <PaymentEditModal
+          payment={editingPayment}
+          onClose={() => setEditingPayment(null)}
+          onSave={handleSavePayment}
+          isLoading={isSavingPayment}
+        />
+      )}
     </div>
   );
 };
