@@ -95,7 +95,7 @@ const ObligationCard = ({ obligation, propertyId }) => {
 
       <button
         onClick={() => navigate(propertyId ? `/property/${propertyId}/obligations/${obligation.id}` : `/obligations/${obligation.id}`)}
-        className="w-full bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors py-2 text-sm font-medium"
+        className="cursor-pointer w-full bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors py-2 text-sm font-medium"
       >
         View Details and Payments
       </button>

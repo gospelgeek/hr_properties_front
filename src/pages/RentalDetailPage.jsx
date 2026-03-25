@@ -373,7 +373,7 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
                       onClick={() =>
                         handleOpenDocument(rental.monthly_records[0].url_files)
                       }
-                      className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                      className="cursor-pointer text-blue-600 hover:text-blue-700 flex items-center gap-1"
                     >
                       <svg
                         className="w-4 h-4"
@@ -608,7 +608,7 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
                           onClick={() =>
                             handleOpenDocument(payment.voucher_url)
                           }
-                          className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                          className="cursor-pointer text-blue-600 hover:text-blue-700 flex items-center gap-1"
                         >
                           <svg
                             className="w-4 h-4"
