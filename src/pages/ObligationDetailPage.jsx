@@ -43,6 +43,14 @@ const getErrorMessage = (error, fallbackMessage) => {
   return error?.message || fallbackMessage;
 };
 
+const toCents = (value) => {
+  const numeric = Number(value || 0);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.round(numeric * 100);
+};
+
+const fromCents = (value) => value / 100;
+
 const ObligationDetailPage = () => {
   const { id, obligationId } = useParams();
   const navigate = useNavigate();
@@ -195,12 +203,21 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(value);
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('es-CO', {
+    if (!dateString) return '';
+
+    // Parse YYYY-MM-DD as local date to avoid timezone shifting one day back.
+    const match = String(dateString).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const date = match
+      ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+      : new Date(dateString);
+
+    return date.toLocaleDateString('es-CO', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -210,10 +227,14 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
   if (loading) return <Loader />;
   if (!obligation) return null;
 
-  const totalPaid = payments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-  const pending = obligation.amount - totalPaid;
-  const isCompleted = pending <= 0;
-  const progress = obligation.amount > 0 ? (totalPaid / obligation.amount) * 100 : 0;
+  const obligationAmountCents = toCents(obligation.amount);
+  const totalPaidCents = obligation.total_paid ? toCents(obligation.total_paid) : obligation.payments.reduce((sum, p) => sum + toCents(p.amount), 0);
+  const pendingCents = Math.max(0, obligationAmountCents - totalPaidCents);
+
+  const totalPaid = fromCents(totalPaidCents);
+  const pending = fromCents(pendingCents);
+  const isCompleted = pendingCents <= 0;
+  const progress = obligationAmountCents > 0 ? (totalPaidCents / obligationAmountCents) * 100 : 0;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -322,7 +343,7 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
               <PaymentForm 
                 onSubmit={handleAddPayment} 
                 isLoading={isSubmitting}
-                maxAmount={pending}
+                maxAmount={Number(pending.toFixed(2))}
               />
               <button
                 onClick={() => setShowPaymentForm(false)}

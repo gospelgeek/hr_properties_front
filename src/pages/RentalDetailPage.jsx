@@ -15,6 +15,14 @@ import {
 } from "../api/rentals.api";
 import { getProperty, openProtectedMedia } from "../api/properties.api";
 
+const toCents = (value) => {
+  const numeric = Number(value || 0);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.round(numeric * 100);
+};
+
+const fromCents = (value) => value / 100;
+
 const RentalDetailPage = () => {
   const { id, rentalId } = useParams();
   const navigate = useNavigate();
@@ -163,7 +171,8 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
-      minimumFractionDigits: 0,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(value);
   };
 
@@ -178,12 +187,13 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
   if (loading) return <Loader />;
   if (!rental) return null;
 
-  const totalPaid = payments.reduce(
-    (sum, p) => sum + parseFloat(p.amount || 0),
-    0,
-  );
-  const pending = rental.amount - totalPaid;
-  const isCompleted = pending <= 0;
+  const rentalAmountCents = toCents(rental.amount);
+  const totalPaidCents = payments.reduce((sum, p) => sum + toCents(p.amount), 0);
+  const pendingCents = Math.max(0, rentalAmountCents - totalPaidCents);
+
+  const totalPaid = fromCents(totalPaidCents);
+  const pending = fromCents(pendingCents);
+  const isCompleted = pendingCents <= 0;
 
   const getStatus = () => {
     // Si no hay tenant o fechas, está disponible
@@ -446,7 +456,7 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
               <PaymentForm
                 onSubmit={handleAddPayment}
                 isLoading={isSubmitting}
-                maxAmount={pending}
+                maxAmount={Number(pending.toFixed(2))}
               />
               <button
                 onClick={() => setShowPaymentForm(false)}

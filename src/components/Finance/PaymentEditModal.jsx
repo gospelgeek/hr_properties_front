@@ -4,6 +4,31 @@ import toast from 'react-hot-toast';
 import { getPaymentMethods } from '../../api/finance.api';
 import { openProtectedMedia } from '../../api/properties.api';
 
+const parseAmountInput = (value) => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : NaN;
+  }
+
+  const raw = String(value ?? '').trim().replace(/\s/g, '');
+  if (!raw) return NaN;
+
+  const lastComma = raw.lastIndexOf(',');
+  const lastDot = raw.lastIndexOf('.');
+  const decimalSeparator = lastComma > lastDot ? ',' : '.';
+
+  let normalized = raw;
+  if (lastComma !== -1 || lastDot !== -1) {
+    if (decimalSeparator === ',') {
+      normalized = raw.replace(/\./g, '').replace(',', '.');
+    } else {
+      normalized = raw.replace(/,/g, '');
+    }
+  }
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : NaN;
+};
+
 const getPaymentMethodId = (paymentMethod) => {
   if (paymentMethod == null) return '';
   if (typeof paymentMethod === 'object') {
@@ -78,6 +103,14 @@ function PaymentEditModal({ payment, onClose, onSave, isLoading = false }) {
   const submitPayment = async (data) => {
     const selectedMethod = paymentMethods.find((m) => String(m.id) === String(data.payment_method));
     const isCashMethod = selectedMethod?.name?.toLowerCase() === 'cash';
+    const parsedAmount = parseAmountInput(data.amount);
+
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      toast.error('Enter a valid amount');
+      return;
+    }
+
+    const normalizedAmount = Number(parsedAmount.toFixed(2));
 
     if (!isCashMethod) {
       data.payment_location = 'online';
@@ -87,7 +120,7 @@ function PaymentEditModal({ payment, onClose, onSave, isLoading = false }) {
       const formData = new FormData();
       formData.append('payment_method', Number(data.payment_method));
       formData.append('payment_location', data.payment_location);
-      formData.append('amount', Number(data.amount));
+      formData.append('amount', normalizedAmount.toFixed(2));
       formData.append('date', data.date);
       formData.append('voucher_url', data.voucher_url[0]);
       await onSave(formData);
@@ -97,7 +130,7 @@ function PaymentEditModal({ payment, onClose, onSave, isLoading = false }) {
     const payload = {
       payment_method: Number(data.payment_method),
       payment_location: data.payment_location,
-      amount: Number(data.amount),
+      amount: normalizedAmount,
       date: data.date,
     };
 
@@ -172,15 +205,19 @@ function PaymentEditModal({ payment, onClose, onSave, isLoading = false }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Amount *</label>
             <input
-              type="number"
-              step="0.01"
-              min="0.01"
+              type="text"
+              inputMode="decimal"
               {...register('amount', {
                 required: 'The amount is required',
-                min: { value: 0.01, message: 'The amount must be greater than 0' },
+                validate: (value) => {
+                  const parsed = parseAmountInput(value);
+                  if (!Number.isFinite(parsed)) return 'Enter a valid amount';
+                  if (parsed <= 0) return 'The amount must be greater than 0';
+                  return true;
+                },
               })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="0.00"
+              placeholder="0.00 o 1.999,98"
             />
             {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>}
           </div>
