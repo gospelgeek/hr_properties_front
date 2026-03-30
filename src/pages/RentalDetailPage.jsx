@@ -23,6 +23,90 @@ const toCents = (value) => {
 
 const fromCents = (value) => value / 100;
 
+const formatApiError = (error, formatCurrency, fallbackMessage) => {
+  const responseData = error?.response?.data;
+
+  if (!responseData) {
+    return fallbackMessage;
+  }
+
+  if (typeof responseData === "string") {
+    return responseData;
+  }
+
+  if (typeof responseData.error === "string") {
+    if (responseData.error === "Payment exceeds the rental expected amount") {
+      return `${responseData.error}. Pending: ${formatCurrency(responseData.pending)}. Attempted: ${formatCurrency(responseData.attempted)}.`;
+    }
+
+    return responseData.error;
+  }
+
+  if (typeof responseData.detail === "string") {
+    return responseData.detail;
+  }
+
+  const entries = Object.entries(responseData)
+    .map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return `${key}: ${value.join(", ")}`;
+      }
+
+      if (value && typeof value === "object") {
+        return `${key}: ${JSON.stringify(value)}`;
+      }
+
+      return `${key}: ${String(value)}`;
+    })
+    .join(" | ");
+
+  return entries || fallbackMessage;
+};
+
+const normalizePaymentsPayload = (paymentsResponse, rentalData) => {
+  const paymentsArray = Array.isArray(paymentsResponse)
+    ? paymentsResponse
+    : Array.isArray(paymentsResponse?.payments)
+      ? paymentsResponse.payments
+      : Array.isArray(paymentsResponse?.results)
+        ? paymentsResponse.results
+        : [];
+
+  const expectedTotalFromApi = paymentsResponse?.expected_total;
+  const expectedTotalCents = toCents(
+    expectedTotalFromApi ?? rentalData?.total_amount ?? rentalData?.amount,
+  );
+
+  const totalPaidFromApi = paymentsResponse?.total_paid;
+  const computedTotalPaidCents = paymentsArray.reduce(
+    (sum, payment) => sum + toCents(payment.amount),
+    0,
+  );
+  const totalPaidCents =
+    totalPaidFromApi != null ? toCents(totalPaidFromApi) : computedTotalPaidCents;
+
+  const pendingFromApi = paymentsResponse?.pending;
+  const pendingCents =
+    pendingFromApi != null
+      ? Math.max(0, toCents(pendingFromApi))
+      : Math.max(0, expectedTotalCents - totalPaidCents);
+
+  const isFullyPaidFromApi = paymentsResponse?.is_fully_paid;
+
+  return {
+    payments: paymentsArray,
+    summary: {
+      expectedTotal: fromCents(expectedTotalCents),
+      totalPaid: fromCents(totalPaidCents),
+      pending: fromCents(pendingCents),
+      isFullyPaid:
+        typeof isFullyPaidFromApi === "boolean"
+          ? isFullyPaidFromApi
+          : pendingCents <= 0,
+    },
+  };
+};
+
 const RentalDetailPage = () => {
   const { id, rentalId } = useParams();
   const navigate = useNavigate();
@@ -36,6 +120,12 @@ const RentalDetailPage = () => {
   const [expandedPaymentId, setExpandedPaymentId] = useState(null);
   const [editingPayment, setEditingPayment] = useState(null);
   const [isSavingPayment, setIsSavingPayment] = useState(false);
+  const [paymentSummary, setPaymentSummary] = useState({
+    expectedTotal: 0,
+    totalPaid: 0,
+    pending: 0,
+    isFullyPaid: false,
+  });
 
   const loadData = useCallback(async () => {
     try {
@@ -48,22 +138,20 @@ const RentalDetailPage = () => {
           getPropertyRental(id, rentalId),
           getRentalPayments(id, rentalId),
         ]);
+        console.log('rentalData:', rentalData);
         setProperty(propData);
         setRental(rentalData);
-        console.log("Admin - rentalData:", rentalData);
-        //console.log('Admin - paymentsData:', paymentsData);
-        setPayments(
-          Array.isArray(paymentsData)
-            ? paymentsData
-            : paymentsData.results || [],
-        );
+
+        const normalized = normalizePaymentsPayload(paymentsData, rentalData);
+        setPayments(normalized.payments);
+        setPaymentSummary(normalized.summary);
       } else {
         // Si es cliente, usa solo el endpoint de payments que ya incluye todo
         const paymentsData = await getRentalPaymentsDirect(rentalId);
 
         //console.log('Client - paymentsData completa:', paymentsData);
 
-        // El endpoint devuelve { payments: [...], count, total_paid, rental: {...} }
+        // El endpoint devuelve { payments: [...], count, total_paid, expected_total, pending, is_fully_paid, rental: {...} }
         setRental(paymentsData.rental);
 
         // Extraer info de property del objeto rental
@@ -73,15 +161,13 @@ const RentalDetailPage = () => {
           address: paymentsData.rental.property?.address || "",
         });
 
-        setPayments(paymentsData.payments || []);
+        const normalized = normalizePaymentsPayload(paymentsData, paymentsData.rental);
+        setPayments(normalized.payments);
+        setPaymentSummary(normalized.summary);
       }
     } catch (error) {
       console.error("Error loading data:", error);
-      toast.error(
-        error.response?.data?.error ||
-          error.response?.data ||
-          "Error loading rental",
-      );
+      toast.error(formatApiError(error, formatCurrency, "Error loading rental"));
       navigate(`/rentals`);
     } finally {
       setLoading(false);
@@ -96,31 +182,23 @@ const RentalDetailPage = () => {
     try {
       setIsSubmitting(true);
       // Si data ya es FormData,mandar directo
-    if (data instanceof FormData) {
-      //for (let pair of data.entries()) {
-        //console.log("FormData entry:", pair[0], pair[1]);
-      //}
-      await addPaymentToRental(id, rentalId, data);
-    } else {
-      // Si no, es JSON normal
-      await addPaymentToRental(id, rentalId, data);
-    }
+      if (data instanceof FormData) {
+        await addPaymentToRental(id, rentalId, data);
+      } else {
+        // Si no, es JSON normal
+        await addPaymentToRental(id, rentalId, data);
+      }
 
-    toast.success("Payment added successfully");
-    setShowPaymentForm(false);
-    loadData();
-  } catch (error) {
-    console.error("Error adding payment:", error);
-    console.log("Error response data:", error.response);
-    toast.error(
-      error.response?.data?.error ||
-        error.response?.data ||
-        "Error adding payment",
-    );
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      toast.success("Payment added successfully");
+      setShowPaymentForm(false);
+      loadData();
+    } catch (error) {
+      console.error("Error adding payment:", error);
+      toast.error(formatApiError(error, formatCurrency, "Error adding payment"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleDeletePayment = async (paymentId) => {
     if (!confirm("Are you sure you want to delete this payment?")) return;
@@ -131,11 +209,7 @@ const RentalDetailPage = () => {
       loadData();
     } catch (error) {
       console.error("Error deleting payment:", error);
-      toast.error(
-        error.response?.data?.error ||
-          error.response?.data ||
-          "Error deleting payment",
-      );
+      toast.error(formatApiError(error, formatCurrency, "Error deleting payment"));
     }
   };
 const handleEditPayment = (payment) => setEditingPayment(payment);
@@ -153,7 +227,7 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
       toast.success('Payment updated successfully');
       setEditingPayment(null);
     } catch (error) {
-      toast.error(error, 'Error updating payment');
+      toast.error(formatApiError(error, formatCurrency, 'Error updating payment'));
     } finally {
       setIsSavingPayment(false);
     }
@@ -187,13 +261,19 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
   if (loading) return <Loader />;
   if (!rental) return null;
 
-  const rentalAmountCents = toCents(rental.amount);
-  const totalPaidCents = payments.reduce((sum, p) => sum + toCents(p.amount), 0);
-  const pendingCents = Math.max(0, rentalAmountCents - totalPaidCents);
+  const expectedTotalCents = toCents(
+    paymentSummary.expectedTotal || rental.total_amount || rental.amount,
+  );
+  const totalPaidCents = toCents(paymentSummary.totalPaid);
+  const pendingCents = Math.max(0, toCents(paymentSummary.pending));
 
   const totalPaid = fromCents(totalPaidCents);
+  const expectedTotal = fromCents(expectedTotalCents);
   const pending = fromCents(pendingCents);
-  const isCompleted = pendingCents <= 0;
+  const isCompleted =
+    typeof paymentSummary.isFullyPaid === "boolean"
+      ? paymentSummary.isFullyPaid
+      : pendingCents <= 0;
 
   const getStatus = () => {
     // Si no hay tenant o fechas, está disponible
@@ -340,10 +420,15 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
             </div>
           )}
           <div>
-            <p className="text-sm text-gray-600 mb-1">Total Amount</p>
+            <p className="text-sm text-gray-600 mb-1">Expected Total</p>
             <p className="text-2xl font-bold text-gray-900">
-              {formatCurrency(rental.amount)}
+              {formatCurrency(expectedTotal)}
             </p>
+            {toCents(rental.amount) !== expectedTotalCents && (
+              <p className="text-xs text-gray-500 mt-1">
+                Base amount: {formatCurrency(rental.amount)}
+              </p>
+            )}
           </div>
 
           {rental.people_count && (
@@ -357,7 +442,7 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
         </div>
 
         {rental.rental_type === "monthly" &&
-          rental.monthly_records.length > 0 && (
+          rental.monthly_records?.length > 0 && (
             <div className="pt-4 border-t border-gray-200">
               <h3 className="font-semibold text-gray-900 mb-2">
                 Monthly Information
@@ -407,7 +492,7 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
           )}
 
         {rental.rental_type === "airbnb" &&
-          rental.airbnb_records.length > 0 && (
+          rental.airbnb_records?.length > 0 && (
             <div className="pt-4 border-t border-gray-200">
               <h3 className="font-semibold text-gray-900 mb-2">
                 Airbnb Information
@@ -437,10 +522,12 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
           <div className="flex justify-between items-center mb-2">
             <p className="text-sm font-medium text-gray-700">Payment Status</p>
             <p className="text-sm font-semibold text-gray-900">
-              {formatCurrency(totalPaid)} / {formatCurrency(rental.amount)}
+              {formatCurrency(totalPaid)} / {formatCurrency(expectedTotal)}
             </p>
           </div>
-          {pending > 0 && (
+          {isCompleted ? (
+            <p className="text-sm text-green-600 font-medium">Fully paid</p>
+          ) : (
             <p className="text-sm text-red-600 font-medium">
               Pending: {formatCurrency(pending)}
             </p>
