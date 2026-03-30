@@ -3,8 +3,37 @@ import { useForm } from 'react-hook-form';
 import { getPaymentMethods } from '../../api/finance.api';
 import toast from 'react-hot-toast';
 
+const parseAmountInput = (value) => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : NaN;
+  }
+
+  const raw = String(value ?? '').trim().replace(/\s/g, '');
+  if (!raw) return NaN;
+
+  const lastComma = raw.lastIndexOf(',');
+  const lastDot = raw.lastIndexOf('.');
+  const decimalSeparator = lastComma > lastDot ? ',' : '.';
+
+  let normalized = raw;
+  if (lastComma !== -1 || lastDot !== -1) {
+    if (decimalSeparator === ',') {
+      normalized = raw.replace(/\./g, '').replace(',', '.');
+    } else {
+      normalized = raw.replace(/,/g, '');
+    }
+  }
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : NaN;
+};
+
 const PaymentForm = ({ onSubmit, isLoading, maxAmount }) => {
   const [paymentMethods, setPaymentMethods] = useState([]);
+  const safeMaxAmount =
+    typeof maxAmount === 'number' && Number.isFinite(maxAmount)
+      ? Number(maxAmount.toFixed(2))
+      : undefined;
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
     defaultValues: {
       payment_method: '',
@@ -49,12 +78,20 @@ const paymentMethod = watch('payment_method');
 
 const handlePaymentSubmit = async (data) => {
   try {
+    const parsedAmount = parseAmountInput(data.amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      toast.error('Enter a valid amount');
+      return;
+    }
+
+    const normalizedAmount = Number(parsedAmount.toFixed(2));
+
     // Si hay archivo, usa FormData
     if (data.voucher_url && data.voucher_url.length > 0 && data.voucher_url[0]) {
       const formData = new FormData();
       formData.append("payment_method", Number(data.payment_method));
       formData.append("payment_location", data.payment_location);
-      formData.append("amount", Number(data.amount));
+      formData.append("amount", normalizedAmount.toFixed(2));
       formData.append("date", data.date);
       formData.append("voucher_url", data.voucher_url[0]);
      //for (let pair of formData.entries()) {
@@ -66,7 +103,7 @@ const handlePaymentSubmit = async (data) => {
       const payload = {
         payment_method: Number(data.payment_method),
         payment_location: data.payment_location,
-        amount: Number(data.amount),
+        amount: normalizedAmount,
         date: data.date,
       };
       //console.log('📤 JSON payload being sent to backend:', payload);
@@ -158,21 +195,28 @@ const handlePaymentSubmit = async (data) => {
             Amount *
           </label>
           <input
-            type="number"
-            step="0.01"
+            type="text"
+            inputMode="decimal"
             {...register('amount', { 
               required: 'The amount is required',
-              min: { value: 0.01, message: 'The amount must be greater than 0' },
-              max: maxAmount ? { value: maxAmount, message: `The amount cannot exceed ${maxAmount}` } : undefined
+              validate: (value) => {
+                const parsed = parseAmountInput(value);
+                if (!Number.isFinite(parsed)) return 'Enter a valid amount';
+                if (parsed <= 0) return 'The amount must be greater than 0';
+                if (safeMaxAmount !== undefined && parsed > safeMaxAmount + 0.000001) {
+                  return `The amount cannot exceed ${safeMaxAmount}`;
+                }
+                return true;
+              }
             })}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="0.00"
+            placeholder="0.00 o 1.999,98"
           />
           {errors.amount && (
             <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
           )}
-          {maxAmount && (
-            <p className="mt-1 text-xs text-gray-500">Maximum amount: ${maxAmount.toLocaleString()}</p>
+          {safeMaxAmount !== undefined && (
+            <p className="mt-1 text-xs text-gray-500">Maximum amount: ${safeMaxAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           )}
         </div>
 
