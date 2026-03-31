@@ -8,7 +8,6 @@ import PaymentEditModal from "../components/Finance/PaymentEditModal";
 import {
   getPropertyRental,
   addPaymentToRental,
-  getRentalPayments,
   getRentalPaymentsDirect,
   deleteRentalPayment,
   updateRentalPayment
@@ -93,6 +92,21 @@ const normalizePaymentsPayload = (paymentsResponse, rentalData) => {
 
   const isFullyPaidFromApi = paymentsResponse?.is_fully_paid;
 
+  const paymentStatus =
+    paymentsResponse?.payment_status ??
+    paymentsResponse?.paymentStatus ??
+    paymentsResponse?.summary?.payment_status ??
+    paymentsResponse?.summary?.paymentStatus ??
+    {};
+  const monthlyAmountFromApi =
+    paymentStatus?.monthly_amount ?? paymentStatus?.monthlyAmount;
+  const overdueAmountFromApi =
+    paymentStatus?.overdue_amount ?? paymentStatus?.overdueAmount;
+  const isUpToDateFromApi =
+    paymentStatus?.is_up_to_date ?? paymentStatus?.isUpToDate;
+  const statusLabelFromApi =
+    paymentStatus?.status_label ?? paymentStatus?.statusLabel;
+
   return {
     payments: paymentsArray,
     summary: {
@@ -103,8 +117,27 @@ const normalizePaymentsPayload = (paymentsResponse, rentalData) => {
         typeof isFullyPaidFromApi === "boolean"
           ? isFullyPaidFromApi
           : pendingCents <= 0,
+      paymentStatus: {
+        monthlyAmount:
+          monthlyAmountFromApi != null
+            ? fromCents(toCents(monthlyAmountFromApi))
+            : fromCents(toCents(rentalData?.amount)),
+        overdueAmount:
+          overdueAmountFromApi != null
+            ? Math.max(0, fromCents(toCents(overdueAmountFromApi)))
+            : 0,
+        isUpToDate:
+          typeof isUpToDateFromApi === "boolean"
+            ? isUpToDateFromApi
+            : statusLabelFromApi === "up_to_date" || statusLabelFromApi === "fully_paid"
+              ? true
+              : overdueAmountFromApi != null
+                ? toCents(overdueAmountFromApi) <= 0
+                : pendingCents <= 0,
+      },
     },
   };
+  
 };
 
 const RentalDetailPage = () => {
@@ -125,8 +158,13 @@ const RentalDetailPage = () => {
     totalPaid: 0,
     pending: 0,
     isFullyPaid: false,
+    paymentStatus: {
+      monthlyAmount: 0,
+      overdueAmount: 0,
+      isUpToDate: false,
+    },
   });
-
+console.log('paymentSummary:', paymentSummary);
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -136,9 +174,11 @@ const RentalDetailPage = () => {
         const [propData, rentalData, paymentsData] = await Promise.all([
           getProperty(id),
           getPropertyRental(id, rentalId),
-          getRentalPayments(id, rentalId),
+          getRentalPaymentsDirect(rentalId),
         ]);
+        
         console.log('rentalData:', rentalData);
+        console.log('paymentsData:', paymentsData);
         setProperty(propData);
         setRental(rentalData);
 
@@ -148,10 +188,11 @@ const RentalDetailPage = () => {
       } else {
         // Si es cliente, usa solo el endpoint de payments que ya incluye todo
         const paymentsData = await getRentalPaymentsDirect(rentalId);
+        
 
-        //console.log('Client - paymentsData completa:', paymentsData);
+      
 
-        // El endpoint devuelve { payments: [...], count, total_paid, expected_total, pending, is_fully_paid, rental: {...} }
+        // El endpoint devuelve { payments: [...], count, total_paid, expected_total, pending, is_fully_paid, payment_status, rental: {...} }
         setRental(paymentsData.rental);
 
         // Extraer info de property del objeto rental
@@ -164,6 +205,7 @@ const RentalDetailPage = () => {
         const normalized = normalizePaymentsPayload(paymentsData, paymentsData.rental);
         setPayments(normalized.payments);
         setPaymentSummary(normalized.summary);
+        console.log('normalized.summary:', normalized.summary);
       }
     } catch (error) {
       console.error("Error loading data:", error);
@@ -261,19 +303,20 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
   if (loading) return <Loader />;
   if (!rental) return null;
 
-  const expectedTotalCents = toCents(
-    paymentSummary.expectedTotal || rental.total_amount || rental.amount,
-  );
-  const totalPaidCents = toCents(paymentSummary.totalPaid);
   const pendingCents = Math.max(0, toCents(paymentSummary.pending));
 
-  const totalPaid = fromCents(totalPaidCents);
-  const expectedTotal = fromCents(expectedTotalCents);
   const pending = fromCents(pendingCents);
   const isCompleted =
     typeof paymentSummary.isFullyPaid === "boolean"
       ? paymentSummary.isFullyPaid
       : pendingCents <= 0;
+  const monthlyAmount =
+    paymentSummary.paymentStatus?.monthlyAmount || fromCents(toCents(rental.amount));
+  const overdueAmount = Math.max(
+    0,
+    paymentSummary.paymentStatus?.overdueAmount || 0,
+  );
+  const isUpToDate = !!paymentSummary.paymentStatus?.isUpToDate;
 
   const getStatus = () => {
     // Si no hay tenant o fechas, está disponible
@@ -420,15 +463,10 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
             </div>
           )}
           <div>
-            <p className="text-sm text-gray-600 mb-1">Expected Total</p>
+            <p className="text-sm text-gray-600 mb-1">Monthly Amount</p>
             <p className="text-2xl font-bold text-gray-900">
-              {formatCurrency(expectedTotal)}
+              {formatCurrency(monthlyAmount)}
             </p>
-            {toCents(rental.amount) !== expectedTotalCents && (
-              <p className="text-xs text-gray-500 mt-1">
-                Base amount: {formatCurrency(rental.amount)}
-              </p>
-            )}
           </div>
 
           {rental.people_count && (
@@ -521,15 +559,17 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
         <div className="pt-4 border-t border-gray-200 mt-4">
           <div className="flex justify-between items-center mb-2">
             <p className="text-sm font-medium text-gray-700">Payment Status</p>
-            <p className="text-sm font-semibold text-gray-900">
-              {formatCurrency(totalPaid)} / {formatCurrency(expectedTotal)}
-            </p>
+            <span
+              className={`px-2.5 py-1 text-xs font-semibold rounded-full ${isUpToDate ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+            >
+              {isUpToDate ? "Up to Date" : "Overdue"}
+            </span>
           </div>
-          {isCompleted ? (
-            <p className="text-sm text-green-600 font-medium">Fully paid</p>
+          {isUpToDate ? (
+            <p className="text-sm text-green-600 font-medium">The payment is up to date</p>
           ) : (
             <p className="text-sm text-red-600 font-medium">
-              Pending: {formatCurrency(pending)}
+              The payment is overdue. Amount due: {formatCurrency(overdueAmount)}
             </p>
           )}
         </div>
@@ -582,11 +622,6 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
           <h3 className="text-lg font-semibold text-gray-900">
             Payment History ({payments.length})
           </h3>
-          {payments.length > 0 && (
-            <span className="text-sm text-gray-700 font-medium">
-              Total paid: {formatCurrency(totalPaid)}
-            </span>
-          )}
         </div>
         {payments.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
