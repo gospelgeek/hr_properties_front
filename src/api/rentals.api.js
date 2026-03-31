@@ -235,12 +235,14 @@ export const addRentalToProperty = async (propertyId, rentalData) => {
 // GET /api/properties/{id}/rentals/ - Listar todos los rentals de la propiedad
 export const getPropertyRentals = async (propertyId) => {
   const response = await api.get(`properties/${propertyId}/rentals/`);
+
   return response.data;
 };
 
 // GET /api/properties/{id}/rentals/{rental_id}/ - Ver rental específico
 export const getPropertyRental = async (propertyId, rentalId) => {
   const response = await api.get(`properties/${propertyId}/rentals/${rentalId}/`);
+ 
   return response.data;
 };
 
