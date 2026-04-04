@@ -149,6 +149,21 @@ const Sidebar = () => {
                 >
                   My Properties
                 </MenuItem>
+                <MenuItem
+                  to="/vehicles"
+                  icon={
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 17h8m-9 0l-2 2m11-2l2 2M5 11h14l1.5 4H3.5L5 11zm2-4h10l1 4H6l1-4z"
+                      />
+                    </svg>
+                  }
+                >
+                  Vehicles
+                </MenuItem>
               </div>
             </div>
           )}

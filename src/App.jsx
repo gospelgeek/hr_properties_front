@@ -37,6 +37,13 @@ import RentalsPage from "./pages/RentalsPage";
 import AddRentalPage from "./pages/AddRentalPage";
 import EditRentalPage from "./pages/EditRentalPage";
 import RentalDetailPage from "./pages/RentalDetailPage";
+import VehiclesPage from "./pages/VehiclesPage";
+import VehiclePage from "./pages/VehiclePage";
+import CreateVehiclePage from "./pages/CreateVehiclePage";
+import EditVehiclePage from "./pages/EditVehiclePage";
+import AddVehicleObligationPage from "./pages/AddVehicleObligationPage";
+import VehicleObligationsPage from "./pages/VehicleObligationsPage";
+import VehicleObligationDetailPage from "./pages/VehicleObligationDetailPage";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -133,6 +140,64 @@ function App() {
                 element={
                   <ProtectedRoute requireAdmin={true}>
                     <DeletedPropertiesPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Vehicles - Admin Only */}
+              <Route
+                path="/vehicles"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <VehiclesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/vehicles/create"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <CreateVehiclePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/vehicles/:id"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <VehiclePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/vehicles/:id/edit"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <EditVehiclePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/vehicles/:id/obligations"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <VehicleObligationsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/vehicles/:id/add-obligation"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AddVehicleObligationPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/vehicles/:id/obligations/:obligationId"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <VehicleObligationDetailPage />
                   </ProtectedRoute>
                 }
               />
@@ -316,7 +381,7 @@ function App() {
           />
 
           {mediaLoadingCount > 0 && (
-            <div className="fixed inset-0 z-[9999] bg-black/30 backdrop-blur-[1px] flex items-center justify-center pointer-events-auto">
+            <div className="fixed inset-0 z-9999 bg-black/30 backdrop-blur-[1px] flex items-center justify-center pointer-events-auto">
               <div className="bg-white rounded-xl shadow-xl border border-gray-200 px-5 py-4 flex items-center gap-3">
                 <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-200 border-t-blue-600"></div>
                 <p className="text-sm font-medium text-gray-800">Opening document...</p>
