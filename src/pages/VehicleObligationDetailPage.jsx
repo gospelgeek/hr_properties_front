@@ -254,6 +254,8 @@ const VehicleObligationDetailPage = () => {
       return;
     }
 
+
+
     const totalPaidAmount = Number(obligation?.total_paid || 0);
     if (parsedAmount < totalPaidAmount) {
       toast.error(`Amount cannot be less than total paid (${formatCurrency(totalPaidAmount)})`);
@@ -302,7 +304,7 @@ const VehicleObligationDetailPage = () => {
     }
   };
 
-
+const totalPaidFinal = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0); 
   const getPaymentMethodId = (payment) => {
     if (!payment) return '';
 
@@ -460,10 +462,12 @@ const VehicleObligationDetailPage = () => {
             <p className="text-sm text-gray-600 mb-1">Due Date</p>
             <p className="text-lg font-semibold text-gray-900">{obligation.due_date}</p>
           </div>
+          {/** 
           <div>
             <p className="text-sm text-gray-600 mb-1">Total Paid</p>
             <p className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</p>
           </div>
+*/}
           <div>
             <p className="text-sm text-gray-600 mb-1">Pending</p>
             <p className="text-2xl font-bold text-red-600">{formatCurrency(pending)}</p>
@@ -557,11 +561,18 @@ const VehicleObligationDetailPage = () => {
       )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment History ({payments.length})</h3>
-
+        <span className="text-lg text-gray-700 font-medium">
+              Total paid: {formatCurrency(totalPaidFinal)}
+            </span>
+            </div>
         {payments.length === 0 ? (
           <p className="text-gray-600">No payments registered yet.</p>
         ) : (
+           <>
+            
+  
           <div className="space-y-3">
             {payments.map((payment) => (
               <div key={payment.id} className="border border-gray-200 rounded-lg p-4">
@@ -601,7 +612,9 @@ const VehicleObligationDetailPage = () => {
               </div>
             ))}
           </div>
+          </>
         )}
+        
       </div>
 
       <Modal isOpen={Boolean(editingPayment)} onClose={handleCloseEditModal} title="Edit Payment">

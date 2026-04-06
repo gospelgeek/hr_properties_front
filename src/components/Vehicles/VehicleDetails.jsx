@@ -779,6 +779,7 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     placeholder="Responsible name"
                   />
+                  <p className="text-xs text-gray-500">Optional</p>
                   <input
                     type="email"
                     value={responsibleForm.email}
@@ -786,6 +787,7 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     placeholder="Responsible email"
                   />
+                  <p className="text-xs text-gray-500">Optional</p>
                   <input
                     value={responsibleForm.number}
                     onChange={(e) => setResponsibleForm((prev) => ({ ...prev, number: e.target.value }))}
