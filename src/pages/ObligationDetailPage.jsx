@@ -304,10 +304,12 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
             <p className="text-sm text-gray-600 mb-1">Due Date</p>
             <p className="text-lg font-semibold text-gray-900">{formatDate(obligation.due_date)}</p>
           </div>
+          {/** 
           <div>
             <p className="text-sm text-gray-600 mb-1">Total Paid</p>
             <p className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</p>
           </div>
+*/}
           <div>
             <p className="text-sm text-gray-600 mb-1">Pending</p>
             <p className="text-2xl font-bold text-red-600">{formatCurrency(pending)}</p>
@@ -374,7 +376,7 @@ const handleEditPayment = (payment) => setEditingPayment(payment);
     Payment History ({payments.length})
   </h3>
   {payments.length > 0 && (
-    <span className="text-sm text-gray-700 font-medium">
+    <span className="text-lg text-gray-700 font-medium">
       Total paid: {formatCurrency(totalPaid)}
     </span>
   )}
