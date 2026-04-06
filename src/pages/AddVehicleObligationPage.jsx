@@ -14,6 +14,14 @@ const temporalityOptions = [
   { value: 'one_time', label: 'One Time' },
 ];
 
+const sanitizePkValue = (value) => String(value ?? '').trim().replace(/^"+|"+$/g, '');
+
+const parsePkToNumber = (value) => {
+  const cleaned = sanitizePkValue(value);
+  const parsed = Number(cleaned);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : NaN;
+};
+
 const AddVehicleObligationPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,9 +35,10 @@ const AddVehicleObligationPage = () => {
     obligation_type: '',
     due_date: '',
     amount: '',
-    temporality: 'monthly',
+    temporality: 'annual',
     file: null,
   });
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -37,7 +46,16 @@ const AddVehicleObligationPage = () => {
         setLoading(true);
         const [vehicleData, typesData] = await Promise.all([getVehicleById(id), getObligationTypes()]);
         setVehicle(vehicleData);
-        setObligationTypes(Array.isArray(typesData) ? typesData : []);
+        const normalizedTypes =
+          Array.isArray(typesData)
+            ? typesData.map((type) => ({
+                ...type,
+                id: sanitizePkValue(type?.id),
+              }))
+            : [];
+
+        console.log('[AddVehicleObligationPage] Available obligation types:', normalizedTypes.map((type) => ({ id: type.id, name: type.name })));
+        setObligationTypes(normalizedTypes);
       } catch (error) {
         console.error('Error loading data:', error);
         toast.error('Error loading obligation setup');
@@ -57,33 +75,53 @@ const AddVehicleObligationPage = () => {
       return;
     }
 
+    const parsedAmount = Number(form.amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      toast.error('Amount must be a valid number greater than 0');
+      return;
+    }
+
+    const normalizedObligationType = parsePkToNumber(form.obligation_type);
+    if (!Number.isInteger(normalizedObligationType)) {
+      toast.error('Invalid obligation type selected');
+      return;
+    }
+
+    const normalizedAmount = parsedAmount.toFixed(2);
+
     try {
       setIsSubmitting(true);
       const payload = form.file
         ? (() => {
             const formData = new FormData();
             formData.append('entity_name', form.entity_name);
-            formData.append('obligation_type', String(form.obligation_type));
+          formData.append('obligation_type', String(normalizedObligationType));
             formData.append('due_date', form.due_date);
-            formData.append('amount', String(form.amount));
+            formData.append('amount', normalizedAmount);
             formData.append('temporality', form.temporality);
             formData.append('file', form.file);
             return formData;
+            
           })()
         : {
             entity_name: form.entity_name,
-            obligation_type: Number(form.obligation_type),
+            obligation_type: normalizedObligationType,
             due_date: form.due_date,
-            amount: String(form.amount),
+            amount: normalizedAmount,
             temporality: form.temporality,
           };
-
+      console.log('Submitting obligation with payload:', payload);
       await addVehicleObligation(id, payload);
+      
       toast.success('Obligation created successfully');
       navigate(`/vehicles/${id}/obligations`);
     } catch (error) {
       console.error('Error creating obligation:', error);
-      toast.error(error?.response?.data?.error || 'Error creating obligation');
+      const backendError = error?.response?.data;
+      const errorMessage = typeof backendError === 'string'
+        ? backendError
+        : backendError?.error || backendError?.detail || JSON.stringify(backendError) || 'Error creating obligation';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -112,12 +150,14 @@ const AddVehicleObligationPage = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">Obligation Type *</label>
           <select
             value={form.obligation_type}
-            onChange={(e) => setForm((prev) => ({ ...prev, obligation_type: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, obligation_type: sanitizePkValue(e.target.value) }))}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg"
           >
             <option value="">Select type...</option>
-            {obligationTypes.map((type) => (
-              <option key={type.id} value={type.id}>
+            {obligationTypes
+            .filter((type) => type.name === 'tax' || type.name === 'insurance')
+            .map((type) => (
+              <option key={type.id} value={sanitizePkValue(type.id)}>
                 {String(type.name || '').charAt(0).toUpperCase() + String(type.name || '').slice(1)}
               </option>
             ))}

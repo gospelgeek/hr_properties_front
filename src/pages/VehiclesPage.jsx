@@ -23,9 +23,7 @@ const VehiclesPage = () => {
   const loadVehicles = async () => {
     try {
       setLoading(true);
-      const params = {};
-      if (typeFilter) params.type = typeFilter;
-      const data = await getVehicles(params);
+      const data = await getVehicles();
       setVehicles(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error loading vehicles:', error);
@@ -37,14 +35,24 @@ const VehiclesPage = () => {
 
   useEffect(() => {
     loadVehicles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [typeFilter]);
+  }, []);
 
   const filteredVehicles = useMemo(() => {
+    const normalizedTypeFilter = String(typeFilter || '').toLowerCase();
     const term = searchTerm.trim().toLowerCase();
-    if (!term) return vehicles;
 
-    return vehicles.filter((vehicle) => {
+    let currentVehicles = vehicles;
+
+    if (normalizedTypeFilter) {
+      currentVehicles = currentVehicles.filter((vehicle) => {
+        const vehicleType = String(vehicle?.type || vehicle?.vehicle_type || '').toLowerCase();
+        return vehicleType === normalizedTypeFilter;
+      });
+    }
+
+    if (!term) return currentVehicles;
+
+    return currentVehicles.filter((vehicle) => {
       const responsibleNames = (vehicle.responsibles || []).map((item) => String(item?.name || '').toLowerCase()).join(' ');
       return (
         String(vehicle?.owner || '').toLowerCase().includes(term) ||
@@ -53,7 +61,7 @@ const VehiclesPage = () => {
         responsibleNames.includes(term)
       );
     });
-  }, [vehicles, searchTerm]);
+  }, [vehicles, searchTerm, typeFilter]);
 
   return (
     <div>

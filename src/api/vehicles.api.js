@@ -46,14 +46,22 @@ const normalizeProtectedMediaUrl = (rawUrl) => {
 
 export const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // Interceptor para agregar token de autenticación
 api.interceptors.request.use(
   (config) => {
+    const isFormData = config.data instanceof FormData;
+
+    // Important: let browser set multipart boundary for FormData payloads.
+    if (isFormData && config.headers) {
+      delete config.headers['Content-Type'];
+    }
+
+    if (!isFormData && config.data && config.headers && !config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+
     const token = localStorage.getItem('access_token');
     
     if (token) {
@@ -304,13 +312,42 @@ export const getVehicleObligations = async (id) => {
 
 export const addVehicleObligation = async (id, obligationData) => {
   try {
-    const config = obligationData instanceof FormData
-      ? { headers: { 'Content-Type': 'multipart/form-data' } }
-      : {};
+    const config = {};
+
+    console.group('[vehicles.api] addVehicleObligation request debug');
+    console.log('Endpoint:', `vehicles/${id}/add_obligation/`);
+    console.log('Payload type:', obligationData instanceof FormData ? 'FormData' : 'JSON');
+
+    if (obligationData instanceof FormData) {
+      const formDataEntries = [];
+      obligationData.forEach((value, key) => {
+        if (value instanceof File) {
+          formDataEntries.push({
+            key,
+            fileName: value.name,
+            fileType: value.type,
+            fileSize: value.size,
+          });
+          return;
+        }
+        formDataEntries.push({ key, value });
+      });
+      console.table(formDataEntries);
+    } else {
+      console.log('Payload data:', obligationData);
+    }
+
+    console.log('Axios config:', config);
+    console.groupEnd();
+
     const response = await api.post(`vehicles/${id}/add_obligation/`, obligationData, config);
     return response.data;
   } catch (error) {
     console.error('Error adding vehicle obligation:', error);
+    console.error('addVehicleObligation backend response:', {
+      status: error?.response?.status,
+      data: error?.response?.data,
+    });
     throw error;
   }
 };
@@ -349,6 +386,16 @@ export const getVehicleObligationPayments = async (vehicleId, obligationId) => {
   }
 };
 
+export const getVehicleObligationPaymentById = async (paymentId) => {
+  try {
+    const response = await api.get(`vehicle-payments/${paymentId}/`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching vehicle obligation payment:', error);
+    throw error;
+  }
+};
+
 
 export const addPayVehicleObligation = async (vehicleId, obligationId, obligationData) => {
   try {
@@ -372,6 +419,16 @@ export const updatePayVehicleObligation = async ( paymentId, paymentData) => {
     return response.data;
   } catch (error) {
     console.error('Error updating vehicle obligation payment:', error);
+    throw error;
+  }
+};
+
+export const deletePayVehicleObligation = async (paymentId) => {
+  try {
+    const response = await api.delete(`vehicle-payments/${paymentId}/`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting vehicle obligation payment:', error);
     throw error;
   }
 };
@@ -435,4 +492,10 @@ export const openProtectedMedia = async (url) => {
   } finally {
     window.dispatchEvent(new CustomEvent('protected-media-loading', { detail: { isLoading: false } }));
   }
+};
+
+export const getProtectedMediaPreviewUrl = async (url) => {
+  const normalizedUrl = normalizeProtectedMediaUrl(url);
+  const response = await api.get(normalizedUrl, { responseType: 'blob' });
+  return URL.createObjectURL(response.data);
 };

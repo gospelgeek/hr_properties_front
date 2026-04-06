@@ -16,6 +16,7 @@ import {
   getVehicleRepairs,
   getVehicleResponsible,
   getVehicleResponsibles,
+  getProtectedMediaPreviewUrl,
   openProtectedMedia,
   removeVehicleResponsible,
   updateVehicleRepair,
@@ -63,10 +64,13 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
   const [showDocModal, setShowDocModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showRepairModal, setShowRepairModal] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
 
   const [docName, setDocName] = useState('');
   const [docFile, setDocFile] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState({});
+  const [loadingImagePreviews, setLoadingImagePreviews] = useState(false);
 
   const [responsibleForm, setResponsibleForm] = useState(initialResponsibleForm);
   const [editingResponsibleId, setEditingResponsibleId] = useState(null);
@@ -116,6 +120,57 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vehicle?.id]);
+
+  useEffect(() => {
+    if (selectedImageIndex !== null && selectedImageIndex >= images.length) {
+      setSelectedImageIndex(images.length > 0 ? images.length - 1 : null);
+    }
+  }, [images.length, selectedImageIndex]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const objectUrls = [];
+
+    const loadImagePreviews = async () => {
+      if (!showImages || images.length === 0) {
+        setImagePreviewUrls({});
+        return;
+      }
+
+      try {
+        setLoadingImagePreviews(true);
+        const previews = await Promise.all(
+          images.map(async (item) => {
+            if (!item?.id || !item?.image) return [item?.id, ''];
+
+            try {
+              const previewUrl = await getProtectedMediaPreviewUrl(item.image);
+              objectUrls.push(previewUrl);
+              return [item.id, previewUrl];
+            } catch (error) {
+              console.error('Error loading vehicle image preview:', error);
+              return [item.id, ''];
+            }
+          })
+        );
+
+        if (isMounted) {
+          setImagePreviewUrls(Object.fromEntries(previews));
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingImagePreviews(false);
+        }
+      }
+    };
+
+    loadImagePreviews();
+
+    return () => {
+      isMounted = false;
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [images, showImages]);
 
   const handleReloadAll = async () => {
     await loadSections();
@@ -191,6 +246,11 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
   };
 
   const handleDeleteImage = async (imageId) => {
+    if (!imageId) {
+      toast.error('Image not found');
+      return;
+    }
+
     if (!window.confirm('Are you sure you want to delete this image?')) return;
     try {
       await deleteVehicleImage(vehicle.id, imageId);
@@ -199,6 +259,18 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
     } catch (error) {
       console.error('Error deleting vehicle image:', error);
       toast.error('Error deleting image');
+    }
+  };
+
+  const handlePrevImage = () => {
+    if (selectedImageIndex > 0) {
+      setSelectedImageIndex(selectedImageIndex - 1);
+    }
+  };
+
+  const handleNextImage = () => {
+    if (selectedImageIndex < images.length - 1) {
+      setSelectedImageIndex(selectedImageIndex + 1);
     }
   };
 
@@ -482,29 +554,113 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
                 Add Image
               </button>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {images.length === 0 ? (
-                  <div className="col-span-full bg-gray-50 rounded-lg border border-gray-200 p-4 text-sm text-gray-600">No images uploaded.</div>
-                ) : (
-                  images.map((item) => (
-                    <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-3">
-                      <img src={item.image} alt="Vehicle asset" className="w-full h-32 object-cover rounded-md border border-gray-200" />
-                      <div className="flex justify-between items-center mt-2 gap-2">
-                        <button type="button" onClick={() => handleOpenProtectedFile(item.image)} className="text-xs text-blue-600 hover:text-blue-700">
-                          Open
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteImage(item.id)}
-                          className="bg-red-100 text-red-700 rounded-lg px-2 py-1 text-xs font-medium"
-                        >
-                          Delete
-                        </button>
+              {images.length === 0 ? (
+                <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 text-sm text-gray-600">No images uploaded.</div>
+              ) : (
+                <>
+                  {selectedImageIndex !== null ? (
+                    <div className="mt-4">
+                      <div className="bg-white rounded-lg shadow-lg border border-gray-300 overflow-hidden">
+                        <div className="relative bg-gray-900">
+                          {images[selectedImageIndex]?.image && (
+                            <img
+                              src={imagePreviewUrls[images[selectedImageIndex].id] || images[selectedImageIndex].image}
+                              alt={`Vehicle image ${selectedImageIndex + 1}`}
+                              className="w-full max-h-150 object-contain"
+                            />
+                          )}
+
+                          {images.length > 1 && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={handlePrevImage}
+                                disabled={selectedImageIndex === 0}
+                                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                              >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleNextImage}
+                                disabled={selectedImageIndex === images.length - 1}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                              >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </button>
+                            </>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => setSelectedImageIndex(null)}
+                            className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all"
+                          >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        <div className="p-4 bg-white border-t border-gray-200 flex items-center justify-between">
+                          <span className="text-sm text-gray-600">
+                            {selectedImageIndex + 1} of {images.length}
+                          </span>
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenProtectedFile(images[selectedImageIndex]?.image)}
+                              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                            >
+                              Open in new tab
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteImage(images[selectedImageIndex]?.id)}
+                              className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium"
+                            >
+                              Delete image
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                      {images.map((item, index) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setSelectedImageIndex(index)}
+                          className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden text-left hover:shadow-md transition-shadow"
+                        >
+                          <div className="aspect-square bg-gray-100 overflow-hidden">
+                            {imagePreviewUrls[item.id] ? (
+                              <img
+                                src={imagePreviewUrls[item.id]}
+                                alt={`Vehicle asset ${index + 1}`}
+                                className="w-full h-full object-cover hover:scale-105 transition-transform"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 px-2 text-center">
+                                {loadingImagePreviews ? 'Loading preview...' : 'Preview unavailable'}
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-2 flex items-center justify-between gap-2">
+                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">Image</span>
+                            <span className="text-xs text-gray-600">#{index + 1}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </section>
