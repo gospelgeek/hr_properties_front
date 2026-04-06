@@ -175,18 +175,6 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Responsible IDs (optional)</label>
-          <input
-            {...register('responsible_ids')}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="2, 4"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Use comma-separated IDs to associate existing responsibles. You can also add responsibles from the vehicle detail.
-          </p>
-        </div>
-
-        <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Photo</label>
           <input
             type="file"
