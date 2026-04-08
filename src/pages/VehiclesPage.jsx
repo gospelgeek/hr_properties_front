@@ -55,7 +55,7 @@ const VehiclesPage = () => {
     return currentVehicles.filter((vehicle) => {
       const responsibleNames = (vehicle.responsibles || []).map((item) => String(item?.name || '').toLowerCase()).join(' ');
       return (
-        String(vehicle?.owner || '').toLowerCase().includes(term) ||
+        String(vehicle?.driver || '').toLowerCase().includes(term) ||
         String(vehicle?.brand || '').toLowerCase().includes(term) ||
         String(vehicle?.model || '').toLowerCase().includes(term) ||
         responsibleNames.includes(term)
@@ -81,7 +81,7 @@ const VehiclesPage = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by owner, brand, model or responsible..."
+              placeholder="Search by driver, brand, model or responsible..."
               className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 shadow-sm placeholder-gray-500 text-sm font-medium transition-all duration-200 outline-none"
             />
           </div>

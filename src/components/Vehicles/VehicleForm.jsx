@@ -33,8 +33,10 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
   } = useForm({
     defaultValues: initialData
       ? {
-          owner: initialData.owner || '',
+          driver: initialData.driver || '',
           type: initialData.type || '',
+          vin_number: initialData.vin_number || '',
+          license_plate: initialData.license_plate || '',
           purchase_date: initialData.purchase_date || '',
           purchase_price: initialData.purchase_price || '',
           brand: initialData.brand || '',
@@ -42,8 +44,10 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
           responsible_ids: defaultResponsibleIds,
         }
       : {
-          owner: '',
+          driver: '',
           type: '',
+          vin_number: '',
+          license_plate: '',
           purchase_date: '',
           purchase_price: '',
           brand: '',
@@ -68,8 +72,10 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
     const responsibleIds = parseResponsibleIds(data.responsible_ids);
 
     const payload = {
-      owner: data.owner,
+      driver: data.driver,
       type: data.type,
+      vin_number: data.vin_number,
+      license_plate: data.license_plate,
       purchase_date: data.purchase_date,
       purchase_price: String(data.purchase_price),
       brand: data.brand,
@@ -82,8 +88,10 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
 
     if (photoFile) {
       const formData = new FormData();
-      formData.append('owner', payload.owner);
+      formData.append('driver', payload.driver);
       formData.append('type', payload.type);
+      formData.append('vin_number', payload.vin_number);
+      formData.append('license_plate', payload.license_plate);
       formData.append('purchase_date', payload.purchase_date);
       formData.append('purchase_price', payload.purchase_price);
       formData.append('brand', payload.brand);
@@ -102,13 +110,13 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Owner *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Driver *</label>
             <input
-              {...register('owner', { required: 'Owner is required' })}
+              {...register('driver', { required: 'Driver is required' })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Inversiones ABC S.A.S"
             />
-            {errors.owner && <p className="text-red-600 text-sm mt-1">{errors.owner.message}</p>}
+            {errors.driver && <p className="text-red-600 text-sm mt-1">{errors.driver.message}</p>}
           </div>
 
           <div>
@@ -145,6 +153,25 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
               placeholder="Hilux"
             />
             {errors.model && <p className="text-red-600 text-sm mt-1">{errors.model.message}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">VIN Number</label>
+            <input
+              {...register('vin_number', { required: 'VIN number is required' })}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="VIN123456789"
+            />
+            {errors.vin_number && <p className="text-red-600 text-sm mt-1">{errors.vin_number.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">License Plate</label>
+            <input
+              {...register('license_plate', { required: 'License plate is required' })}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="ABC123"
+            />
+            {errors.license_plate && <p className="text-red-600 text-sm mt-1">{errors.license_plate.message}</p>}
           </div>
 
           <div>

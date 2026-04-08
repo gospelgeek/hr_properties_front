@@ -21,7 +21,9 @@ import {
   removeVehicleResponsible,
   updateVehicleRepair,
   updateVehicleResponsible,
+  getVehicleObligations
 } from '../../api/vehicles.api';
+import { set } from 'react-hook-form';
 
 const vehicleTypeLabels = {
   commercial: 'Commercial',
@@ -71,7 +73,7 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreviewUrls, setImagePreviewUrls] = useState({});
   const [loadingImagePreviews, setLoadingImagePreviews] = useState(false);
-
+  const [obligations, setObligations] = useState([]);
   const [responsibleForm, setResponsibleForm] = useState(initialResponsibleForm);
   const [editingResponsibleId, setEditingResponsibleId] = useState(null);
   const [editingResponsibleData, setEditingResponsibleData] = useState({ name: '', email: '', number: '' });
@@ -87,18 +89,23 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
   const loadSections = async () => {
     try {
       setLoadingSections(true);
-      const [docs, imgs, resp, reps, catalog] = await Promise.all([
+      const [docs, imgs, resp, reps, catalog, obligations] = await Promise.all([
         getVehicleDocuments(vehicle.id),
         getVehicleImages(vehicle.id),
         getVehicleResponsible(vehicle.id),
         getVehicleRepairs(vehicle.id),
-        getVehicleResponsibles(),
+         getVehicleResponsibles(),
+        getVehicleObligations(vehicle.id),
+       
       ]);
+      console.log('obligationssss', obligations);
       setDocuments(Array.isArray(docs) ? docs : []);
       setImages(Array.isArray(imgs) ? imgs : []);
       setResponsibles(Array.isArray(resp) ? resp : []);
       setRepairs(Array.isArray(reps) ? reps : []);
       setAvailableResponsibles(Array.isArray(catalog) ? catalog : []);
+      setObligations(Array.isArray(obligations) ? obligations : []);       
+      console.log('obligations', obligations);
     } catch (error) {
       console.error('Error loading vehicle detail sections:', error);
       toast.error('Error loading vehicle resources');
@@ -111,6 +118,7 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
     setDocuments(vehicle?.documents || []);
     setImages(vehicle?.images || []);
     setResponsibles(vehicle?.responsibles || []);
+    setObligations(vehicle?.obligations || []);
     setRepairs(vehicle?.repairs || []);
   }, [vehicle]);
 
@@ -400,6 +408,8 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
     }
   };
 
+  const insuranceObligation = obligations.find((o) => o.obligation_type_name === 'insurance' || o.obligation_type_name === 'Insurance');
+
   const vehicleTypeLabel = useMemo(() => {
     return vehicleTypeLabels[String(vehicle?.type || '').toLowerCase()] || 'Unknown';
   }, [vehicle?.type]);
@@ -444,9 +454,11 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
           {vehicle?.brand || 'Unknown brand'} {vehicle?.model || ''}
         </h1>
         <p className="text-blue-100 text-sm sm:text-base">
-          {vehicleTypeLabel} - Owner: {vehicle?.owner || 'Not specified'}
+          {vehicleTypeLabel} - Driver: {vehicle?.driver || 'Not specified'}
         </p>
-
+          <p className="text-blue-100 text-sm sm:text-base">
+          Insured with: {insuranceObligation?.entity_name || 'Not specified'} - Expiration date: {insuranceObligation?.due_date || 'Not specified'}
+        </p>
         <div className="flex flex-wrap gap-3 mt-6 items-center">
           <Link
             to={`/vehicles/${vehicle.id}/edit`}
@@ -485,6 +497,14 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
               <p className="text-sm text-gray-900 mt-1">{vehicle?.model || 'Not specified'}</p>
             </div>
             <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-xs">
+              <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">Vin Number</p>
+              <p className="text-sm text-gray-900 mt-1">{vehicle?.vin_number || 'Not specified'}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-xs">
+              <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">License Plate</p>
+              <p className="text-sm text-gray-900 mt-1">{vehicle?.license_plate || 'Not specified'}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-xs">
               <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">Type</p>
               <p className="text-sm text-gray-900 mt-1">{vehicleTypeLabel}</p>
             </div>
@@ -495,10 +515,6 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
             <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-xs">
               <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">Purchase Date</p>
               <p className="text-sm text-gray-900 mt-1">{vehicle?.purchase_date || 'Not specified'}</p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-xs">
-              <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">Responsible</p>
-              <p className="text-sm text-gray-900 mt-1">{primaryResponsible}</p>
             </div>
           </div>
         </section>
@@ -666,7 +682,7 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
         </section>
 
         <section className="space-y-3">
-          {renderSectionHeader('Repairs', repairs.length, showRepairs, () => setShowRepairs((prev) => !prev))}
+          {renderSectionHeader('Repairs and Maintenance', repairs.length, showRepairs, () => setShowRepairs((prev) => !prev))}
           {showRepairs && (
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <button
@@ -674,7 +690,7 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
                 onClick={() => setShowRepairModal(true)}
                 className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 mb-4"
               >
-                Add Repair
+                Add Repair or Maintenance
               </button>
 
               <div className="space-y-3">
@@ -752,7 +768,7 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
             </div>
           )}
         </section>
-
+{/** 
         <section>
           <h2 className="text-xl font-bold text-gray-900 mb-4">Responsibles</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -865,7 +881,7 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
             </div>
           </div>
         </section>
-
+*/}
         <section>
           <h2 className="text-xl font-bold text-gray-900 mb-4">Obligations</h2>
           <p className="text-sm text-gray-600">Manage obligations and payments from obligations pages.</p>
@@ -907,13 +923,13 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
         </form>
       </Modal>
 
-      <Modal isOpen={showRepairModal} onClose={() => setShowRepairModal(false)} title="Add Repair">
+      <Modal isOpen={showRepairModal} onClose={() => setShowRepairModal(false)} title="Add Repair or Maintenance">
         <form onSubmit={handleAddRepair} className="space-y-3">
           <input
             value={repairForm.observation}
             onChange={(e) => setRepairForm((prev) => ({ ...prev, observation: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            placeholder="Observation (repair name)"
+            placeholder="Observation (repair or maintenance name)"
           />
           <input type="date" value={repairForm.date} onChange={(e) => setRepairForm((prev) => ({ ...prev, date: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
           <textarea
@@ -932,7 +948,7 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
             placeholder="Cost"
           />
           <button type="submit" className="w-full bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700">
-            Add Repair
+            Add Repair or Maintenance
           </button>
         </form>
       </Modal>
