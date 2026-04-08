@@ -923,13 +923,13 @@ const VehicleDetails = ({ vehicle, onReload, onDelete }) => {
         </form>
       </Modal>
 
-      <Modal isOpen={showRepairModal} onClose={() => setShowRepairModal(false)} title="Add Repair">
+      <Modal isOpen={showRepairModal} onClose={() => setShowRepairModal(false)} title="Add Repair or Maintenance">
         <form onSubmit={handleAddRepair} className="space-y-3">
           <input
             value={repairForm.observation}
             onChange={(e) => setRepairForm((prev) => ({ ...prev, observation: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            placeholder="Observation (repair name)"
+            placeholder="Observation (repair or maintenance name)"
           />
           <input type="date" value={repairForm.date} onChange={(e) => setRepairForm((prev) => ({ ...prev, date: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
           <textarea
