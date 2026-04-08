@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { getVehicleObligations } from '../../api/vehicles.api';
 import autoImg from '../../assets/auto.png';
 
 const vehicleTypeLabels = {
@@ -16,7 +17,13 @@ const vehicleTypeBadgeClass = {
   water: 'bg-cyan-100 text-cyan-800',
 };
 
+
+
 const VehicleCard = ({ vehicle }) => {
+
+const obligations = Array.isArray(vehicle?.obligations) ? vehicle.obligations : [];
+ const insuranceObligation = obligations.find((o) => o.obligation_type_name === 'insurance' || o.obligation_type_name === 'Insurance');
+
   const type = String(vehicle?.type || '').toLowerCase();
   const typeLabel = vehicleTypeLabels[type] || 'Unknown';
   const badgeClass = vehicleTypeBadgeClass[type] || 'bg-gray-100 text-gray-700';
@@ -46,18 +53,34 @@ const VehicleCard = ({ vehicle }) => {
           </span>
         </div>
 
+        <div className="text-sm text-gray-600 mb-2">
+
+          <span className="font-medium text-gray-800" >Vin Number</span>{vehicle?.vin_number ? (
+            <span className=" text-gray-800">: {vehicle.vin_number}</span>
+          ) : (
+            <span className=" text-gray-800">: Not specified</span>
+          )}
+        </div>
+          
+         <div className="text-sm text-gray-600 mb-2">
+          <span className="font-medium text-gray-800" >License Plate</span>{vehicle?.license_plate ? (
+            <span className=" text-gray-800">: {vehicle.license_plate}</span>
+          ) : (
+            <span className=" text-gray-800">: Not specified</span>
+          )}
+        </div>  
+
+
         <p className="text-sm text-gray-600 mb-2">
-          <span className="font-medium text-gray-800">Owner:</span> {vehicle?.owner || 'Not specified'}
+          <span className="font-medium text-gray-800">Driver:</span> {vehicle?.driver || 'Not specified'}
         </p>
-
-        <p className="text-sm text-gray-600 mb-5">
-          <span className="font-medium text-gray-800">Responsible:</span>{' '}
-          {responsibles.length > 0
-            ? responsibles.slice(0, 2).map((item) => item?.name).filter(Boolean).join(', ')
-            : 'Not assigned'}
-          {responsibles.length > 2 ? '...' : ''}
-        </p>
-
+           <div className="text-sm text-gray-600 mb-2">
+          <span className="font-medium text-gray-800" >Insured with</span>{insuranceObligation ? (
+            <span className=" text-gray-800">: {insuranceObligation.entity_name} - Expiration date: {insuranceObligation.due_date}</span>
+          ) : (
+            <span className=" text-gray-800">: Not specified</span>
+          )}
+        </div> 
         <div className="mt-auto pt-4 border-t border-gray-200">
           <Link
             to={`/vehicles/${vehicle.id}`}
