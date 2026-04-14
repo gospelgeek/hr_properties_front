@@ -485,7 +485,7 @@ const totalPaidFinal = payments.reduce((sum, payment) => sum + Number(payment.am
         </div>
 
         <div className="pt-4 border-t border-gray-200 text-sm text-gray-600 space-y-1">
-          <p><span className="font-medium">Periodicity:</span> {obligation.temporality}</p>
+          <p><span className="font-medium">Periodicity:</span> {obligation.temporality.charAt(0).toUpperCase() + obligation.temporality.slice(1)}</p>
           {obligation.file && (
             <button
               type="button"
