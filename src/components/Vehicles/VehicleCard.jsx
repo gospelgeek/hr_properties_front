@@ -8,6 +8,8 @@ const vehicleTypeLabels = {
   sport: 'Sport',
   permanent_use: 'Permanent Use',
   water: 'Water',
+  personal: 'Personal',
+  non_permanent_use: 'Non-Permanent Use',
 };
 
 const vehicleTypeBadgeClass = {
@@ -15,6 +17,8 @@ const vehicleTypeBadgeClass = {
   sport: 'bg-red-100 text-red-800',
   permanent_use: 'bg-blue-100 text-blue-800',
   water: 'bg-cyan-100 text-cyan-800',
+  personal: 'bg-green-100 text-green-800',
+  non_permanent_use: 'bg-gray-100 text-gray-800',
 };
 
 

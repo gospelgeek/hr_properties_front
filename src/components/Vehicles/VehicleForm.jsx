@@ -7,6 +7,8 @@ const vehicleTypeOptions = [
   { value: 'sport', label: 'Sport' },
   { value: 'permanent_use', label: 'Permanent Use' },
   { value: 'water', label: 'Water' },
+  { value: 'personal', label: 'Personal' },
+  { value: 'non_permanent_use', label: 'Non-Permanent Use' },
 ];
 
 const parseResponsibleIds = (value) => {

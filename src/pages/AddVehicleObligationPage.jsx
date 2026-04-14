@@ -11,6 +11,7 @@ const temporalityOptions = [
   { value: 'bimonthly', label: 'Bimonthly' },
   { value: 'quarterly', label: 'Quarterly' },
   { value: 'annual', label: 'Annual' },
+    { value: 'semiannual', label: 'Semi-Annual' },
   { value: 'one_time', label: 'One Time' },
 ];
 

@@ -30,6 +30,8 @@ const vehicleTypeLabels = {
   sport: 'Sport',
   permanent_use: 'Permanent Use',
   water: 'Water',
+  personal: 'Personal',
+  non_permanent_use: 'Non-Permanent Use',
 };
 
 const currencyFormatter = new Intl.NumberFormat('es-CO', {
