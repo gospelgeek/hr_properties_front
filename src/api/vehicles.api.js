@@ -149,7 +149,7 @@ export const createVehicle = async (vehicleData) => {
     const response = await api.post('vehicles/', vehicleData, config);
     return response.data;
   } catch (error) {
-    console.error('Error creating vehicle:', error);
+    console.error('Error creating vehicle:', error.response);
     throw error;
   }
 };
