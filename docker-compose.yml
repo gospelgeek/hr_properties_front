@@ -1,0 +1,27 @@
+# HR Properties Frontend — Docker Compose
+# Stack: Vite SPA + nginx + Cloudflare Tunnel
+# Sin puertos expuestos — cloudflared maneja el ingress
+
+services:
+  # ===== Frontend: Vite SPA served by nginx =====
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Build-time env vars (baked into the JS bundle)
+        # URL pública del backend API (vía Cloudflare Tunnel del backend)
+        VITE_API_BASE_LOCAL: ${VITE_API_BASE_LOCAL:?VITE_API_BASE_LOCAL is required}
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:?VITE_GOOGLE_CLIENT_ID is required}
+    restart: unless-stopped
+    # No ports: — cloudflared routes to http://frontend:8080 internally
+
+  # ===== Cloudflare Tunnel: acceso público sin exponer puertos =====
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --protocol http2 run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?TUNNEL_TOKEN is required}
+    restart: unless-stopped
+    depends_on:
+      - frontend

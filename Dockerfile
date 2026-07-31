@@ -17,8 +17,8 @@ RUN npm install
 COPY . .
 
 # Build-time env vars (baked into the bundle at build time)
-# VITE_API_BASE_LOCAL: set to /api/ so the SPA calls the nginx reverse proxy (same origin)
-ARG VITE_API_BASE_LOCAL=/api/
+# VITE_API_BASE_LOCAL: URL of the backend API (public URL via Cloudflare Tunnel)
+ARG VITE_API_BASE_LOCAL
 ENV VITE_API_BASE_LOCAL=$VITE_API_BASE_LOCAL
 
 # VITE_GOOGLE_CLIENT_ID: Google OAuth client ID for the frontend
@@ -27,13 +27,13 @@ ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 
 RUN npm run build
 
-# ---- Runtime stage (nginx serving static files + reverse proxy) ----
+# ---- Runtime stage (nginx serving static files) ----
 FROM nginxinc/nginx-unprivileged:alpine AS runtime
 
 # Copy built static assets
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Custom nginx config: SPA routing + reverse proxy to backend
+# Custom nginx config: SPA routing only
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # nginx-unprivileged runs as UID 101 and listens on 8080
