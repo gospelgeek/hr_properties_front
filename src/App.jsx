@@ -45,7 +45,7 @@ import AddVehicleObligationPage from "./pages/AddVehicleObligationPage";
 import VehicleObligationsPage from "./pages/VehicleObligationsPage";
 import VehicleObligationDetailPage from "./pages/VehicleObligationDetailPage";
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').replace(/^['"]+|['"]+$/g, '');
 
 function App() {
   const [mediaLoadingCount, setMediaLoadingCount] = useState(0);
