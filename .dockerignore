@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Docker
+Dockerfile
+docker-compose*.yml
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# CI/CD
+.github/
+
+# Documentation
+*.md
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Hermes / tooling
+.hermes/
+graphify-out/
+
+# Vite cache
+.vite/
