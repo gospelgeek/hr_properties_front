@@ -1,62 +1,71 @@
-import React, { useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import autoImg from '../../assets/auto.png';
+import React, { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import autoImg from "../../assets/auto.png";
 
 const vehicleTypeOptions = [
-  { value: 'commercial', label: 'Commercial' },
-  { value: 'sport', label: 'Sport' },
-  { value: 'permanent_use', label: 'Permanent Use' },
-  { value: 'water', label: 'Water' },
-  { value: 'personal', label: 'Personal' },
-  { value: 'non_permanent_use', label: 'Non-Permanent Use' },
+  { value: "commercial", label: "Commercial" },
+  { value: "sport", label: "Sport" },
+  { value: "permanent_use", label: "Permanent Use" },
+  { value: "water", label: "Water" },
+  { value: "personal", label: "Personal" },
+  { value: "non_permanent_use", label: "Non-Permanent Use" },
+  { value: "trailer", label: "Trailer" },
 ];
 
 const parseResponsibleIds = (value) => {
-  if (!value || typeof value !== 'string') return [];
+  if (!value || typeof value !== "string") return [];
   return value
-    .split(',')
+    .split(",")
     .map((item) => Number(item.trim()))
     .filter((item) => Number.isInteger(item) && item > 0);
 };
 
 const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
   const defaultResponsibleIds = useMemo(() => {
-    if (!initialData?.responsibles?.length) return '';
-    return initialData.responsibles.map((item) => item.id).filter(Boolean).join(', ');
+    if (!initialData?.responsibles?.length) return "";
+    return initialData.responsibles
+      .map((item) => item.id)
+      .filter(Boolean)
+      .join(", ");
   }, [initialData]);
 
   const [photoFile, setPhotoFile] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(initialData?.photo || autoImg);
+  const [photoPreview, setPhotoPreview] = useState(
+    initialData?.photo || autoImg,
+  );
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: initialData
       ? {
-          driver: initialData.driver || '',
-          type: initialData.type || '',
-          vin_number: initialData.vin_number || '',
-          license_plate: initialData.license_plate || '',
-          purchase_date: initialData.purchase_date || '',
-          purchase_price: initialData.purchase_price || '',
-          brand: initialData.brand || '',
-          model: initialData.model || '',
+          driver: initialData.driver || "",
+          type: initialData.type || "",
+          vin_number: initialData.vin_number || "",
+          license_plate: initialData.license_plate || "",
+          purchase_date: initialData.purchase_date || "",
+          purchase_price: initialData.purchase_price || "",
+          brand: initialData.brand || "",
+          model: initialData.model || "",
           responsible_ids: defaultResponsibleIds,
         }
       : {
-          driver: '',
-          type: '',
-          vin_number: '',
-          license_plate: '',
-          purchase_date: '',
-          purchase_price: '',
-          brand: '',
-          model: '',
-          responsible_ids: '',
+          driver: "",
+          type: "",
+          vin_number: "",
+          license_plate: "",
+          purchase_date: "",
+          purchase_price: "",
+          brand: "",
+          model: "",
+          responsible_ids: "",
         },
   });
+
+  const selectedType = watch("type");
 
   const handlePhotoChange = (event) => {
     const file = event.target.files?.[0];
@@ -72,17 +81,23 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
 
   const submitForm = (data) => {
     const responsibleIds = parseResponsibleIds(data.responsible_ids);
+    const shouldIncludeLicensePlate = !(
+      data.type === "trailer" && !data.license_plate?.trim()
+    );
 
     const payload = {
       driver: data.driver,
       type: data.type,
       vin_number: data.vin_number,
-      license_plate: data.license_plate,
       purchase_date: data.purchase_date,
       purchase_price: String(data.purchase_price),
       brand: data.brand,
       model: data.model,
     };
+
+    if (shouldIncludeLicensePlate) {
+      payload.license_plate = data.license_plate;
+    }
 
     if (responsibleIds.length > 0) {
       payload.responsible_ids = responsibleIds;
@@ -90,16 +105,20 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
 
     if (photoFile) {
       const formData = new FormData();
-      formData.append('driver', payload.driver);
-      formData.append('type', payload.type);
-      formData.append('vin_number', payload.vin_number);
-      formData.append('license_plate', payload.license_plate);
-      formData.append('purchase_date', payload.purchase_date);
-      formData.append('purchase_price', payload.purchase_price);
-      formData.append('brand', payload.brand);
-      formData.append('model', payload.model);
-      responsibleIds.forEach((id) => formData.append('responsible_ids', String(id)));
-      formData.append('photo', photoFile);
+      formData.append("driver", payload.driver);
+      formData.append("type", payload.type);
+      formData.append("vin_number", payload.vin_number);
+      if (shouldIncludeLicensePlate) {
+        formData.append("license_plate", data.license_plate);
+      }
+      formData.append("purchase_date", payload.purchase_date);
+      formData.append("purchase_price", payload.purchase_price);
+      formData.append("brand", payload.brand);
+      formData.append("model", payload.model);
+      responsibleIds.forEach((id) =>
+        formData.append("responsible_ids", String(id)),
+      );
+      formData.append("photo", photoFile);
       onSubmit(formData);
       return;
     }
@@ -108,23 +127,34 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(submitForm)} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+    <form
+      onSubmit={handleSubmit(submitForm)}
+      className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8"
+    >
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Driver *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Driver *
+            </label>
             <input
-              {...register('driver', { required: 'Driver is required' })}
+              {...register("driver", { required: "Driver is required" })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Inversiones ABC S.A.S"
             />
-            {errors.driver && <p className="text-red-600 text-sm mt-1">{errors.driver.message}</p>}
+            {errors.driver && (
+              <p className="text-red-600 text-sm mt-1">
+                {errors.driver.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Type *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Vehicle Type *
+            </label>
             <select
-              {...register('type', { required: 'Vehicle type is required' })}
+              {...register("type", { required: "Vehicle type is required" })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Select type</option>
@@ -134,77 +164,135 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
                 </option>
               ))}
             </select>
-            {errors.type && <p className="text-red-600 text-sm mt-1">{errors.type.message}</p>}
+            {errors.type && (
+              <p className="text-red-600 text-sm mt-1">{errors.type.message}</p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Brand *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Brand *
+            </label>
             <input
-              {...register('brand', { required: 'Brand is required' })}
+              {...register("brand", { required: "Brand is required" })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Toyota"
             />
-            {errors.brand && <p className="text-red-600 text-sm mt-1">{errors.brand.message}</p>}
+            {errors.brand && (
+              <p className="text-red-600 text-sm mt-1">
+                {errors.brand.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Model *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Model *
+            </label>
             <input
-              {...register('model', { required: 'Model is required' })}
+              {...register("model", { required: "Model is required" })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Hilux"
             />
-            {errors.model && <p className="text-red-600 text-sm mt-1">{errors.model.message}</p>}
+            {errors.model && (
+              <p className="text-red-600 text-sm mt-1">
+                {errors.model.message}
+              </p>
+            )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">VIN Number</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              VIN Number
+            </label>
             <input
-              {...register('vin_number', { required: 'VIN number is required' })}
+              {...register("vin_number", {
+                required: "VIN number is required",
+              })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="VIN123456789"
             />
-            {errors.vin_number && <p className="text-red-600 text-sm mt-1">{errors.vin_number.message}</p>}
+            {errors.vin_number && (
+              <p className="text-red-600 text-sm mt-1">
+                {errors.vin_number.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">License Plate</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              License Plate
+            </label>
             <input
-              {...register('license_plate', { required: 'License plate is required' })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              {...register("license_plate", {
+                validate: (value) => {
+                  if (selectedType === "trailer") return true;
+                  return value?.trim() ? true : "License plate is required";
+                },
+              })}
+              disabled={selectedType === "trailer"}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
               placeholder="ABC123"
             />
-            {errors.license_plate && <p className="text-red-600 text-sm mt-1">{errors.license_plate.message}</p>}
+            {selectedType === "trailer" && (
+              <p className="text-gray-500 text-sm mt-1">
+                License plate is not required for trailer vehicles.
+              </p>
+            )}
+            {errors.license_plate && (
+              <p className="text-red-600 text-sm mt-1">
+                {errors.license_plate.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Date *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Purchase Date *
+            </label>
             <input
               type="date"
-              {...register('purchase_date', { required: 'Purchase date is required' })}
+              {...register("purchase_date", {
+                required: "Purchase date is required",
+              })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            {errors.purchase_date && <p className="text-red-600 text-sm mt-1">{errors.purchase_date.message}</p>}
+            {errors.purchase_date && (
+              <p className="text-red-600 text-sm mt-1">
+                {errors.purchase_date.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Price *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Purchase Price *
+            </label>
             <input
               type="number"
               step="0.01"
               min="0"
-              {...register('purchase_price', {
-                required: 'Purchase price is required',
-                min: { value: 0, message: 'Purchase price must be greater than or equal to 0' },
+              {...register("purchase_price", {
+                required: "Purchase price is required",
+                min: {
+                  value: 0,
+                  message: "Purchase price must be greater than or equal to 0",
+                },
               })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="158000000.00"
             />
-            {errors.purchase_price && <p className="text-red-600 text-sm mt-1">{errors.purchase_price.message}</p>}
+            {errors.purchase_price && (
+              <p className="text-red-600 text-sm mt-1">
+                {errors.purchase_price.message}
+              </p>
+            )}
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Photo</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Vehicle Photo
+          </label>
           <input
             type="file"
             accept="image/*"
@@ -213,7 +301,11 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
           />
           {photoPreview && (
             <div className="mt-3">
-              <img src={photoPreview} alt="Vehicle preview" className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200" />
+              <img
+                src={photoPreview}
+                alt="Vehicle preview"
+                className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200"
+              />
             </div>
           )}
         </div>
@@ -224,7 +316,11 @@ const VehicleForm = ({ initialData, onSubmit, isLoading }) => {
             disabled={isLoading}
             className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
-            {isLoading ? 'Saving...' : initialData ? 'Update Vehicle' : 'Create Vehicle'}
+            {isLoading
+              ? "Saving..."
+              : initialData
+                ? "Update Vehicle"
+                : "Create Vehicle"}
           </button>
         </div>
       </div>
